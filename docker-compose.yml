@@ -1,0 +1,96 @@
+# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Use of this source code is governed by a Apache license
+# that can be found in the LICENSE file.
+
+version: '3'
+
+services:
+  dataworkbench-db:
+    image: "mysql:8.0.11"
+    container_name: "dataworkbench-db"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ${DATA_PATH}/mysql:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "3306:${MYSQL_PORT}" # for test & debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+
+  dataworkbench-db-init:
+    image: "datawh/flyway:latest"
+    container_name: "dataworkbench-db-init"
+    entrypoint: "sh"
+    command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
+    environment:
+      - PASSWORD=${MYSQL_ROOT_PASSWORD}
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db
+
+  dataworkbench-db-ctrl:
+    image: "datawh/flyway:latest"
+    container_name: "dataworkbench-db-ctrl"
+    command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-init
+
+  apiserver:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-apiserver"
+    command: "apiserver start -c /datawh/conf/apiserver.yaml"
+    ports:
+     - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+    links:
+      - spacemanager
+    depends_on:
+      - spacemanager
+    environment:
+      - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
+      - API_SERVER_WRITE_TIMEOUT=${API_SERVER_WRITE_TIMEOUT}
+      - API_SERVER_DLE_TIMEOUT=${API_SERVER_DLE_TIMEOUT}
+      - API_SERVER_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
+      - API_SERVER_HTTP_SERVER_ADDRESS=0.0.0.0:${API_SERVER_PORT}
+      - API_SERVER_SPACE_MANAGER_ADDRESS=spacemanager:${SPACE_MANAGER_PORT}
+      - API_SERVER_SPACE_MANAGER_LOG_LEVEL=${SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL}
+      - API_SERVER_SPACE_MANAGER_LOG_VERBOSITY=${SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+
+  spacemanager:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-spacemanager"
+    command: "spacemanager start -c /datawh/conf/spacemanager.yaml"
+    ports:
+      - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - SPACE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - SPACE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_PORT}
+      - SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL=${SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL}
+      - SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY}
+      - SPACE_MANAGER_METRICS_ENABLED=${SPACE_MANAGER_METRICS_ENABLED}
+      - SPACE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_METRICS_PORT}
+      - SPACE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SPACE_MANAGER_MYSQL_DATABASE=${SPACE_MANAGER_MYSQL_DATABASE}
+      - SPACE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SPACE_MANAGER_MYSQL_LOG_LEVEL=${SPACE_MANAGER_MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
