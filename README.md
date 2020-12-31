@@ -19,7 +19,7 @@ The main image to run service with docker-compose;
 The image used to migrate database; If you update the table struct or data, 
 run `make compose-migrate-db` to make it works at local develop environment;
 
-
+----
 ## Develop Process
 
 Running services of DataWorkbench at local, you need:
@@ -53,3 +53,13 @@ After all services running, you could write code, then:
 run `make compose-migrate-db` to update the database if needed;
 
 run `make update [service=apiserver]` to update the service;
+
+
+----
+
+## add new service
+
+- add the service to `service` in `Makefile`
+- add copy-sentence for default config.yaml in `Dockerfile.dev` if need
+- add copy-sentence for DB schema sql in `build/db/Dockerfile` if need
+- add the service in `docker-compose.yaml` refer to `spacemanager`
