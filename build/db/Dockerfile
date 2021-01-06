@@ -9,4 +9,9 @@ RUN apk add --no-cache mysql-client
 
 COPY ./deploy/build/db/ddl_init.sh /flyway/sql/ddl/
 COPY ./deploy/build/db/ddl/*.sql /flyway/sql/ddl/
+
 COPY ./spacemanager/scripts/sql/schema/*.sql /flyway/sql/
+COPY ./flowmanager/scripts/sql/schema/*.sql /flyway/sql/
+COPY ./scheduler/scripts/sql/schema/*.sql /flyway/sql/
+COPY ./sourcemanager/scripts/sql/schema/*.sql /flyway/sql/
+COPY ./jobmanager/scripts/sql/schema/*.sql /flyway/sql/

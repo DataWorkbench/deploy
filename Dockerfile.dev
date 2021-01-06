@@ -9,6 +9,10 @@ RUN apk add --update ca-certificates && update-ca-certificates
 RUN mkdir -p /datawh/conf
 COPY ./apiserver/config/config.yaml /datawh/conf/apiserver.yaml
 COPY ./spacemanager/config/config.yaml /datawh/conf/spacemanager.yaml
+COPY ./flowmanager/config/config.yaml /datawh/conf/flowmanager.yaml
+COPY ./scheduler/config/config.yaml /datawh/conf/scheduler.yaml
+COPY ./sourcemanager/config/config.yaml /datawh/conf/sourcemanager.yaml
+COPY ./jobmanager/config/config.yaml /datawh/conf/jobmanager.yaml
 
 COPY ./deploy/tmp/bin/* /usr/local/bin/
 

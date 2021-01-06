@@ -4,6 +4,9 @@
 
 version: '3'
 
+networks:
+  dataworkbench-net:
+
 services:
   dataworkbench-db:
     image: "mysql:8.0.11"
@@ -20,6 +23,10 @@ services:
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-db
 
   dataworkbench-db-init:
     image: "datawh/flyway:latest"
@@ -32,6 +39,10 @@ services:
       - dataworkbench-db:dataworkbench-db
     depends_on:
       - dataworkbench-db
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-db-init
 
   dataworkbench-db-ctrl:
     image: "datawh/flyway:latest"
@@ -41,6 +52,29 @@ services:
       - dataworkbench-db:dataworkbench-db
     depends_on:
       - dataworkbench-db-init
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-ctrl
+
+  dataworkbench-etcd:
+    image: "quay.io/coreos/etcd:latest"
+    container_name: "dataworkbench-etcd"
+    volumes:
+      - ${DATA_PATH}/etcd:/etcd-data
+    command: "/usr/local/bin/etcd --data-dir=/etcd-data --name dataworkbench-etcd --initial-advertise-peer-urls http://0.0.0.0:2380 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --initial-cluster dataworkbench-etcd=http://0.0.0.0:2380"
+    ports:
+      - "2379:${ETCD_SERVER_PORT}" # for test & debug
+      - "2380:${ETCD_PEER_PORT}" # for test & debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-etcd
 
   apiserver:
     image: "datawh/datawh"
@@ -50,8 +84,16 @@ services:
      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
       - spacemanager
+      - flowmanager
+      - scheduler
+      - sourcemanager
+      - jobmanager
     depends_on:
       - spacemanager
+      - flowmanager
+      - scheduler
+      - sourcemanager
+      - jobmanager
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -60,13 +102,23 @@ services:
       - API_SERVER_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
       - API_SERVER_HTTP_SERVER_ADDRESS=0.0.0.0:${API_SERVER_PORT}
       - API_SERVER_SPACE_MANAGER_ADDRESS=spacemanager:${SPACE_MANAGER_PORT}
-      - API_SERVER_SPACE_MANAGER_LOG_LEVEL=${SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL}
-      - API_SERVER_SPACE_MANAGER_LOG_VERBOSITY=${SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY}
+      - API_SERVER_SPACE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_SPACE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_FLOW_MANAGER_ADDRESS=flowmanager:${FLOW_MANAGER_PORT}
+      - API_SERVER_FLOW_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_FLOW_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_SOURCE_MANAGER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
+      - API_SERVER_SOURCE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_SOURCE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - apiserver
 
   spacemanager:
     image: "datawh/datawh"
@@ -81,16 +133,158 @@ services:
     environment:
       - SPACE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SPACE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_PORT}
-      - SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL=${SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL}
-      - SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY}
-      - SPACE_MANAGER_METRICS_ENABLED=${SPACE_MANAGER_METRICS_ENABLED}
+      - SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - SPACE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - SPACE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_METRICS_PORT}
       - SPACE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
-      - SPACE_MANAGER_MYSQL_DATABASE=${SPACE_MANAGER_MYSQL_DATABASE}
+      - SPACE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
       - SPACE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - SPACE_MANAGER_MYSQL_LOG_LEVEL=${SPACE_MANAGER_MYSQL_LOG_LEVEL}
+      - SPACE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - spacemanager
+
+  flowmanager:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-flowmanager"
+    command: "flowmanager start -c /datawh/conf/flowmanager.yaml"
+    ports:
+      - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+      - dataworkbench-etcd
+    environment:
+      - FLOW_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - FLOW_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_PORT}
+      - FLOW_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - FLOW_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - FLOW_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - FLOW_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_METRICS_PORT}
+      - FLOW_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - FLOW_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - FLOW_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - FLOW_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - FLOW_MANAGER_SCHEDULER_ADDRESS=scheduler:${SCHEDULER_PORT}
+      - FLOW_MANAGER_SCHEDULER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - FLOW_MANAGER_SCHEDULER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - flowmanager
+
+  scheduler:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-scheduler"
+    command: "scheduler start -c /datawh/conf/scheduler.yaml"
+    ports:
+      - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+      - dataworkbench-etcd:dataworkbench-etcd
+    depends_on:
+      - dataworkbench-db-ctrl
+      - dataworkbench-etcd
+    environment:
+      - SCHEDULER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - SCHEDULER_GRPC_SERVER_ADDRESS=0.0.0.0:${SCHEDULER_PORT}
+      - SCHEDULER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - SCHEDULER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - SCHEDULER_METRICS_ENABLED=${METRICS_ENABLED}
+      - SCHEDULER_METRICS_SERVER_ADDRESS=0.0.0.0:${SCHEDULER_METRICS_PORT}
+      - SCHEDULER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SCHEDULER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - SCHEDULER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SCHEDULER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - SCHEDULER_ETCD_ENDPOINTS=dataworkbench-etcd:${ETCD_SERVER_PORT}
+      - SCHEDULER_ETCD_DIAL_TIMEOUT=5s
+      - SCHEDULER_FLOW_MANAGER_ADDRESS=flowmanager:${FLOW_MANAGER_PORT}
+      - SCHEDULER_FLOW_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - SCHEDULER_FLOW_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - SCHEDULER_JOB_MANAGER_ADDRESS=jobmanager:${JOB_MANAGER_PORT}
+      - SCHEDULER_JOB_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - SCHEDULER_JOB_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - scheduler
+
+  sourcemanager:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-sourcemanager"
+    command: "sourcemanager start -c /datawh/conf/sourcemanager.yaml"
+    ports:
+      - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - SOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - SOURCE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_PORT}
+      - SOURCE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - SOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - SOURCE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - SOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_METRICS_PORT}
+      - SOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - SOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - sourcemanager
+
+  jobmanager:
+    image: "datawh/datawh"
+    container_name: "dataworkbench-jobmanager"
+    command: "jobmanager start -c /datawh/conf/jobmanager.yaml"
+    ports:
+      - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_PORT}
+      - JOB_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - JOB_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - JOB_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_METRICS_PORT}
+      - JOB_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - JOB_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - JOB_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - JOB_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - jobmanager
