@@ -246,6 +246,7 @@ services:
       - SOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_METRICS_PORT}
       - SOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
       - SOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - SOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - SOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - SOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
     logging:
@@ -270,13 +271,19 @@ services:
       - dataworkbench-db-ctrl
     environment:
       - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
-      - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_PORT}
+      - JOB_MANAGER_JOB_WORKS=${JOB_MANAGER_JOB_WORKS}
+      - JOB_MANAGER_ZEPPELIN_SERVER=zeppelin:${ZEPPELIN_PORT}
+      - JOB_MANAGER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
+      - JOB_MANAGER_ZEPPELIN_FLINK_EXECUTE_JARS=/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/zeppelin/lib/mysql-connector-java-8.0.21.jar,/zeppelin/lib/postgresql-42.2.18.jar,/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar
+      - JOB_MANAGER_SOURCEMANAGER_SERVER=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_PORT}
       - JOB_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - JOB_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - JOB_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_METRICS_PORT}
       - JOB_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
       - JOB_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - JOB_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - JOB_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - JOB_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
     logging:
@@ -288,3 +295,62 @@ services:
       dataworkbench-net:
         aliases:
           - jobmanager
+
+  zeppelin:
+    image: "datawh/zeppelin"
+    container_name: "dataworkbench-zeppelin"
+    links:
+      - flinkjobmanager:flinkjobmanager
+    ports:
+      - "${ZEPPELIN_PORT}:${ZEPPELIN_PORT}"
+    depends_on:
+      - flinkjobmanager
+      - flinktaskmanager
+    environment:
+      - LIB_URL=${LIB_URL}
+      - LIB_NAMES=${LIB_NAMES}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - zeppelin
+
+  flinkjobmanager:
+    image: "flink:1.11.2-scala_2.11"
+    container_name: "dataworkbench-flink-jobmanager"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    ports:
+      - "${FLINK_PORT}:${FLINK_PORT}"
+    command: jobmanager
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flinkjobmanager
+    networks:
+      dataworkbench-net:
+        aliases:
+          - flinkjobmanager
+
+  flinktaskmanager:
+    image: "flink:1.11.2-scala_2.11"
+    container_name: "dataworkbench-flink-taskmanager"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - flinkjobmanager
+    command: taskmanager
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: flinkjobmanager
+        taskmanager.numberOfTaskSlots: 10
+    networks:
+      dataworkbench-net:
+        aliases:
+          - flinktaskmanager

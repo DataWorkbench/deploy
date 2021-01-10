@@ -8,6 +8,7 @@ TRAG.Gopkg:=DataWorkbench
 
 DOCKER_TAGS=latest
 BUILDER_IMAGE=datawh/builder:latest
+BUILDER_IMAGE_ZEPPELIN=apache/zeppelin:0.9.0
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
@@ -30,6 +31,7 @@ help: ## This help
 .PHONY: update-builder
 update-builder: ## Pull dataworkbench-builder image
 	docker pull $(BUILDER_IMAGE)
+	docker pull $(BUILDER_IMAGE_ZEPPELIN)
 	@echo "update-builder done"
 
 .PHONY: compile
@@ -41,6 +43,11 @@ compile:
 build-flyway: ## Build flyway image for database migration
 	cd .. && docker build -t $(TARG.Name)/flyway:${DOCKER_TAGS} -f ./deploy/build/db/Dockerfile .
 
+.PHONY: build-zeppelin
+build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
+	echo "if build zeppelin failed, please download flink to .build/zeppelin. https://archive.apache.org/dist/flink/flink-1.11.2/flink-1.11.2-bin-scala_2.11.tgz"
+	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
+
 .PHONY: build-dev
 build-dev: compile ## Build datawh image
 	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name) -f ./deploy/Dockerfile.dev .
@@ -48,7 +55,7 @@ build-dev: compile ## Build datawh image
 	@echo "build done"
 
 .PHONY: build-all
-build-all: build-flyway build-dev ## Build all images
+build-all: build-zeppelin build-flyway build-dev ## Build all images
 
 .PHONY: pull-images
 pull-images: ## Pull images
