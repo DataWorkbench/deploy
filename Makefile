@@ -2,12 +2,12 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Name:=datawh
+TARG.Name:=dataworkbench
 TRAG.Gopkg:=DataWorkbench
 #TRAG.Version:=$(TRAG.Gopkg)/pkg/version
 
 DOCKER_TAGS=latest
-BUILDER_IMAGE=datawh/builder:latest
+BUILDER_IMAGE=dataworkbench/builder:latest
 BUILDER_IMAGE_ZEPPELIN=apache/zeppelin:0.9.0
 
 LOCAL_CACHE:=`go env GOCACHE`
@@ -49,7 +49,7 @@ build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib 
 	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
 
 .PHONY: build-dev
-build-dev: compile ## Build datawh image
+build-dev: compile ## Build dataworkbench image
 	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name) -f ./deploy/Dockerfile.dev .
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build done"

@@ -3,15 +3,15 @@
 # that can be found in the LICENSE file.
 
 default:
-	docker build -t datawh/builder .
+	docker build -t dataworkbench/builder .
 	@echo "ok"
 
 pull:
-	docker pull datawh/builder
+	docker pull dataworkbench/builder
 	@echo "ok"
 
 run:
-	docker run --rm -it -v `pwd`:/root datawh/builder
+	docker run --rm -it -v `pwd`:/root dataworkbench/builder
 
 clean:
 	@echo "ok"

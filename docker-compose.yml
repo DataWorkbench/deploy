@@ -29,7 +29,7 @@ services:
           - dataworkbench-db
 
   dataworkbench-db-init:
-    image: "datawh/flyway:latest"
+    image: "dataworkbench/flyway:latest"
     container_name: "dataworkbench-db-init"
     entrypoint: "sh"
     command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
@@ -45,7 +45,7 @@ services:
           - dataworkbench-db-init
 
   dataworkbench-db-ctrl:
-    image: "datawh/flyway:latest"
+    image: "dataworkbench/flyway:latest"
     container_name: "dataworkbench-db-ctrl"
     command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
     links:
@@ -92,9 +92,9 @@ services:
           - dataworkbench-etcdkeeper
         
   apiserver:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-apiserver"
-    command: "apiserver start -c /datawh/conf/apiserver.yaml"
+    command: "apiserver start -c /dataworkbench/conf/apiserver.yaml"
     ports:
      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
@@ -136,9 +136,9 @@ services:
           - apiserver
 
   spacemanager:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-spacemanager"
-    command: "spacemanager start -c /datawh/conf/spacemanager.yaml"
+    command: "spacemanager start -c /dataworkbench/conf/spacemanager.yaml"
     ports:
       - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
     links:
@@ -167,9 +167,9 @@ services:
           - spacemanager
 
   flowmanager:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-flowmanager"
-    command: "flowmanager start -c /datawh/conf/flowmanager.yaml"
+    command: "flowmanager start -c /dataworkbench/conf/flowmanager.yaml"
     ports:
       - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
     links:
@@ -202,9 +202,9 @@ services:
           - flowmanager
 
   scheduler:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-scheduler"
-    command: "scheduler start -c /datawh/conf/scheduler.yaml"
+    command: "scheduler start -c /dataworkbench/conf/scheduler.yaml"
     ports:
       - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
     links:
@@ -243,9 +243,9 @@ services:
           - scheduler
 
   sourcemanager:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-sourcemanager"
-    command: "sourcemanager start -c /datawh/conf/sourcemanager.yaml"
+    command: "sourcemanager start -c /dataworkbench/conf/sourcemanager.yaml"
     ports:
       - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
     links:
@@ -275,9 +275,9 @@ services:
           - sourcemanager
 
   jobmanager:
-    image: "datawh/datawh"
+    image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobmanager"
-    command: "jobmanager start -c /datawh/conf/jobmanager.yaml"
+    command: "jobmanager start -c /dataworkbench/conf/jobmanager.yaml"
     ports:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
@@ -312,7 +312,7 @@ services:
           - jobmanager
 
   zeppelin:
-    image: "datawh/zeppelin"
+    image: "dataworkbench/zeppelin"
     container_name: "dataworkbench-zeppelin"
     links:
       - flinkjobmanager:flinkjobmanager

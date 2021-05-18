@@ -6,15 +6,15 @@ Develop all service of the data workbench at local that base on docker-compose;
 
 ## Images
 
-#### datawh/builder
+#### dataworkbench/builder
 
 The base image used to build other images or compile service;
 
-#### datawh/datawh
+#### dataworkbench/dataworkbench
 
 The main image to run service with docker-compose;
 
-#### datawh/flyway
+#### dataworkbench/flyway
 
 The image used to migrate database; If you update the table struct or data, 
 run `make compose-migrate-db` to make it works at local develop environment;
