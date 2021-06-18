@@ -11,7 +11,7 @@ TiniCmd = "/usr/bin/tini"
 zeppelinCmd = "/zeppelin/bin/zeppelin.sh"
 libUrl = os.getenv("LIB_URL")
 libName = os.getenv("LIB_NAMES")
-libDir = "/zeppelin/lib/"
+libDir = "/opt/zeppelin/lib/"
 
 def log(msg):
     print(msg, file=sys.stderr)

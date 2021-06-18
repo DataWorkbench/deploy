@@ -11,8 +11,13 @@ COPY ./apiserver/config/config.yaml /dataworkbench/conf/apiserver.yaml
 COPY ./spacemanager/config/config.yaml /dataworkbench/conf/spacemanager.yaml
 COPY ./flowmanager/config/config.yaml /dataworkbench/conf/flowmanager.yaml
 COPY ./scheduler/config/config.yaml /dataworkbench/conf/scheduler.yaml
+
 COPY ./sourcemanager/config/config.yaml /dataworkbench/conf/sourcemanager.yaml
+COPY ./udfmanager/config/config.yaml /dataworkbench/conf/udfmanager.yaml
+COPY ./zeppelinscale/config/config.yaml /dataworkbench/conf/zeppelinscale.yaml
 COPY ./jobmanager/config/config.yaml /dataworkbench/conf/jobmanager.yaml
+COPY ./jobwatcher/config/config.yaml /dataworkbench/conf/jobwatcher.yaml
+COPY ./jobdeveloper/config/config.yaml /dataworkbench/conf/jobdeveloper.yaml
 
 COPY ./deploy/tmp/bin/* /usr/local/bin/
 

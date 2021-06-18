@@ -103,12 +103,14 @@ services:
       - scheduler
       - sourcemanager
       - jobmanager
+      - udfmanager
     depends_on:
       - spacemanager
       - flowmanager
       - scheduler
       - sourcemanager
       - jobmanager
+      - udfmanager
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -274,6 +276,132 @@ services:
         aliases:
           - sourcemanager
 
+  udfmanager:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-udfmanager"
+    command: "udfmanager start -c /dataworkbench/conf/udfmanager.yaml"
+    ports:
+      - "${UDF_MANAGER_PORT}:${UDF_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - UDF_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - UDF_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${UDF_MANAGER_PORT}
+      - UDF_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - UDF_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - UDF_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - UDF_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${UDF_MANAGER_METRICS_PORT}
+      - UDF_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - UDF_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - UDF_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
+      - UDF_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - UDF_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - udfmanager
+
+  zeppelinscale:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-zeppelinscale"
+    command: "zeppelinscale start -c /dataworkbench/conf/zeppelinscale.yaml"
+    ports:
+      - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS=zeppelin:8080
+      - ZEPPELIN_SCALE_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - ZEPPELIN_SCALE_GRPC_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_PORT}
+      - ZEPPELIN_SCALE_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - ZEPPELIN_SCALE_METRICS_ENABLED=${METRICS_ENABLED}
+      - ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_METRICS_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - zeppelinscale
+
+  jobwatcher:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-jobwatcher"
+    command: "jobwatcher start -c /dataworkbench/conf/jobwatcher.yaml"
+    ports:
+      - "${JOB_WATCHER_PORT}:${JOB_WATCHER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - JOB_WATCHER_JOB_WORKS=16
+      - JOB_WATCHER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_WATCHER_PICKUP_ALONE_JOBS=1
+      - JOB_WATCHER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - JOB_WATCHER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_PORT}
+      - JOB_WATCHER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - JOB_WATCHER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - JOB_WATCHER_METRICS_ENABLED=${METRICS_ENABLED}
+      - JOB_WATCHER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_METRICS_PORT}
+      - JOB_WATCHER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - JOB_WATCHER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - JOB_WATCHER_MYSQL_USERS=${MYSQL_ROOT_USERS}
+      - JOB_WATCHER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - JOB_WATCHER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - jobwatcher
+
+  jobdeveloper:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-jobdeveloper"
+    command: "jobdeveloper start -c /dataworkbench/conf/jobdeveloper.yaml"
+    ports:
+      - "${JOB_DEVELOPER_PORT}:${JOB_DEVELOPER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
+      - JOB_DEVELOPER_UDFMANAGER_SERVER=udfmanager:${UDF_MANAGER_PORT}
+      - JOB_DEVELOPER_SOURCEMANAGER_SERVER=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
+      - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - JOB_DEVELOPER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - JOB_DEVELOPER_METRICS_ENABLED=${METRICS_ENABLED}
+      - JOB_DEVELOPER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_METRICS_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - jobdeveloper
+
   jobmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobmanager"
@@ -282,15 +410,16 @@ services:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
       - dataworkbench-db:dataworkbench-db
+      - jobwatcher:jobwatcher
+      - jobdeveloper:jobdeveloper
+      - zeppelinscale:zeppelinscale
     depends_on:
       - dataworkbench-db-ctrl
     environment:
+      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER=zeppelinscale:${ZEPPELIN_SCALE_PORT}
+      - JOB_MANAGER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_MANAGER_JOBWATCHER_SERVER=jobwatcher:${JOB_WATCHER_PORT}
       - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
-      - JOB_MANAGER_JOB_WORKS=${JOB_MANAGER_JOB_WORKS}
-      - JOB_MANAGER_ZEPPELIN_SERVER=zeppelin:${ZEPPELIN_PORT}
-      - JOB_MANAGER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
-      - JOB_MANAGER_ZEPPELIN_FLINK_EXECUTE_JARS=/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/zeppelin/lib/mysql-connector-java-8.0.21.jar,/zeppelin/lib/postgresql-42.2.18.jar,/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar
-      - JOB_MANAGER_SOURCEMANAGER_SERVER=sourcemanager:${SOURCE_MANAGER_PORT}
       - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_PORT}
       - JOB_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
