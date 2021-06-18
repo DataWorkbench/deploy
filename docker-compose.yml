@@ -90,7 +90,31 @@ services:
       dataworkbench-net:
         aliases:
           - dataworkbench-etcdkeeper
-        
+
+  dataworkbench-jaeger:
+    image: "jaegertracing/all-in-one:1.22"
+    container_name: "dataworkbench-jaeger"
+    ports:
+      - "5775:5775/udp" # for test & debug
+      - "6831:6831/udp" # for test & debug
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+      - "9411:9411"
+    environment:
+      - COLLECTOR_ZIPKIN_HTTP_PORT=9411
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-jaeger
+
   apiserver:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-apiserver"
@@ -111,6 +135,7 @@ services:
       - sourcemanager
       - jobmanager
       - udfmanager
+      - dataworkbench-jaeger
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -118,6 +143,8 @@ services:
       - API_SERVER_DLE_TIMEOUT=${API_SERVER_DLE_TIMEOUT}
       - API_SERVER_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
       - API_SERVER_HTTP_SERVER_ADDRESS=0.0.0.0:${API_SERVER_PORT}
+      - API_SERVER_TRACER_SERVICE_NAME=apiserver
+      - API_SERVER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
       - API_SERVER_SPACE_MANAGER_ADDRESS=spacemanager:${SPACE_MANAGER_PORT}
       - API_SERVER_SPACE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_SPACE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
@@ -150,6 +177,7 @@ services:
       - dataworkbench-db:dataworkbench-db
     depends_on:
       - dataworkbench-db-ctrl
+      - dataworkbench-jaeger
     environment:
       - SPACE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SPACE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_PORT}
@@ -161,6 +189,8 @@ services:
       - SPACE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
       - SPACE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - SPACE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - SPACE_MANAGER_TRACER_SERVICE_NAME=spacemanager
+      - SPACE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -182,6 +212,7 @@ services:
     depends_on:
       - dataworkbench-db-ctrl
       - dataworkbench-etcd
+      - dataworkbench-jaeger
     environment:
       - FLOW_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - FLOW_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_PORT}
@@ -196,6 +227,8 @@ services:
       - FLOW_MANAGER_SCHEDULER_ADDRESS=scheduler:${SCHEDULER_PORT}
       - FLOW_MANAGER_SCHEDULER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - FLOW_MANAGER_SCHEDULER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - FLOW_MANAGER_TRACER_SERVICE_NAME=flowmanager
+      - FLOW_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -218,6 +251,7 @@ services:
     depends_on:
       - dataworkbench-db-ctrl
       - dataworkbench-etcd
+      - dataworkbench-jaeger
     environment:
       - SCHEDULER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SCHEDULER_GRPC_SERVER_ADDRESS=0.0.0.0:${SCHEDULER_PORT}
@@ -231,6 +265,8 @@ services:
       - SCHEDULER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - SCHEDULER_ETCD_ENDPOINTS=dataworkbench-etcd:${ETCD_SERVER_PORT}
       - SCHEDULER_ETCD_DIAL_TIMEOUT=5s
+      - SCHEDULER_TRACER_SERVICE_NAME=scheduler
+      - SCHEDULER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
       - SCHEDULER_FLOW_MANAGER_ADDRESS=flowmanager:${FLOW_MANAGER_PORT}
       - SCHEDULER_FLOW_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - SCHEDULER_FLOW_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
@@ -257,6 +293,7 @@ services:
       - dataworkbench-db:dataworkbench-db
     depends_on:
       - dataworkbench-db-ctrl
+      - dataworkbench-jaeger
     environment:
       - SOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SOURCE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_PORT}
@@ -269,6 +306,8 @@ services:
       - SOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - SOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - SOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - SOURCE_MANAGER_TRACER_SERVICE_NAME=sourcemanager
+      - SOURCE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -418,6 +457,7 @@ services:
       - zeppelinscale:zeppelinscale
     depends_on:
       - dataworkbench-db-ctrl
+      - dataworkbench-jaeger
     environment:
       - JOB_MANAGER_ZEPPELIN_SCALE_SERVER=zeppelinscale:${ZEPPELIN_SCALE_PORT}
       - JOB_MANAGER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
@@ -433,6 +473,8 @@ services:
       - JOB_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - JOB_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - JOB_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - JOB_MANAGER_TRACER_SERVICE_NAME=jobmanager
+      - JOB_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
