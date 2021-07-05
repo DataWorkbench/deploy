@@ -63,3 +63,8 @@ run `make update [service=apiserver]` to update the service;
 - add copy-sentence for default config.yaml in `Dockerfile.dev` if need
 - add copy-sentence for DB schema sql in `build/db/Dockerfile` if need
 - add the service in `docker-compose.yaml` refer to `spacemanager`
+
+
+## regress test
+- add test scripy to tests directory
+- make test
