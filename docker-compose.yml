@@ -581,3 +581,33 @@ services:
         aliases:
           - dataworkbench-kafka-for-test
 
+  notifier:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-notifier"
+    command: "notifier start -c /dataworkbench/conf/notifier.yaml"
+    ports:
+      - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - NOTIFIER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - NOTIFIER_GRPC_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_PORT}
+      - NOTIFIER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - NOTIFIER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - NOTIFIER_METRICS_ENABLED=${METRICS_ENABLED}
+      - NOTIFIER_METRICS_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_METRICS_PORT}
+      - NOTIFIER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - NOTIFIER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - NOTIFIER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - NOTIFIER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - notifier

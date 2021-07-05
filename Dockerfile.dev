@@ -18,6 +18,7 @@ COPY ./zeppelinscale/config/config.yaml /dataworkbench/conf/zeppelinscale.yaml
 COPY ./jobmanager/config/config.yaml /dataworkbench/conf/jobmanager.yaml
 COPY ./jobwatcher/config/config.yaml /dataworkbench/conf/jobwatcher.yaml
 COPY ./jobdeveloper/config/config.yaml /dataworkbench/conf/jobdeveloper.yaml
+COPY ./notifier/config/config.yaml /dataworkbench/conf/notifier.yaml
 
 COPY ./deploy/tmp/bin/* /usr/local/bin/
 
