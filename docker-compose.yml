@@ -491,7 +491,7 @@ services:
     links:
       - flinkjobmanager:flinkjobmanager
     ports:
-      - "${ZEPPELIN_PORT}:${ZEPPELIN_PORT}"
+      - "${ZEPPELIN_NODEPORT}:8080"
     depends_on:
       - flinkjobmanager
       - flinktaskmanager
@@ -559,15 +559,15 @@ services:
         aliases:
           - zookeeper
 
-  kafka:
+  dataworkbench-kafka-for-test:
     image: wurstmeister/kafka:2.12-2.5.0
-    container_name: "dataworkbench-kafka"
+    container_name: "dataworkbench-kafka-for-test"
     ports:
       - "9092:9092"
     links:
       - zookeeper:zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: "kafka"
+      KAFKA_ADVERTISED_HOST_NAME: "dataworkbench-kafka-for-test"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -579,5 +579,5 @@ services:
     networks:
       dataworkbench-net:
         aliases:
-          - kafka
+          - dataworkbench-kafka-for-test
 

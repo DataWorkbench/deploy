@@ -90,3 +90,7 @@ update: build-dev ## Update some service
 .PHONY: clean
 clean:
 	rm -r ./tmp
+
+.PHONY: test
+test: ## Launch dataworkbench in docker compose
+	@bash ./tests/run.sh
