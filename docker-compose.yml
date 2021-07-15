@@ -157,6 +157,9 @@ services:
       - API_SERVER_SOURCE_MANAGER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
       - API_SERVER_SOURCE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_SOURCE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_JOB_MANAGER_ADDRESS=jobmanager:${JOB_MANAGER_PORT}
+      - API_SERVER_JOB_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_JOB_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -340,6 +343,8 @@ services:
       - UDF_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - UDF_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - UDF_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - UDF_MANAGER_TRACER_SERVICE_NAME=udfmanager
+      - UDF_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -368,6 +373,8 @@ services:
       - ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - ZEPPELIN_SCALE_METRICS_ENABLED=${METRICS_ENABLED}
       - ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_METRICS_PORT}
+      - ZEPPELIN_SCALE_TRACER_SERVICE_NAME=zeppelinscale
+      - ZEPPELIN_SCALE_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -403,6 +410,8 @@ services:
       - JOB_WATCHER_MYSQL_USERS=${MYSQL_ROOT_USERS}
       - JOB_WATCHER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - JOB_WATCHER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - JOB_WATCHER_TRACER_SERVICE_NAME=jobwatcher
+      - JOB_WATCHER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -434,6 +443,8 @@ services:
       - JOB_DEVELOPER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - JOB_DEVELOPER_METRICS_ENABLED=${METRICS_ENABLED}
       - JOB_DEVELOPER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_METRICS_PORT}
+      - JOB_DEVELOPER_TRACER_SERVICE_NAME=jobdeveloper
+      - JOB_DEVELOPER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -491,7 +502,7 @@ services:
     links:
       - flinkjobmanager:flinkjobmanager
     ports:
-      - "${ZEPPELIN_PORT}:${ZEPPELIN_PORT}"
+      - "${ZEPPELIN_NODEPORT}:8080"
     depends_on:
       - flinkjobmanager
       - flinktaskmanager
@@ -559,15 +570,15 @@ services:
         aliases:
           - zookeeper
 
-  kafka:
+  dataworkbench-kafka-for-test:
     image: wurstmeister/kafka:2.12-2.5.0
-    container_name: "dataworkbench-kafka"
+    container_name: "dataworkbench-kafka-for-test"
     ports:
       - "9092:9092"
     links:
       - zookeeper:zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: "kafka"
+      KAFKA_ADVERTISED_HOST_NAME: "dataworkbench-kafka-for-test"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -579,5 +590,35 @@ services:
     networks:
       dataworkbench-net:
         aliases:
-          - kafka
+          - dataworkbench-kafka-for-test
 
+  notifier:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-notifier"
+    command: "notifier start -c /dataworkbench/conf/notifier.yaml"
+    ports:
+      - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - NOTIFIER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - NOTIFIER_GRPC_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_PORT}
+      - NOTIFIER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - NOTIFIER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - NOTIFIER_METRICS_ENABLED=${METRICS_ENABLED}
+      - NOTIFIER_METRICS_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_METRICS_PORT}
+      - NOTIFIER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - NOTIFIER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - NOTIFIER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - NOTIFIER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - notifier
