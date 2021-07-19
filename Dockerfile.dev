@@ -7,19 +7,19 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk add --update ca-certificates && update-ca-certificates
 
 ENV DW_CONF=/etc/dataworkbench
-RUN mkdir -p ${DW_CONF}
-COPY ./apiserver/config/config.yaml ${DW_CONF}/apiserver.yaml
-COPY ./spacemanager/config/config.yaml ${DW_CONF}/spacemanager.yaml
-COPY ./flowmanager/config/config.yaml ${DW_CONF}/flowmanager.yaml
-COPY ./scheduler/config/config.yaml ${DW_CONF}/scheduler.yaml
+RUN mkdir -p ${DATAWORKBENCH_CONF}
+COPY ./apiserver/config/config.yaml ${DATAWORKBENCH_CONF}/apiserver.yaml
+COPY ./spacemanager/config/config.yaml ${DATAWORKBENCH_CONF}/spacemanager.yaml
+COPY ./flowmanager/config/config.yaml ${DATAWORKBENCH_CONF}/flowmanager.yaml
+COPY ./scheduler/config/config.yaml ${DATAWORKBENCH_CONF}/scheduler.yaml
 
-COPY ./sourcemanager/config/config.yaml ${DW_CONF}/sourcemanager.yaml
-COPY ./udfmanager/config/config.yaml ${DW_CONF}/udfmanager.yaml
-COPY ./zeppelinscale/config/config.yaml ${DW_CONF}/zeppelinscale.yaml
-COPY ./jobmanager/config/config.yaml ${DW_CONF}/jobmanager.yaml
-COPY ./jobwatcher/config/config.yaml ${DW_CONF}/jobwatcher.yaml
-COPY ./jobdeveloper/config/config.yaml ${DW_CONF}/jobdeveloper.yaml
-COPY ./notifier/config/config.yaml ${DW_CONF}/notifier.yaml
+COPY ./sourcemanager/config/config.yaml ${DATAWORKBENCH_CONF}/sourcemanager.yaml
+COPY ./udfmanager/config/config.yaml ${DATAWORKBENCH_CONF}/udfmanager.yaml
+COPY ./zeppelinscale/config/config.yaml ${DATAWORKBENCH_CONF}/zeppelinscale.yaml
+COPY ./jobmanager/config/config.yaml ${DATAWORKBENCH_CONF}/jobmanager.yaml
+COPY ./jobwatcher/config/config.yaml ${DATAWORKBENCH_CONF}/jobwatcher.yaml
+COPY ./jobdeveloper/config/config.yaml ${DATAWORKBENCH_CONF}/jobdeveloper.yaml
+COPY ./notifier/config/config.yaml ${DATAWORKBENCH_CONF}/notifier.yaml
 
 RUN find ./deploy/tmp/bin/ -type f -exec upx {} \;
 COPY ./deploy/tmp/bin/* /usr/local/bin/

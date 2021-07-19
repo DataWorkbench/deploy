@@ -118,7 +118,7 @@ services:
   apiserver:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-apiserver"
-    command: "apiserver start -c ${DW_CONF}/apiserver.yaml"
+    command: "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"
     ports:
      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
@@ -173,7 +173,7 @@ services:
   spacemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-spacemanager"
-    command: "spacemanager start -c ${DW_CONF}/spacemanager.yaml"
+    command: "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"
     ports:
       - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
     links:
@@ -207,7 +207,7 @@ services:
   flowmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-flowmanager"
-    command: "flowmanager start -c ${DW_CONF}/flowmanager.yaml"
+    command: "flowmanager start -c ${DATAWORKBENCH_CONF}/flowmanager.yaml"
     ports:
       - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
     links:
@@ -245,7 +245,7 @@ services:
   scheduler:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-scheduler"
-    command: "scheduler start -c ${DW_CONF}/scheduler.yaml"
+    command: "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"
     ports:
       - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
     links:
@@ -289,7 +289,7 @@ services:
   sourcemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-sourcemanager"
-    command: "sourcemanager start -c ${DW_CONF}/sourcemanager.yaml"
+    command: "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"
     ports:
       - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
     links:
@@ -324,7 +324,7 @@ services:
   udfmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-udfmanager"
-    command: "udfmanager start -c ${DW_CONF}/udfmanager.yaml"
+    command: "udfmanager start -c ${DATAWORKBENCH_CONF}/udfmanager.yaml"
     ports:
       - "${UDF_MANAGER_PORT}:${UDF_MANAGER_PORT}"
     links:
@@ -358,7 +358,7 @@ services:
   zeppelinscale:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-zeppelinscale"
-    command: "zeppelinscale start -c ${DW_CONF}/zeppelinscale.yaml"
+    command: "zeppelinscale start -c ${DATAWORKBENCH_CONF}/zeppelinscale.yaml"
     ports:
       - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
     links:
@@ -388,7 +388,7 @@ services:
   jobwatcher:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobwatcher"
-    command: "jobwatcher start -c ${DW_CONF}/jobwatcher.yaml"
+    command: "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"
     ports:
       - "${JOB_WATCHER_PORT}:${JOB_WATCHER_PORT}"
     links:
@@ -425,7 +425,7 @@ services:
   jobdeveloper:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobdeveloper"
-    command: "jobdeveloper start -c ${DW_CONF}/jobdeveloper.yaml"
+    command: "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"
     ports:
       - "${JOB_DEVELOPER_PORT}:${JOB_DEVELOPER_PORT}"
     links:
@@ -458,7 +458,7 @@ services:
   jobmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobmanager"
-    command: "jobmanager start -c ${DW_CONF}/jobmanager.yaml"
+    command: "jobmanager start -c ${DATAWORKBENCH_CONF}/jobmanager.yaml"
     ports:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
@@ -595,7 +595,7 @@ services:
   notifier:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-notifier"
-    command: "notifier start -c ${DW_CONF}/notifier.yaml"
+    command: "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"
     ports:
       - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
     links:
