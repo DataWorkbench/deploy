@@ -397,7 +397,7 @@ services:
       - dataworkbench-db-ctrl
     environment:
       - JOB_WATCHER_JOB_WORKS=16
-      - JOB_WATCHER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
       - JOB_WATCHER_PICKUP_ALONE_JOBS=1
       - JOB_WATCHER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_WATCHER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_PORT}
@@ -435,8 +435,8 @@ services:
     environment:
       - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
       - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
-      - JOB_DEVELOPER_UDFMANAGER_SERVER=udfmanager:${UDF_MANAGER_PORT}
-      - JOB_DEVELOPER_SOURCEMANAGER_SERVER=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
+      - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
       - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -470,9 +470,9 @@ services:
       - dataworkbench-db-ctrl
       - dataworkbench-jaeger
     environment:
-      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER=zeppelinscale:${ZEPPELIN_SCALE_PORT}
-      - JOB_MANAGER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
-      - JOB_MANAGER_JOBWATCHER_SERVER=jobwatcher:${JOB_WATCHER_PORT}
+      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS=zeppelinscale:${ZEPPELIN_SCALE_PORT}
+      - JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS=jobwatcher:${JOB_WATCHER_PORT}
       - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_PORT}
       - JOB_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
