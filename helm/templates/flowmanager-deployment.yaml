@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-flowmanager
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: flowmanager
+annotations:
+  {{- range $key, $value := .Values.flowmanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.flowmanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.flowmanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: flowmanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: flowmanager
+      annotations:
+      {{- range $key, $value := .Values.flowmanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command:
+          - '/bin/sh'
+          - '-c'
+          - '{{ include "mysql.waiting.cmd" . }}'
+      containers:
+      - name: flowmanager
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - "sh"
+          - "-c"
+          - "flowmanager start -c /dataworkbench/conf/flowmanager.yaml"
+        ports:
+          - containerPort: {{ .Values.ports.flowmanager }}
+            name: service
+          - containerPort: {{ .Values.ports.opentracing }}
+            name: opentracing
+        env:
+          - name: FLOW_MANAGER_LOG_LEVEL
+            value: {{ coalesce .Values.flowmanager.logLevel .Values.common.logLevel | quote }}
+          - name: FLOW_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.flowmanager }}"
+          - name: FLOW_MANAGER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.flowmanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: FLOW_MANAGER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.flowmanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: FLOW_MANAGER_TRACER_LOCAL_AGENT
+            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+          - name: FLOW_MANAGER_MYSQL_HOSTS
+            value: '{{- include "mysql.host" . }}:{{- include "mysql.port" . }}'
+          - name: FLOW_MANAGER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          {{- if .Values.flowmanager.metric.enabled }}
+          - name: FLOW_MANAGER_METRICS_SERVER_ENABLED
+            value: "true"
+          - name: FLOW_MANAGER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.flowmanager.metric.address }}
+          - name: FLOW_MANAGER_METRICS_SERVER_URL_PATH
+            value: {{ .Values.flowmanager.metric.urlPath }}
+          {{- end }}
+          {{- range $ename, $evalue := .Values.flowmanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.ports.flowmanager }}
+          {{- if .Values.flowmanager.readinessProbe }}
+          periodSeconds: {{ .Values.flowmanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.flowmanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.ports.flowmanager }}
+          {{- if .Values.flowmanager.livenessProbe }}
+          periodSeconds: {{ .Values.flowmanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.flowmanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
