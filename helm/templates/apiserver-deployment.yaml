@@ -53,7 +53,7 @@ spec:
               value: "0.0.0.0:{{ .Values.ports.apiserver }}"
             - name: API_SERVER_TRACER_LOCAL_AGENT
               value: "0.0.0.0:{{ .Values.ports.opentracing }}"
-{{ include "apiserver.services" . | indent 12 }}
+{{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
             - name: {{ $ename }}
               value: {{ $evalue | quote }}

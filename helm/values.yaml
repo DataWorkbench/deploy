@@ -97,3 +97,18 @@ flowmanager:
     enabled: false
     address: "0.0.0.0:9203"
     urlPath: "/metrics"
+
+# jobdeveloper settings
+jobdeveloper:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
+    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+    urlPath: "/metrics"

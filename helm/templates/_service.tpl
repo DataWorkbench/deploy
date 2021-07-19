@@ -1,7 +1,14 @@
 {{/*
 Service Addresses For ApiServer
 */}}
-{{- define "apiserver.services" -}}
+{{- define "service.udfmanager" -}}
+{{ .Release.Name }}-udfmanager:{{ .Values.ports.udfmanager }}
+{{- end -}}
+{{- define "service.sourcemanger" -}}
+{{ .Release.Name }}-sourcemanager:{{ .Values.ports.sourcemanager }}
+{{- end -}}
+
+{{- define "apiserver.link.services" -}}
 - name: API_SERVER_TRACER_LOCAL_AGENT
   value: "{{ .Release.Name }}-jaeger:{{ .Values.ports.jaeger }}"
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
@@ -11,7 +18,7 @@ Service Addresses For ApiServer
 - name: API_SERVER_SCHEDULER_ADDRESS
   value: "{{ .Release.Name }}-scheduler:{{ .Values.ports.scheduler }}"
 - name: API_SERVER_SOURCE_MANAGER_ADDRESS
-  value: "{{ .Release.Name }}-sourcemanager:{{ .Values.ports.sourcemanager }}"
+  value: {{ include "service.sourcemanager" . | quote }}
 {{- end -}}
 
 

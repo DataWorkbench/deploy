@@ -65,15 +65,14 @@ spec:
             value: '{{- include "mysql.host" . }}:{{- include "mysql.port" . }}'
           - name: SPACE_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          {{- if .Values.spacemanager.metric.enabled }}
           - name: SPACE_MANAGER_METRICS_SERVER_ENABLED
+          {{- if .Values.spacemanager.metric.enabled }}
             value: "true"
           - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
             value: {{ .Values.spacemanager.metric.address }}
           - name: SPACE_MANAGER_METRICS_SERVER_URL_PATH
             value: {{ .Values.spacemanager.metric.urlPath }}
           {{- else }}
-          - name: SPACE_MANAGER_METRICS_SERVER_ENABLED
             value: "false"
           {{- end }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}

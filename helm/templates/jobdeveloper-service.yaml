@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-jobdeveloper
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: jobdeveloper
+  annotations:
+    {{ toYaml .Values.jobdeveloper.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.jobdeveloper.service.type }}
+  ports:
+    - name: service
+      port: {{ .Values.ports.jobdeveloper }}
+      targetPort: service
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: jobdeveloper
