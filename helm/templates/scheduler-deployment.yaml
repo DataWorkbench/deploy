@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-scheduler
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: scheduler
+annotations:
+  {{- range $key, $value := .Values.scheduler.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.scheduler.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.scheduler.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: scheduler
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: scheduler
+      annotations:
+      {{- range $key, $value := .Values.scheduler.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+      - name: scheduler
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - "sh"
+          - "-c"
+          - "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"
+        ports:
+          - containerPort: {{ .Values.ports.scheduler }}
+            name: service
+          - containerPort: {{ .Values.ports.opentracing }}
+            name: opentracing
+        env:
+          - name: SCHEDULER_LOG_LEVEL
+            value: {{ coalesce .Values.scheduler.logLevel .Values.common.logLevel | quote }}
+          - name: SCHEDULER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.scheduler }}"
+          - name: SCHEDULER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.scheduler.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: SCHEDULER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.scheduler.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: SCHEDULER_TRACER_LOCAL_AGENT
+            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+          - name: SCHEDULER_MYSQL_HOSTS
+            value: {{- include "mysql.hostPort" . | quote }}
+          - name: SCHEDULER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          - name: SCHEDULER_FLOW_MANAGER_ADDRESS
+            value: {{ include "service.flowmanager" . | quote }}
+          - name: SCHEDULER_JOB_MANAGER_ADDRESS
+            value: {{ include "service.jobmanager" . | quote }}
+          - name: SCHEDULER_ETCD_ENDPOINTS
+            value: {{ include "etcd.endpoints" . | quote }}
+          - name: SCHEDULER_METRICS_ENABLED
+          {{- if .Values.scheduler.metric.enabled }}
+            value: "true"
+          - name: SCHEDULER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.scheduler.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.scheduler.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.scheduler }}"
+          {{- if .Values.scheduler.readinessProbe }}
+          periodSeconds: {{ .Values.scheduler.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.scheduler.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.scheduler }}"
+          {{- if .Values.scheduler.livenessProbe }}
+          periodSeconds: {{ .Values.scheduler.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.scheduler.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

@@ -24,6 +24,7 @@ ports:
   jaeger: 9117
   zeppelinscale: 9119
   mysql: 3306
+  etcd: 2379
 
 ## mysql settings
 mysql:
@@ -161,6 +162,22 @@ notifier:
   envs:
     NOTIFIER_MYSQL_DATABASE: data_workbench
     NOTIFIER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# scheduler settings
+scheduler:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    SCHEDULER_TRACER_SERVICE_NAME: scheduler
+    SCHEDULER_MYSQL_DATABASE: data_workbench
+    SCHEDULER_MYSQL_LOG_LEVEL: 4
+    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
   metric:
     enabled: false
     address: "0.0.0.0:9203"

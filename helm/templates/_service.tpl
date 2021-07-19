@@ -4,6 +4,9 @@ Service Addresses For ApiServer
 {{- define "service.udfmanager" -}}
 {{ .Release.Name }}-udfmanager:{{ .Values.ports.udfmanager }}
 {{- end -}}
+{{- define "service.flowmanager" -}}
+{{ .Release.Name }}-flowmanager:{{ .Values.ports.flowmanager }}
+{{- end -}}
 {{- define "service.sourcemanager" -}}
 {{ .Release.Name }}-sourcemanager:{{ .Values.ports.sourcemanager }}
 {{- end -}}
@@ -12,6 +15,9 @@ Service Addresses For ApiServer
 {{- end -}}
 {{- define "service.jobwatcher" -}}
 {{ .Release.Name }}-jobwatcher:{{ .Values.ports.jobwatcher }}
+{{- end -}}
+{{- define "service.jobmanager" -}}
+{{ .Release.Name }}-jobmanager:{{ .Values.ports.jobmanager }}
 {{- end -}}
 {{- define "service.zeppelinscale" -}}
 {{ .Release.Name }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
@@ -56,3 +62,9 @@ Mysql Settings
 until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
 {{- end -}}
 
+{{/*
+Etcd Settings
+*/}}
+{{- define "etcd.endpoints" -}}
+{{ .Release.Name }}-etcd:{{- .Values.ports.mysql }}
+{{- end -}}
