@@ -36,7 +36,7 @@ spec:
           command:
             - "/bin/sh"
             - "-c"
-            - "apiserver start -c /dataworkbench/conf/apiserver.yaml"
+            - "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"
           ports:
             - containerPort: {{ .Values.ports.apiserver }}
               name: service
@@ -59,8 +59,10 @@ spec:
               value: {{ $evalue | quote }}
             {{- end }}
           readinessProbe:
-            tcpSocket:
-              port: {{ .Values.ports.apiserver }}
+            exec:
+              command:
+                - "grpc_health_probe"
+                - "-addr=:{{ .Values.ports.apiserver }}"
             {{- if .Values.apiserver.readinessProbe }}
             periodSeconds: {{ .Values.apiserver.readinessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.apiserver.readinessProbe.initialDelaySeconds }}
@@ -69,8 +71,10 @@ spec:
             initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
             {{- end }}
           livenessProbe:
-            tcpSocket:
-              port: {{ .Values.ports.apiserver }}
+            exec:
+              command:
+                - "grpc_health_probe"
+                - "-addr=:{{ .Values.ports.apiserver }}"
             {{- if .Values.apiserver.livenessProbe }}
             initialDelaySeconds: {{ .Values.apiserver.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.apiserver.livenessProbe.periodSeconds }}

@@ -44,7 +44,7 @@ spec:
         command:
           - "sh"
           - "-c"
-          - "spacemanager start -c /dataworkbench/conf/spacemanager.yaml"
+          - "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"
         ports:
           - containerPort: {{ .Values.ports.spacemanager }}
             name: service
@@ -56,9 +56,9 @@ spec:
           - name: SPACE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
           - name: SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: { { coalesce .Values.spacemanager.grpcLogLevel .Values.common.grpcLogLevel | quote } }
+            value: {{ coalesce .Values.spacemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
           - name: SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: { { coalesce .Values.spacemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote } }
+            value: {{ coalesce .Values.spacemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: SPACE_MANAGER_TRACER_LOCAL_AGENT
             value: "0.0.0.0:{{- .Values.ports.opentracing }}"
           - name: SPACE_MANAGER_MYSQL_HOSTS
@@ -80,8 +80,8 @@ spec:
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.spacemanager }}
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}"]
           {{- if .Values.spacemanager.readinessProbe }}
           periodSeconds: {{ .Values.spacemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.spacemanager.readinessProbe.initialDelaySeconds }}
@@ -90,8 +90,8 @@ spec:
           initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
           {{- end }}
         livenessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.spacemanager }}
+          exec:
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}" ]
           {{- if .Values.spacemanager.livenessProbe }}
           periodSeconds: {{ .Values.spacemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.spacemanager.livenessProbe.initialDelaySeconds }}

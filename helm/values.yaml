@@ -4,7 +4,8 @@
 
 image:
   pullPolicy: IfNotPresent
-  dataworkbench: dataworkbench/dataworkbench:latest
+#  pullPolicy: Always
+  dataworkbench: dataworkbench/dataworkbench:dev
   flyway: dataworkbench/flyway:latest
 
 
@@ -17,8 +18,9 @@ ports:
   scheduler: 9105
   sourcemanager: 9107
   jobmanager: 9109
-  udfmanager: 9111
-  jaeger: 9113
+  jobdeveloper: 9111
+  udfmanager: 9113
+  jaeger: 9115
   mysql: 3306
 
 ## mysql settings

@@ -44,7 +44,7 @@ spec:
         command:
           - "sh"
           - "-c"
-          - "flowmanager start -c /dataworkbench/conf/flowmanager.yaml"
+          - "flowmanager start -c ${DATAWORKBENCH_CONF}/flowmanager.yaml"
         ports:
           - containerPort: {{ .Values.ports.flowmanager }}
             name: service
@@ -80,8 +80,10 @@ spec:
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.flowmanager }}
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.flowmanager }}"
           {{- if .Values.flowmanager.readinessProbe }}
           periodSeconds: {{ .Values.flowmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.readinessProbe.initialDelaySeconds }}
@@ -90,8 +92,10 @@ spec:
           initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
           {{- end }}
         livenessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.flowmanager }}
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.flowmanager }}"
           {{- if .Values.flowmanager.livenessProbe }}
           periodSeconds: {{ .Values.flowmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.livenessProbe.initialDelaySeconds }}

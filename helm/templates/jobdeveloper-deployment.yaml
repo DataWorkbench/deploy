@@ -29,14 +29,6 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
-      initContainers:
-      - name: wait-mysql
-        image: busybox:1.28.4
-        imagePullPolicy: IfNotPresent
-        command:
-          - '/bin/sh'
-          - '-c'
-          - '{{ include "mysql.waiting.cmd" . }}'
       containers:
       - name: jobdeveloper
         image: {{ .Values.image.dataworkbench | quote }}
@@ -44,7 +36,7 @@ spec:
         command:
           - "sh"
           - "-c"
-          - "jobdeveloper start -c /dataworkbench/conf/jobdeveloper.yaml"
+          - "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"
         ports:
           - containerPort: {{ .Values.ports.jobdeveloper }}
             name: service
@@ -80,8 +72,10 @@ spec:
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.jobdeveloper }}
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.jobdeveloper }}"
           {{- if .Values.jobdeveloper.readinessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.readinessProbe.initialDelaySeconds }}
@@ -90,8 +84,10 @@ spec:
           initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
           {{- end }}
         livenessProbe:
-          tcpSocket:
-            port: {{ .Values.ports.jobdeveloper }}
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.jobdeveloper }}"
           {{- if .Values.jobdeveloper.livenessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.livenessProbe.initialDelaySeconds }}
