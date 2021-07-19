@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-notifier
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: notifier
+  annotations:
+    {{ toYaml .Values.notifier.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.notifier.service.type }}
+  ports:
+    - name: service
+      port: {{ .Values.ports.notifier }}
+      targetPort: service
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: notifier

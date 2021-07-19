@@ -150,3 +150,17 @@ jobwatcher:
   metric:
     enabled: false
     address: "0.0.0.0:9203"
+
+# notifier settings
+notifier:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    NOTIFIER_MYSQL_DATABASE: data_workbench
+    NOTIFIER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
