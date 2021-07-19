@@ -7,6 +7,15 @@ Service Addresses For ApiServer
 {{- define "service.sourcemanager" -}}
 {{ .Release.Name }}-sourcemanager:{{ .Values.ports.sourcemanager }}
 {{- end -}}
+{{- define "service.jobdeveloper" -}}
+{{ .Release.Name }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
+{{- end -}}
+{{- define "service.jobwatcher" -}}
+{{ .Release.Name }}-jobwatcher:{{ .Values.ports.jobwatcher }}
+{{- end -}}
+{{- define "service.zeppelinscale" -}}
+{{ .Release.Name }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
+{{- end -}}
 
 {{/*
 - name: API_SERVER_SCHEDULER_ADDRESS
@@ -33,6 +42,10 @@ Mysql Settings
 
 {{- define "mysql.port" -}}
 {{ .Values.ports.mysql }}
+{{- end -}}
+
+{{- define "mysql.hostPort" -}}
+{{ .Release.Name }}-mysql:{{- .Values.ports.mysql }}
 {{- end -}}
 
 {{- define "mysql.root.password" -}}

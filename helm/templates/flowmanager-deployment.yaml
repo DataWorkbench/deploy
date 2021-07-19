@@ -62,7 +62,7 @@ spec:
           - name: FLOW_MANAGER_TRACER_LOCAL_AGENT
             value: "0.0.0.0:{{- .Values.ports.opentracing }}"
           - name: FLOW_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.host" . }}:{{- include "mysql.port" . }}'
+            value: {{- include "mysql.hostPort" . | quote }}
           - name: FLOW_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: FLOW_MANAGER_METRICS_SERVER_ENABLED
@@ -73,7 +73,7 @@ spec:
           - name: FLOW_MANAGER_METRICS_SERVER_URL_PATH
             value: {{ .Values.flowmanager.metric.urlPath }}
           {{- else }}
-            value: "true"
+            value: "false"
           {{- end }}
           {{- range $ename, $evalue := .Values.flowmanager.envs }}
           - name: {{ $ename }}

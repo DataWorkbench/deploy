@@ -62,7 +62,7 @@ spec:
           - name: SPACE_MANAGER_TRACER_LOCAL_AGENT
             value: "0.0.0.0:{{- .Values.ports.opentracing }}"
           - name: SPACE_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.host" . }}:{{- include "mysql.port" . }}'
+            value: {{- include "mysql.hostPort" . | quote }}
           - name: SPACE_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: SPACE_MANAGER_METRICS_SERVER_ENABLED

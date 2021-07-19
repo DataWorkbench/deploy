@@ -62,10 +62,8 @@ spec:
             value: "true"
           - name: JOB_DEVELOPER_METRICS_SERVER_ADDRESS
             value: {{ .Values.jobdeveloper.metric.address }}
-          - name: JOB_DEVELOPER_TRACER_SERVICE_NAME
-            value: {{ .Values.jobdeveloper.metric.urlPath }}
           {{- else }}
-            value: "true"
+            value: "false"
           {{- end }}
           {{- range $ename, $evalue := .Values.jobdeveloper.envs }}
           - name: {{ $ename }}

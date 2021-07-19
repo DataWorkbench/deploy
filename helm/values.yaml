@@ -19,8 +19,10 @@ ports:
   sourcemanager: 9107
   jobmanager: 9109
   jobdeveloper: 9111
-  udfmanager: 9113
-  jaeger: 9115
+  jobwatcher: 9113
+  udfmanager: 9115
+  jaeger: 9117
+  zeppelinscale: 9119
   mysql: 3306
 
 ## mysql settings
@@ -108,9 +110,25 @@ jobdeveloper:
     type: ClusterIP
     annotations: {}
   envs:
+    JOB_DEVELOPER_TRACER_SERVICE_NAME: jobdeveloper
     JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
     JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
   metric:
     enabled: false
     address: "0.0.0.0:9203"
-    urlPath: "/metrics"
+
+# jobmanager settings
+jobmanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_MANAGER_TRACER_SERVICE_NAME: jobmanager
+    JOB_MANAGER_MYSQL_USERS: root
+    JOB_MANAGER_MYSQL_DATABASE: data_workbench
+    JOB_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
