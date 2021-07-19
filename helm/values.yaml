@@ -132,3 +132,21 @@ jobmanager:
   metric:
     enabled: false
     address: "0.0.0.0:9203"
+
+# jobwatcher settings
+jobwatcher:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_WATCHER_JOB_WORKS: 16
+    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
+    JOB_WATCHER_TRACER_SERVICE_NAME: jobwatcher
+    JOB_WATCHER_MYSQL_USERS: root
+    JOB_WATCHER_MYSQL_DATABASE: data_workbench
+    JOB_WATCHER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
