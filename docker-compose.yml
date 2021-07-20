@@ -433,8 +433,8 @@ services:
     depends_on:
       - dataworkbench-db-ctrl
     environment:
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
       - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
@@ -520,7 +520,7 @@ services:
           - zeppelin
 
   flinkjobmanager:
-    image: "flink:1.11.2-scala_2.11"
+    image: "flink:1.12.3-scala_2.11"
     container_name: "dataworkbench-flink-jobmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -537,7 +537,7 @@ services:
           - flinkjobmanager
 
   flinktaskmanager:
-    image: "flink:1.11.2-scala_2.11"
+    image: "flink:1.12.3-scala_2.11"
     container_name: "dataworkbench-flink-taskmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -622,3 +622,28 @@ services:
       dataworkbench-net:
         aliases:
           - notifier
+
+  hbase:
+    image: "harisekhon/hbase:2.1"
+    container_name: "hbase"
+    ports:
+      - "2182:2181"
+      # - "8080:8080"
+      - "8085:8085"
+      - "9090:9090"
+      - "9095:9095"
+      - "16000:16000"
+      - "16010:16010"
+      - "16201:16201"
+      - "16301:16301"
+      - "16030:16030"
+      - "16020:16020"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - hbase
