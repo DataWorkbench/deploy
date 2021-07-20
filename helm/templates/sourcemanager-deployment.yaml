@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-sourcemanager
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: sourcemanager
+annotations:
+  {{- range $key, $value := .Values.sourcemanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.sourcemanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.sourcemanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: sourcemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: sourcemanager
+      annotations:
+      {{- range $key, $value := .Values.sourcemanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+      - name: sourcemanager
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command:
+          - "sh"
+          - "-c"
+          - "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"
+        ports:
+          - containerPort: {{ .Values.ports.sourcemanager }}
+            name: service
+          - containerPort: {{ .Values.ports.opentracing }}
+            name: opentracing
+        env:
+          - name: SOURCE_MANAGER_LOG_LEVEL
+            value: {{ coalesce .Values.sourcemanager.logLevel .Values.common.logLevel | quote }}
+          - name: SOURCE_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.sourcemanager }}"
+          - name: SOURCE_MANAGER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.sourcemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: SOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.sourcemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: SOURCE_MANAGER_TRACER_LOCAL_AGENT
+            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+          - name: SOURCE_MANAGER_MYSQL_HOSTS
+            value: {{- include "mysql.hostPort" . | quote }}
+          - name: SOURCE_MANAGER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          - name: SOURCE_MANAGER_METRICS_ENABLED
+          {{- if .Values.sourcemanager.metric.enabled }}
+            value: "true"
+          - name: SOURCE_MANAGER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.sourcemanager.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.sourcemanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.sourcemanager }}"
+          {{- if .Values.sourcemanager.readinessProbe }}
+          periodSeconds: {{ .Values.sourcemanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.sourcemanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command:
+              - "grpc_health_probe"
+              - "-addr=:{{ .Values.ports.sourcemanager }}"
+          {{- if .Values.sourcemanager.livenessProbe }}
+          periodSeconds: {{ .Values.sourcemanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.sourcemanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

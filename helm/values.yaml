@@ -181,3 +181,19 @@ scheduler:
   metric:
     enabled: false
     address: "0.0.0.0:9203"
+
+# sourcemanager settings
+sourcemanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    SOURCE_MANAGER_TRACER_SERVICE_NAME: sourcemanager
+    SOURCE_MANAGER_MYSQL_USERS: root
+    SOURCE_MANAGER_MYSQL_DATABASE: data_workbench
+    SOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
