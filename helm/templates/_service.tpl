@@ -68,3 +68,6 @@ Etcd Settings
 {{- define "etcd.endpoints" -}}
 {{ .Release.Name }}-etcd:{{- .Values.ports.mysql }}
 {{- end -}}
+{{- define "etcd.waiting.cmd" -}}
+until nc -z {{ .Release.Name }}-etcd {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
+{{- end -}}

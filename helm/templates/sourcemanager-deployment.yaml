@@ -29,14 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: sourcemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command:
-          - "sh"
-          - "-c"
-          - "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"
+        command: ["sh", "-c", "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.sourcemanager }}
             name: service
@@ -71,9 +73,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.sourcemanager }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
           {{- if .Values.sourcemanager.readinessProbe }}
           periodSeconds: {{ .Values.sourcemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.readinessProbe.initialDelaySeconds }}
@@ -83,9 +83,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.sourcemanager }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
           {{- if .Values.sourcemanager.livenessProbe }}
           periodSeconds: {{ .Values.sourcemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.livenessProbe.initialDelaySeconds }}

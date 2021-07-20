@@ -33,18 +33,12 @@ spec:
       - name: wait-mysql
         image: busybox:1.28.4
         imagePullPolicy: IfNotPresent
-        command:
-          - '/bin/sh'
-          - '-c'
-          - '{{ include "mysql.waiting.cmd" . }}'
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: spacemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command:
-          - "sh"
-          - "-c"
-          - "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"
+        command: ["sh", "-c", "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.spacemanager }}
             name: service

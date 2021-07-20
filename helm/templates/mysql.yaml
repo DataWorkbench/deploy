@@ -40,7 +40,7 @@ spec:
 {{ include "dataworkbench.labels" . | indent 8 }}
     spec:
       containers:
-      - name: openpitrix-db
+      - name: {{ .Release.Name }}-mysql
         image: mysql:8.0
         imagePullPolicy: IfNotPresent
         lifecycle:

@@ -33,10 +33,7 @@ spec:
       - name: jobdeveloper
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command:
-          - "sh"
-          - "-c"
-          - "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"
+        command: ["sh", "-c", "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"]
         ports:
           - containerPort: {{ .Values.ports.jobdeveloper }}
             name: service
@@ -71,9 +68,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.jobdeveloper }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
           {{- if .Values.jobdeveloper.readinessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.readinessProbe.initialDelaySeconds }}
@@ -83,9 +78,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.jobdeveloper }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
           {{- if .Values.jobdeveloper.livenessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.livenessProbe.initialDelaySeconds }}

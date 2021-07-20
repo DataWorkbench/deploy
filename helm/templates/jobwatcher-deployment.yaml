@@ -29,14 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: jobwatcher
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command:
-          - "sh"
-          - "-c"
-          - "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"
+        command: ["sh", "-c", "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"]
         ports:
           - containerPort: {{ .Values.ports.jobwatcher }}
             name: service
@@ -73,9 +75,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.jobwatcher }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
           {{- if .Values.jobwatcher.readinessProbe }}
           periodSeconds: {{ .Values.jobwatcher.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.readinessProbe.initialDelaySeconds }}
@@ -85,9 +85,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.jobwatcher }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
           {{- if .Values.jobwatcher.livenessProbe }}
           periodSeconds: {{ .Values.jobwatcher.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.livenessProbe.initialDelaySeconds }}

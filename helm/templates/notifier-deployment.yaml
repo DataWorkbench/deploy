@@ -29,14 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: notifier
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command:
-          - "sh"
-          - "-c"
-          - "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"
+        command: ["sh", "-c", "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"]
         ports:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
@@ -69,9 +71,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.notifier }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
           {{- if .Values.notifier.readinessProbe }}
           periodSeconds: {{ .Values.notifier.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.notifier.readinessProbe.initialDelaySeconds }}
@@ -81,9 +81,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command:
-              - "grpc_health_probe"
-              - "-addr=:{{ .Values.ports.notifier }}"
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
           {{- if .Values.notifier.livenessProbe }}
           periodSeconds: {{ .Values.notifier.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.notifier.livenessProbe.initialDelaySeconds }}
