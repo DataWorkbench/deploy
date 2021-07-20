@@ -54,7 +54,7 @@ spec:
           - name: NOTIFIER_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: NOTIFIER_MYSQL_HOSTS
-            value: {{- include "mysql.hostPort" . | quote }}
+            value: '{{- include "mysql.hostPort" . }}'
           - name: NOTIFIER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: NOTIFIER_METRICS_ENABLED

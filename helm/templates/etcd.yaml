@@ -3,21 +3,21 @@ kind: Service
 metadata:
   name: {{ .Release.Name }}-etcd
   labels:
-    component: mysql
+    component: etcd
 {{ include "dataworkbench.labels" . | indent 4 }}
 spec:
   type: ClusterIP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    component: mysql
+    component: etcd
   ports:
     - name: etcd
       protocol: TCP
       port: 2379
       targetPort: etcd
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ .Release.Name }}-etcd
@@ -35,8 +35,8 @@ spec:
   template:
     metadata:
       labels:
-        component: mysql
-        {{ include "dataworkbench.labels" . | indent 8 }}
+        component: etcd
+{{ include "dataworkbench.labels" . | indent 8 }}
     spec:
       containers:
         - name: {{ .Release.Name }}-etcd

@@ -62,7 +62,7 @@ spec:
           - name: JOB_MANAGER_TRACER_LOCAL_AGENT
             value: "0.0.0.0:{{- .Values.ports.opentracing }}"
           - name: JOB_MANAGER_MYSQL_HOSTS
-            value: {{- include "mysql.hostPort" . | quote }}
+            value: '{{- include "mysql.hostPort" . }}'
           - name: JOB_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: JOB_MANAGER_METRICS_ENABLED

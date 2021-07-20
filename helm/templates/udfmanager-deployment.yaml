@@ -56,7 +56,7 @@ spec:
           - name: UDF_MANAGER_TRACER_LOCAL_AGENT
             value: "0.0.0.0:{{- .Values.ports.opentracing }}"
           - name: UDF_MANAGER_MYSQL_HOSTS
-            value: {{- include "mysql.hostPort" . | quote }}
+            value: '{{- include "mysql.hostPort" . }}'
           - name: UDF_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: UDF_MANAGER_METRICS_ENABLED
