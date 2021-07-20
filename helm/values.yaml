@@ -23,6 +23,7 @@ ports:
   udfmanager: 9115
   jaeger: 9117
   zeppelinscale: 9119
+  zeppelin: 9121
   mysql: 3306
   etcd: 2379
 
@@ -197,3 +198,43 @@ sourcemanager:
   metric:
     enabled: false
     address: "0.0.0.0:9203"
+
+# udfmanager settings
+udfmanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    UDF_MANAGER_TRACER_SERVICE_NAME: udfmanager
+    UDF_MANAGER_MYSQL_USERS: root
+    UDF_MANAGER_MYSQL_DATABASE: data_workbench
+    UDF_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# zeppelinscale settings
+zeppelinscale:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: zeppelinscale
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# zeppelin settings
+zeppelin:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
+    LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"

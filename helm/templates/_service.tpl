@@ -22,6 +22,9 @@ Service Addresses For ApiServer
 {{- define "service.zeppelinscale" -}}
 {{ .Release.Name }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
 {{- end -}}
+{{- define "service.zeppelin" -}}
+{{ .Release.Name }}-zeppelin:{{ .Values.ports.zeppelin }}
+{{- end -}}
 
 {{/*
 - name: API_SERVER_SCHEDULER_ADDRESS

@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-zeppelinscale
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: zeppelinscale
+annotations:
+  {{- range $key, $value := .Values.zeppelinscale.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.zeppelinscale.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.zeppelinscale.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: zeppelinscale
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: zeppelinscale
+      annotations:
+      {{- range $key, $value := .Values.zeppelinscale.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+      - name: zeppelinscale
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "zeppelinscale start -c ${DATAWORKBENCH_CONF}/zeppelinscale.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.zeppelinscale }}
+            name: service
+          - containerPort: {{ .Values.ports.opentracing }}
+            name: opentracing
+        env:
+          - name: ZEPPELIN_SCALE_LOG_LEVEL
+            value: {{ coalesce .Values.zeppelinscale.logLevel .Values.common.logLevel | quote }}
+          - name: ZEPPELIN_SCALE_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.zeppelinscale }}"
+          - name: ZEPPELIN_SCALE_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.zeppelinscale.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.zeppelinscale.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: ZEPPELIN_SCALE_TRACER_LOCAL_AGENT
+            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+          - name: ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS
+            value: {{ include "service.zeppelin" . | quote }}
+          - name: ZEPPELIN_SCALE_METRICS_ENABLED
+          {{- if .Values.zeppelinscale.metric.enabled }}
+            value: "true"
+          - name: ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS
+            value: {{ .Values.zeppelinscale.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.zeppelinscale.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinscale }}"]
+          {{- if .Values.zeppelinscale.readinessProbe }}
+          periodSeconds: {{ .Values.zeppelinscale.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.zeppelinscale.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinscale }}"]
+          {{- if .Values.zeppelinscale.livenessProbe }}
+          periodSeconds: {{ .Values.zeppelinscale.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.zeppelinscale.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
