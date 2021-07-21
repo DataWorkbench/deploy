@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-jaeger
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: jaeger
+  annotations:
+    {{ toYaml .Values.jaeger.service.annotations | indent 4 }}
+spec:
+  type: {{ .Values.jaeger.service.type }}
+  ports:
+    - name: service
+      port: {{ .Values.ports.jaeger }}
+      targetPort: service
+      protocol: TCP
+    - name: web
+      port: {{ .Values.ports.jaegerweb }}
+      targetPort: web
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: jaeger
