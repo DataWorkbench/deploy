@@ -4,6 +4,7 @@
 
 set -e
 
+# add serviceName here
 SERVICES=""
 OUTPUT_DIR="${GOPATH}/bin"
 
@@ -12,7 +13,7 @@ usage(){
   echo "OPTIONS:"
   echo "    -s required, service wanted to compile, split by comma, default all services"
   echo "    -o output dir of compiled service, default ${GOPATH}/bin"
-  echo "    -g the program name of compiled service, default same as services"
+  echo "    -p the program name of compiled service, default same as services"
 }
 
 while getopts ":hs:o:p:" opt;

@@ -2,10 +2,6 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-default:
-	docker build -t dataworkbench/builder .
-	@echo "ok"
-
 pull:
 	docker pull dataworkbench/builder
 	@echo "ok"
@@ -14,4 +10,8 @@ run:
 	docker run --rm -it -v `pwd`:/root dataworkbench/builder
 
 clean:
+	@echo "ok"
+
+build:
+	docker build -t dataworkbench/builder .
 	@echo "ok"

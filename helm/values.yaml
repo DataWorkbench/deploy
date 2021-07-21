@@ -1,0 +1,261 @@
+# Default values for dataworkbench.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  pullPolicy: IfNotPresent
+#  pullPolicy: Always
+  dataworkbench: dataworkbench/dataworkbench:dev
+  flyway: dataworkbench/flyway:latest
+  zeppelin: dataworkbench/zeppelin:latest
+  jaeger: jaegertracing/all-in-one:1.22
+
+
+# serviceName: port
+ports:
+  jaeger: 6831
+  jaegerweb: 16686
+  mysql: 3306
+  etcd: 2379
+  apiserver: 9101
+  spacemanager: 9102
+  flowmanager: 9103
+  scheduler: 9104
+  sourcemanager: 9105
+  jobmanager: 9106
+  jobdeveloper: 9107
+  jobwatcher: 9108
+  udfmanager: 9109
+  zeppelinscale: 9111
+  zeppelin: 9112
+  notifier: 9113
+
+## mysql settings
+mysql:
+  user: root
+  password: zhu88jie
+  database: data_workbench
+  logLevel: 4
+
+## etcd settings
+etcd:
+  dial_timeout: 5s
+
+# common settings for all service
+common:
+  replicas: 3
+  strategy: RollingUpdate
+  logLevel: 1
+  grpcLogLevel: 1
+  grpcLogVerbosity: 99
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    periodSeconds: 10
+    initialDelaySeconds: 20
+
+# apiserver settings
+apiserver:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    API_SERVER_READ_TIMEOUT: 30s
+    API_SERVER_WRITE_TIMEOUT: 30s
+    API_SERVER_DLE_TIMEOUT: 30s
+    API_SERVER_EXIT_TIMEOUT: 5m
+    API_SERVER_TRACER_SERVICE_NAME: apiserver
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 60
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 60
+
+# spacemanager settings
+spacemanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    SPACE_MANAGER_TRACER_SERVICE_NAME: spacemanager
+    SPACE_MANAGER_MYSQL_USERS: root
+    SPACE_MANAGER_MYSQL_DATABASE: data_workbench
+    SPACE_MANAGER_MYSQL_LOG_LEVEL: 4
+    SPACE_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
+    SPACE_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
+  metric:
+    enabled: false
+    address: "0.0.0.0:9201"
+    urlPath: "/metrics"
+
+# flowmanager settings
+flowmanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
+    FLOW_MANAGER_MYSQL_USERS: root
+    FLOW_MANAGER_MYSQL_DATABASE: data_workbench
+    FLOW_MANAGER_MYSQL_LOG_LEVEL: 4
+    FLOW_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
+    FLOW_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+    urlPath: "/metrics"
+
+# jobdeveloper settings
+jobdeveloper:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_DEVELOPER_TRACER_SERVICE_NAME: jobdeveloper
+    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
+    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# jobmanager settings
+jobmanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_MANAGER_TRACER_SERVICE_NAME: jobmanager
+    JOB_MANAGER_MYSQL_USERS: root
+    JOB_MANAGER_MYSQL_DATABASE: data_workbench
+    JOB_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# jobwatcher settings
+jobwatcher:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    JOB_WATCHER_JOB_WORKS: 16
+    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
+    JOB_WATCHER_TRACER_SERVICE_NAME: jobwatcher
+    JOB_WATCHER_MYSQL_USERS: root
+    JOB_WATCHER_MYSQL_DATABASE: data_workbench
+    JOB_WATCHER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# notifier settings
+notifier:
+  enabled: false
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    NOTIFIER_MYSQL_DATABASE: data_workbench
+    NOTIFIER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# scheduler settings
+scheduler:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    SCHEDULER_TRACER_SERVICE_NAME: scheduler
+    SCHEDULER_MYSQL_DATABASE: data_workbench
+    SCHEDULER_MYSQL_LOG_LEVEL: 4
+    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# sourcemanager settings
+sourcemanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    SOURCE_MANAGER_TRACER_SERVICE_NAME: sourcemanager
+    SOURCE_MANAGER_MYSQL_USERS: root
+    SOURCE_MANAGER_MYSQL_DATABASE: data_workbench
+    SOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# udfmanager settings
+udfmanager:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    UDF_MANAGER_TRACER_SERVICE_NAME: udfmanager
+    UDF_MANAGER_MYSQL_USERS: root
+    UDF_MANAGER_MYSQL_DATABASE: data_workbench
+    UDF_MANAGER_MYSQL_LOG_LEVEL: 4
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# zeppelinscale settings
+zeppelinscale:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: zeppelinscale
+  metric:
+    enabled: false
+    address: "0.0.0.0:9203"
+
+# zeppelin settings
+zeppelin:
+  enabled: false
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
+    LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
+
+# jaeger settings
+jaeger:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    COLLECTOR_ZIPKIN_HTTP_PORT: 9411

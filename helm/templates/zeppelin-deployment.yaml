@@ -1,0 +1,65 @@
+{{- if .Values.zeppelin.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-zeppelin
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: zeppelin
+annotations:
+  {{- range $key, $value := .Values.zeppelin.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.zeppelin.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.zeppelin.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: zeppelin
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: zeppelin
+      annotations:
+      {{- range $key, $value := .Values.zeppelin.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+      - name: zeppelin
+        image: {{ .Values.image.zeppelin | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - containerPort: {{ .Values.ports.zeppelin }}
+            name: service
+        env:
+          {{- range $ename, $evalue := .Values.zeppelin.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.ports.zeppelin }}
+          {{- if .Values.zeppelin.readinessProbe }}
+          periodSeconds: {{ .Values.zeppelin.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.zeppelin.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.ports.zeppelin }}
+          {{- if .Values.zeppelin.livenessProbe }}
+          periodSeconds: {{ .Values.zeppelin.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.zeppelin.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+{{- end }}

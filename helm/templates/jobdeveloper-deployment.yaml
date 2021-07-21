@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-jobdeveloper
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: jobdeveloper
+annotations:
+  {{- range $key, $value := .Values.jobdeveloper.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.jobdeveloper.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.jobdeveloper.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: jobdeveloper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: jobdeveloper
+      annotations:
+      {{- range $key, $value := .Values.jobdeveloper.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      containers:
+      - name: jobdeveloper
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.jobdeveloper }}
+            name: service
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
+        env:
+          - name: JOB_DEVELOPER_LOG_LEVEL
+            value: {{ coalesce .Values.jobdeveloper.logLevel .Values.common.logLevel | quote }}
+          - name: JOB_DEVELOPER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobdeveloper }}"
+          - name: JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.jobdeveloper.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: JOB_DEVELOPER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.jobdeveloper.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: JOB_DEVELOPER_TRACER_LOCAL_AGENT
+            value: '{{ include "service.jaeger" . }}'
+          - name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
+            value: {{ include "service.udfmanager" . | quote }}
+          - name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
+            value: {{ include "service.sourcemanager" . | quote }}
+          - name: JOB_DEVELOPER_METRICS_ENABLED
+          {{- if .Values.jobdeveloper.metric.enabled }}
+            value: "true"
+          - name: JOB_DEVELOPER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.jobdeveloper.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.jobdeveloper.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
+          {{- if .Values.jobdeveloper.readinessProbe }}
+          periodSeconds: {{ .Values.jobdeveloper.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobdeveloper.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
+          {{- if .Values.jobdeveloper.livenessProbe }}
+          periodSeconds: {{ .Values.jobdeveloper.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobdeveloper.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

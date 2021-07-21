@@ -1,0 +1,93 @@
+{{- if .Values.notifier.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-notifier
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: notifier
+annotations:
+  {{- range $key, $value := .Values.notifier.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.notifier.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.notifier.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: notifier
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: notifier
+      annotations:
+      {{- range $key, $value := .Values.notifier.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: notifier
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.notifier }}
+            name: service
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
+        env:
+          - name: NOTIFIER_LOG_LEVEL
+            value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
+          - name: NOTIFIER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.notifier }}"
+          - name: NOTIFIER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.notifier.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: NOTIFIER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: NOTIFIER_MYSQL_HOSTS
+            value: '{{- include "mysql.hostPort" . }}'
+          - name: NOTIFIER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          - name: NOTIFIER_METRICS_ENABLED
+          {{- if .Values.notifier.metric.enabled }}
+            value: "true"
+          - name: NOTIFIER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.notifier.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.notifier.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
+          {{- if .Values.notifier.readinessProbe }}
+          periodSeconds: {{ .Values.notifier.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.notifier.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
+          {{- if .Values.notifier.livenessProbe }}
+          periodSeconds: {{ .Values.notifier.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.notifier.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+{{- end }}

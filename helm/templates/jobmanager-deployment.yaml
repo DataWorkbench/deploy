@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-jobmanager
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: jobmanager
+annotations:
+  {{- range $key, $value := .Values.jobmanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.jobmanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.jobmanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: jobmanager
+      annotations:
+      {{- range $key, $value := .Values.jobmanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: jobmanager
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "jobmanager start -c ${DATAWORKBENCH_CONF}/jobmanager.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.jobmanager }}
+            name: service
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
+        env:
+          - name: JOB_MANAGER_LOG_LEVEL
+            value: {{ coalesce .Values.jobmanager.logLevel .Values.common.logLevel | quote }}
+          - name: JOB_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobmanager }}"
+          - name: JOB_MANAGER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.jobmanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.jobmanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
+            value: {{ include "service.jobdeveloper" . | quote }}
+          - name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS
+            value: {{ include "service.jobwatcher" . | quote }}
+          - name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
+            value: {{ include "service.zeppelinscale" . | quote }}
+          - name: JOB_MANAGER_TRACER_LOCAL_AGENT
+            value: '{{ include "service.jaeger" . }}'
+          - name: JOB_MANAGER_MYSQL_HOSTS
+            value: '{{- include "mysql.hostPort" . }}'
+          - name: JOB_MANAGER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          - name: JOB_MANAGER_METRICS_ENABLED
+          {{- if .Values.jobmanager.metric.enabled }}
+            value: "true"
+          - name: JOB_MANAGER_METRICS_SERVER_ADDRESS
+            value: {{ .Values.jobmanager.metric.address }}
+          {{- else }}
+            value: "false"
+          {{- end }}
+          {{- range $ename, $evalue := .Values.jobmanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
+          {{- if .Values.jobmanager.readinessProbe }}
+          periodSeconds: {{ .Values.jobmanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobmanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
+          {{- if .Values.jobmanager.livenessProbe }}
+          periodSeconds: {{ .Values.jobmanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobmanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

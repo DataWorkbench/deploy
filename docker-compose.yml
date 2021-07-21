@@ -118,7 +118,7 @@ services:
   apiserver:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-apiserver"
-    command: "apiserver start -c /dataworkbench/conf/apiserver.yaml"
+    command: "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"
     ports:
      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
@@ -173,7 +173,7 @@ services:
   spacemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-spacemanager"
-    command: "spacemanager start -c /dataworkbench/conf/spacemanager.yaml"
+    command: "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"
     ports:
       - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
     links:
@@ -207,7 +207,7 @@ services:
   flowmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-flowmanager"
-    command: "flowmanager start -c /dataworkbench/conf/flowmanager.yaml"
+    command: "flowmanager start -c ${DATAWORKBENCH_CONF}/flowmanager.yaml"
     ports:
       - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
     links:
@@ -245,7 +245,7 @@ services:
   scheduler:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-scheduler"
-    command: "scheduler start -c /dataworkbench/conf/scheduler.yaml"
+    command: "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"
     ports:
       - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
     links:
@@ -289,7 +289,7 @@ services:
   sourcemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-sourcemanager"
-    command: "sourcemanager start -c /dataworkbench/conf/sourcemanager.yaml"
+    command: "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"
     ports:
       - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
     links:
@@ -324,7 +324,7 @@ services:
   udfmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-udfmanager"
-    command: "udfmanager start -c /dataworkbench/conf/udfmanager.yaml"
+    command: "udfmanager start -c ${DATAWORKBENCH_CONF}/udfmanager.yaml"
     ports:
       - "${UDF_MANAGER_PORT}:${UDF_MANAGER_PORT}"
     links:
@@ -358,7 +358,7 @@ services:
   zeppelinscale:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-zeppelinscale"
-    command: "zeppelinscale start -c /dataworkbench/conf/zeppelinscale.yaml"
+    command: "zeppelinscale start -c ${DATAWORKBENCH_CONF}/zeppelinscale.yaml"
     ports:
       - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
     links:
@@ -388,7 +388,7 @@ services:
   jobwatcher:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobwatcher"
-    command: "jobwatcher start -c /dataworkbench/conf/jobwatcher.yaml"
+    command: "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"
     ports:
       - "${JOB_WATCHER_PORT}:${JOB_WATCHER_PORT}"
     links:
@@ -397,7 +397,7 @@ services:
       - dataworkbench-db-ctrl
     environment:
       - JOB_WATCHER_JOB_WORKS=16
-      - JOB_WATCHER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
       - JOB_WATCHER_PICKUP_ALONE_JOBS=1
       - JOB_WATCHER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_WATCHER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_PORT}
@@ -425,7 +425,7 @@ services:
   jobdeveloper:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobdeveloper"
-    command: "jobdeveloper start -c /dataworkbench/conf/jobdeveloper.yaml"
+    command: "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"
     ports:
       - "${JOB_DEVELOPER_PORT}:${JOB_DEVELOPER_PORT}"
     links:
@@ -433,10 +433,10 @@ services:
     depends_on:
       - dataworkbench-db-ctrl
     environment:
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.11.2
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
-      - JOB_DEVELOPER_UDFMANAGER_SERVER=udfmanager:${UDF_MANAGER_PORT}
-      - JOB_DEVELOPER_SOURCEMANAGER_SERVER=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar
+      - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
+      - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
       - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -458,7 +458,7 @@ services:
   jobmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobmanager"
-    command: "jobmanager start -c /dataworkbench/conf/jobmanager.yaml"
+    command: "jobmanager start -c ${DATAWORKBENCH_CONF}/jobmanager.yaml"
     ports:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
@@ -470,9 +470,9 @@ services:
       - dataworkbench-db-ctrl
       - dataworkbench-jaeger
     environment:
-      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER=zeppelinscale:${ZEPPELIN_SCALE_PORT}
-      - JOB_MANAGER_JOBDEVELOPER_SERVER=jobdeveloper:${JOB_DEVELOPER_PORT}
-      - JOB_MANAGER_JOBWATCHER_SERVER=jobwatcher:${JOB_WATCHER_PORT}
+      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS=zeppelinscale:${ZEPPELIN_SCALE_PORT}
+      - JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
+      - JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS=jobwatcher:${JOB_WATCHER_PORT}
       - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_PORT}
       - JOB_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -520,7 +520,7 @@ services:
           - zeppelin
 
   flinkjobmanager:
-    image: "flink:1.11.2-scala_2.11"
+    image: "flink:1.12.3-scala_2.11"
     container_name: "dataworkbench-flink-jobmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -537,7 +537,7 @@ services:
           - flinkjobmanager
 
   flinktaskmanager:
-    image: "flink:1.11.2-scala_2.11"
+    image: "flink:1.12.3-scala_2.11"
     container_name: "dataworkbench-flink-taskmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -595,7 +595,7 @@ services:
   notifier:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-notifier"
-    command: "notifier start -c /dataworkbench/conf/notifier.yaml"
+    command: "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"
     ports:
       - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
     links:
@@ -622,3 +622,28 @@ services:
       dataworkbench-net:
         aliases:
           - notifier
+
+  hbase:
+    image: "harisekhon/hbase:2.1"
+    container_name: "hbase"
+    ports:
+      - "2182:2181"
+      # - "8080:8080"
+      - "8085:8085"
+      - "9090:9090"
+      - "9095:9095"
+      - "16000:16000"
+      - "16010:16010"
+      - "16201:16201"
+      - "16301:16301"
+      - "16030:16030"
+      - "16020:16020"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - hbase
