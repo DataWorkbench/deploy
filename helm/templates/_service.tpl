@@ -1,6 +1,9 @@
 {{/*
 Service Addresses For ApiServer
 */}}
+{{- define "service.jaeger" -}}
+{{ .Release.Name }}-jaeger:{{ .Values.ports.jaeger }}
+{{- end -}}
 {{- define "service.udfmanager" -}}
 {{ .Release.Name }}-udfmanager:{{ .Values.ports.udfmanager }}
 {{- end -}}
@@ -26,19 +29,19 @@ Service Addresses For ApiServer
 {{ .Release.Name }}-zeppelin:{{ .Values.ports.zeppelin }}
 {{- end -}}
 
-{{/*
-- name: API_SERVER_SCHEDULER_ADDRESS
-  value: "{{ .Release.Name }}-scheduler:{{ .Values.ports.scheduler }}"
-- name: API_SERVER_SOURCE_MANAGER_ADDRESS
-  value: {{ include "service.sourcemanager" . | quote }}
-*/}}
 {{- define "apiserver.link.services" -}}
 - name: API_SERVER_TRACER_LOCAL_AGENT
-  value: "{{ .Release.Name }}-jaeger:{{ .Values.ports.jaeger }}"
+  value: '{{ include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
   value: "{{ .Release.Name }}-spacemanager:{{ .Values.ports.spacemanager }}"
 - name: API_SERVER_FLOW_MANAGER_ADDRESS
-  value: "{{ .Release.Name }}-flowmanager:{{ .Values.ports.flowmanager }}"
+  value: '{{- include "service.flowmanager" . }}'
+- name: API_SERVER_SCHEDULER_ADDRESS
+  value: "{{ .Release.Name }}-scheduler:{{ .Values.ports.scheduler }}"
+- name: API_SERVER_SOURCE_MANAGER_ADDRESS
+  value: '{{ include "service.sourcemanager" . }}'
+- name: API_SERVER_JOB_MANAGER_ADDRESS
+  value: "{{ .Release.Name }}-jobmanager:{{ .Values.ports.jobmanager }}"
 {{- end -}}
 
 
@@ -69,7 +72,7 @@ until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waitin
 Etcd Settings
 */}}
 {{- define "etcd.endpoints" -}}
-{{ .Release.Name }}-etcd:{{- .Values.ports.mysql }}
+{{ .Release.Name }}-etcd:{{- .Values.ports.etcd }}
 {{- end -}}
 {{- define "etcd.waiting.cmd" -}}
 until nc -z {{ .Release.Name }}-etcd {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;

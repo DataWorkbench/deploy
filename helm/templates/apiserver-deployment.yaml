@@ -37,8 +37,8 @@ spec:
           ports:
             - containerPort: {{ .Values.ports.apiserver }}
               name: service
-            - containerPort: {{ .Values.ports.opentracing }}
-              name: opentracing
+            - containerPort: {{ .Values.ports.jaeger }}
+              name: jaeger
           env:
             - name: API_SERVER_LOG_LEVEL
               value: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel | quote }}
@@ -48,17 +48,15 @@ spec:
               value: {{ coalesce .Values.apiserver.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
             - name: API_SERVER_HTTP_SERVER_ADDRESS
               value: "0.0.0.0:{{ .Values.ports.apiserver }}"
-            - name: API_SERVER_TRACER_LOCAL_AGENT
-              value: "0.0.0.0:{{ .Values.ports.opentracing }}"
 {{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
             - name: {{ $ename }}
               value: {{ $evalue | quote }}
             {{- end }}
           readinessProbe:
-            exec:
-              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.apiserver }}"]
-            {{- if .Values.apiserver.readinessProbe }}
+            tcpSocket:
+              port: service
+  {{- if .Values.apiserver.readinessProbe }}
             periodSeconds: {{ .Values.apiserver.readinessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.apiserver.readinessProbe.initialDelaySeconds }}
             {{- else }}
@@ -66,8 +64,8 @@ spec:
             initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
             {{- end }}
           livenessProbe:
-            exec:
-              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.apiserver }}"]
+            tcpSocket:
+              port: service
             {{- if .Values.apiserver.livenessProbe }}
             initialDelaySeconds: {{ .Values.apiserver.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.apiserver.livenessProbe.periodSeconds }}

@@ -2,21 +2,21 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-zeppelinscale
+  name: {{ .Release.Name }}-zeppelin
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: zeppelinscale
+    component: zeppelin
   annotations:
-    {{ toYaml .Values.zeppelinscale.service.annotations | indent 4 }}
+    {{ toYaml .Values.zeppelin.service.annotations | indent 4 }}
 spec:
-  type: {{ .Values.zeppelinscale.service.type }}
+  type: {{ .Values.zeppelin.service.type }}
   ports:
     - name: service
-      port: {{ .Values.ports.zeppelinscale }}
+      port: {{ .Values.ports.zeppelin }}
       targetPort: service
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    component: zeppelinscale
+    component: zeppelin
 {{- end }}

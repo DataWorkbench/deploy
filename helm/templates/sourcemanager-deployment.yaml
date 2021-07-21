@@ -42,8 +42,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.sourcemanager }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: SOURCE_MANAGER_LOG_LEVEL
             value: {{ coalesce .Values.sourcemanager.logLevel .Values.common.logLevel | quote }}
@@ -54,7 +54,7 @@ spec:
           - name: SOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.sourcemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: SOURCE_MANAGER_TRACER_LOCAL_AGENT
-            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+            value: '{{ include "service.jaeger" . }}'
           - name: SOURCE_MANAGER_MYSQL_HOSTS
             value: '{{- include "mysql.hostPort" . }}'
           - name: SOURCE_MANAGER_MYSQL_PASSWORD

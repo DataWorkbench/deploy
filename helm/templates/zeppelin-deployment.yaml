@@ -54,7 +54,7 @@ spec:
           {{- end }}
         livenessProbe:
           tcpSocket:
-            port: { { .Values.ports.zeppelin } }
+            port: {{ .Values.ports.zeppelin }}
           {{- if .Values.zeppelin.livenessProbe }}
           periodSeconds: {{ .Values.zeppelin.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.zeppelin.livenessProbe.initialDelaySeconds }}

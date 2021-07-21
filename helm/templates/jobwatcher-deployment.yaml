@@ -42,8 +42,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jobwatcher }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: JOB_WATCHER_LOG_LEVEL
             value: {{ coalesce .Values.jobwatcher.logLevel .Values.common.logLevel | quote }}
@@ -56,7 +56,7 @@ spec:
           - name: JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS
             value: {{ include "service.jobdeveloper" . | quote }}
           - name: JOB_WATCHER_TRACER_LOCAL_AGENT
-            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+            value: '{{ include "service.jaeger" . }}'
           - name: JOB_WATCHER_MYSQL_HOSTS
             value: '{{- include "mysql.hostPort" . }}'
           - name: JOB_WATCHER_MYSQL_PASSWORD

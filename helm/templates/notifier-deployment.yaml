@@ -1,3 +1,4 @@
+{{- if .Values.notifier.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -42,8 +43,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: NOTIFIER_LOG_LEVEL
             value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
@@ -89,3 +90,4 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+{{- end }}

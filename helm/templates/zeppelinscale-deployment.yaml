@@ -37,8 +37,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.zeppelinscale }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: ZEPPELIN_SCALE_LOG_LEVEL
             value: {{ coalesce .Values.zeppelinscale.logLevel .Values.common.logLevel | quote }}
@@ -49,7 +49,7 @@ spec:
           - name: ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.zeppelinscale.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: ZEPPELIN_SCALE_TRACER_LOCAL_AGENT
-            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+            value: '{{ include "service.jaeger" . }}'
           - name: ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS
             value: {{ include "service.zeppelin" . | quote }}
           - name: ZEPPELIN_SCALE_METRICS_ENABLED

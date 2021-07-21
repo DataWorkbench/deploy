@@ -37,8 +37,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jobdeveloper }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: JOB_DEVELOPER_LOG_LEVEL
             value: {{ coalesce .Values.jobdeveloper.logLevel .Values.common.logLevel | quote }}
@@ -49,7 +49,7 @@ spec:
           - name: JOB_DEVELOPER_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.jobdeveloper.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: JOB_DEVELOPER_TRACER_LOCAL_AGENT
-            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+            value: '{{ include "service.jaeger" . }}'
           - name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
             value: {{ include "service.udfmanager" . | quote }}
           - name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS

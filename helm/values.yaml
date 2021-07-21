@@ -7,26 +7,28 @@ image:
 #  pullPolicy: Always
   dataworkbench: dataworkbench/dataworkbench:dev
   flyway: dataworkbench/flyway:latest
+  zeppelin: dataworkbench/zeppelin:latest
+  jaeger: jaegertracing/all-in-one:1.22
 
 
 # serviceName: port
 ports:
-  opentracing: 6831
-  apiserver: 9001
-  spacemanager: 9101
-  flowmanager: 9103
-  scheduler: 9105
-  sourcemanager: 9107
-  jobmanager: 9109
-  jobdeveloper: 9111
-  jobwatcher: 9113
-  udfmanager: 9115
-  jaeger: 9117
-  zeppelinscale: 9119
-  zeppelin: 9121
-  notifier: 9123
+  jaeger: 6831
+  jaegerweb: 16686
   mysql: 3306
   etcd: 2379
+  apiserver: 9101
+  spacemanager: 9102
+  flowmanager: 9103
+  scheduler: 9104
+  sourcemanager: 9105
+  jobmanager: 9106
+  jobdeveloper: 9107
+  jobwatcher: 9108
+  udfmanager: 9109
+  zeppelinscale: 9111
+  zeppelin: 9112
+  notifier: 9113
 
 ## mysql settings
 mysql:
@@ -66,6 +68,12 @@ apiserver:
     API_SERVER_DLE_TIMEOUT: 30s
     API_SERVER_EXIT_TIMEOUT: 5m
     API_SERVER_TRACER_SERVICE_NAME: apiserver
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 60
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 60
 
 # spacemanager settings
 spacemanager:
@@ -156,6 +164,7 @@ jobwatcher:
 
 # notifier settings
 notifier:
+  enabled: false
   annotations: {}
   podAnnotations: {}
   service:
@@ -240,3 +249,13 @@ zeppelin:
   envs:
     LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
     LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
+
+# jaeger settings
+jaeger:
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    COLLECTOR_ZIPKIN_HTTP_PORT: 9411

@@ -42,8 +42,8 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jobmanager }}
             name: service
-          - containerPort: {{ .Values.ports.opentracing }}
-            name: opentracing
+          - containerPort: {{ .Values.ports.jaeger }}
+            name: jaeger
         env:
           - name: JOB_MANAGER_LOG_LEVEL
             value: {{ coalesce .Values.jobmanager.logLevel .Values.common.logLevel | quote }}
@@ -60,7 +60,7 @@ spec:
           - name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
             value: {{ include "service.zeppelinscale" . | quote }}
           - name: JOB_MANAGER_TRACER_LOCAL_AGENT
-            value: "0.0.0.0:{{- .Values.ports.opentracing }}"
+            value: '{{ include "service.jaeger" . }}'
           - name: JOB_MANAGER_MYSQL_HOSTS
             value: '{{- include "mysql.hostPort" . }}'
           - name: JOB_MANAGER_MYSQL_PASSWORD
