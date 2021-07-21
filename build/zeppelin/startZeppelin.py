@@ -9,8 +9,8 @@ import time
 fileName = "/zeppelin/conf/interpreter.json"
 TiniCmd = "/usr/bin/tini"
 zeppelinCmd = "/zeppelin/bin/zeppelin.sh"
-libUrl = os.getenv("LIB_URL")
-libName = os.getenv("LIB_NAMES")
+#libUrl = os.getenv("LIB_URL")
+#libName = os.getenv("LIB_NAMES")
 libDir = "/opt/zeppelin/lib/"
 
 def log(msg):
@@ -28,13 +28,13 @@ def rewriteZeppelinConf():
     f.close()
     log("set flink perNote to 'isolated', perUser to ''")
 
-def downloadLib():
-    for lib in libName.split(','):
-        log("download " + lib + " to " + libDir + " is running")
-        r = requests.get(libUrl + lib)
-        with open(libDir + lib, "wb") as f:
-            f.write(r.content)
-        log("download " + lib + " to " + libDir + " done")
+#def downloadLib():
+#    for lib in libName.split(','):
+#        log("download " + lib + " to " + libDir + " is running")
+#        r = requests.get(libUrl + lib)
+#        with open(libDir + lib, "wb") as f:
+#            f.write(r.content)
+#        log("download " + lib + " to " + libDir + " done")
 
 
 def startRealZeppelin(arg):
@@ -46,7 +46,7 @@ def startRealZeppelin(arg):
 def main(arg):
     try:
         rewriteZeppelinConf()
-        downloadLib()
+#        downloadLib()
         startRealZeppelin(arg)
     except Exception as err:
         log(err)
