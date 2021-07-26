@@ -20,6 +20,7 @@ COPY ./jobmanager/config/config.yaml ${DATAWORKBENCH_CONF}/jobmanager.yaml
 COPY ./jobwatcher/config/config.yaml ${DATAWORKBENCH_CONF}/jobwatcher.yaml
 COPY ./jobdeveloper/config/config.yaml ${DATAWORKBENCH_CONF}/jobdeveloper.yaml
 COPY ./notifier/config/config.yaml ${DATAWORKBENCH_CONF}/notifier.yaml
+COPY ./filemanager/config/config.yaml ${DATAWORKBENCH_CONF}/filemanager.yaml
 
 #RUN find ./deploy/tmp/bin/ -type f -exec upx {} \;
 COPY ./deploy/tmp/bin /usr/local/bin/

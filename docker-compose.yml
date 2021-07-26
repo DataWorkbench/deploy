@@ -120,7 +120,7 @@ services:
     container_name: "dataworkbench-apiserver"
     command: "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"
     ports:
-     - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
       - spacemanager
       - flowmanager
@@ -438,6 +438,7 @@ services:
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
       - JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT} #TODO this is not right address
       - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS=filemanager:${FILE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
       - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -496,6 +497,42 @@ services:
       dataworkbench-net:
         aliases:
           - jobmanager
+
+  filemanager:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-filemanager"
+    command: "filemanager start -c ${DATAWORKBENCH_CONF}/filemanager.yaml"
+    ports:
+      - "${FILE_MANAGER_PORT}:${FILE_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - FILE_MANAGER_HDFS_SERVER=hadoop:9000
+      - FILE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - FILE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FILE_MANAGER_PORT}
+      - FILE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - FILE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - FILE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - FILE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${FILE_MANAGER_METRICS_PORT}
+      - FILE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - FILE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - FILE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
+      - FILE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - FILE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - FILE_MANAGER_TRACER_SERVICE_NAME=filemanager
+      - FILE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - filemanager
+
 
   zeppelin:
     image: "dataworkbench/zeppelin"
@@ -650,3 +687,26 @@ services:
       dataworkbench-net:
         aliases:
           - hbase
+
+  hadoop:
+    image: "sequenceiq/hadoop-docker:2.7.0"
+    container_name: "hadoop"
+    ports:
+      - "50070:50070"
+      - "9000:9000"
+      - "8088:8088"
+      - "8040:8040"
+      - "8042:8042"
+      - "49707:49707"
+      - "50010:50010"
+      - "50075:50075"
+      - "50090:50090"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - hadoop
