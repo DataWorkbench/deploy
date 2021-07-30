@@ -48,6 +48,10 @@ build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib 
 	echo "if build zeppelin failed, please download flink to .build/zeppelin. https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz"
 	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
 
+.PHONY: build-flink-utile
+build-flink-utile:
+	cd ./build/flink_utile/ && docker build -t $(TARG.Name)/flinkutile:${DOCKER_TAGS} . && cd ../..
+
 .PHONY: build-dev
 build-dev: compile ## Build dataworkbench image
 	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name) -f ./deploy/Dockerfile.dev .
@@ -55,7 +59,7 @@ build-dev: compile ## Build dataworkbench image
 	@echo "build done"
 
 .PHONY: build-all
-build-all: build-zeppelin build-flyway build-dev ## Build all images
+build-all: build-zeppelin build-flyway build-dev build-flink-utile ## Build all images
 
 .PHONY: pull-images
 pull-images: ## Pull images
