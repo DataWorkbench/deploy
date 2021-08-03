@@ -46,6 +46,7 @@ build-flyway: ## Build flyway image for database migration
 .PHONY: build-zeppelin
 build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
 	echo "if build zeppelin failed, please download flink to .build/zeppelin. https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz"
+	echo "if build zeppelin failed, please download hadoop to .build/zeppelin. "
 	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
 
 .PHONY: build-flink-utile

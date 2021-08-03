@@ -690,7 +690,7 @@ services:
 
   hadoop:
     image: "sequenceiq/hadoop-docker:2.7.0"
-    container_name: "hadoop"
+    container_name: "dataworkbench-hadoop-for-test"
     ports:
       - "50070:50070"
       - "9000:9000"
