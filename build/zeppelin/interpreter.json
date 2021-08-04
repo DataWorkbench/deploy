@@ -7,7 +7,7 @@
       "properties": {
         "zeppelin.scio.argz": {
           "name": "zeppelin.scio.argz",
-          "value": "--runner=InProcessPipelineRunner",
+          "value": "--runner\u003dInProcessPipelineRunner",
           "type": "textarea",
           "description": "Scio interpreter wide arguments"
         },
@@ -198,7 +198,7 @@
           "name": "default.completer.schemaFilters",
           "value": "",
           "type": "textarea",
-          "description": "\u0421omma separated schema (schema = catalog = database) filters to get metadata for completions. Supports '%' symbol is equivalent to any set of characters. (ex. prod_v_%,public%,info)"
+          "description": "Сomma separated schema (schema \u003d catalog \u003d database) filters to get metadata for completions. Supports \u0027%\u0027 symbol is equivalent to any set of characters. (ex. prod_v_%,public%,info)"
         },
         "default.precode": {
           "name": "default.precode",
@@ -223,6 +223,12 @@
           "value": "",
           "type": "string",
           "description": "If auth type is needed, Example: KERBEROS"
+        },
+        "zeppelin.jdbc.auth.kerberos.proxy.enable": {
+          "name": "zeppelin.jdbc.auth.kerberos.proxy.enable",
+          "value": "true",
+          "type": "checkbox",
+          "description": "When auth type is Kerberos, enable/disable Kerberos proxy with the login user to get the connection. Default value is true."
         },
         "zeppelin.jdbc.concurrent.use": {
           "name": "zeppelin.jdbc.concurrent.use",
@@ -265,6 +271,12 @@
           "value": "1000",
           "type": "number",
           "description": "Maximum number of rows fetched from the query."
+        },
+        "zeppelin.jdbc.hive.timeout.threshold": {
+          "name": "zeppelin.jdbc.hive.timeout.threshold",
+          "value": "60000",
+          "type": "number",
+          "description": "Timeout for hive job timeout"
         }
       },
       "status": "READY",
@@ -368,7 +380,7 @@
         },
         "lens.server.base.url": {
           "name": "lens.server.base.url",
-          "value": "http://<hostname>:<port>/lensapi",
+          "value": "http://\u003chostname\u003e:\u003cport\u003e/lensapi",
           "type": "url",
           "description": "The URL for Lens Server"
         },
@@ -807,7 +819,7 @@
           "name": "shell.command.timeout.millisecs",
           "value": "60000",
           "type": "number",
-          "description": "Shell command time out in millisecs. Default = 60000"
+          "description": "Shell command time out in millisecs. Default \u003d 60000"
         }
       },
       "status": "READY",
@@ -965,7 +977,7 @@
         },
         "spark.app.name": {
           "name": "spark.app.name",
-          "value": "Zeppelin",
+          "value": "",
           "type": "string",
           "description": "The name of spark application."
         },
@@ -992,6 +1004,12 @@
           "value": "1g",
           "type": "string",
           "description": "Executor memory per worker instance. ex) 512m, 32g"
+        },
+        "spark.executor.instances": {
+          "name": "spark.executor.instances",
+          "value": "2",
+          "type": "number",
+          "description": "The number of executors for static allocation."
         },
         "spark.files": {
           "name": "spark.files",
@@ -1039,7 +1057,7 @@
           "name": "zeppelin.spark.uiWebUrl",
           "value": "",
           "type": "string",
-          "description": "Override Spark UI default URL. In Kubernetes mode, value can be Jinja template string with 3 template variables 'PORT', 'SERVICE_NAME' and 'SERVICE_DOMAIN'. (ex: http://{{PORT}}-{{SERVICE_NAME}}.{{SERVICE_DOMAIN}})"
+          "description": "Override Spark UI default URL. In Kubernetes mode, value can be Jinja template string with 3 template variables \u0027PORT\u0027, \u0027SERVICE_NAME\u0027 and \u0027SERVICE_DOMAIN\u0027. (ex: http://{{PORT}}-{{SERVICE_NAME}}.{{SERVICE_DOMAIN}})"
         },
         "zeppelin.spark.ui.hidden": {
           "name": "zeppelin.spark.ui.hidden",
@@ -1127,7 +1145,7 @@
         },
         "zeppelin.R.render.options": {
           "name": "zeppelin.R.render.options",
-          "value": "out.format = 'html', comment = NA, echo = FALSE, results = 'asis', message = F, warning = F, fig.retina = 2",
+          "value": "out.format \u003d \u0027html\u0027, comment \u003d NA, echo \u003d FALSE, results \u003d \u0027asis\u0027, message \u003d F, warning \u003d F, fig.retina \u003d 2",
           "type": "textarea",
           "description": ""
         },
@@ -1135,7 +1153,7 @@
           "name": "zeppelin.kotlin.shortenTypes",
           "value": true,
           "type": "checkbox",
-          "description": "Show short types instead of full, e.g. List<String> or kotlin.collections.List<kotlin.String>"
+          "description": "Show short types instead of full, e.g. List\u003cString\u003e or kotlin.collections.List\u003ckotlin.String\u003e"
         }
       },
       "status": "READY",
@@ -1248,13 +1266,13 @@
           "name": "shell.command.timeout.millisecs",
           "value": "60000",
           "type": "number",
-          "description": "Shell command time out in millisecs. Default = 60000"
+          "description": "Shell command time out in millisecs. Default \u003d 60000"
         },
         "shell.working.directory.user.home": {
           "name": "shell.working.directory.user.home",
           "value": false,
           "type": "checkbox",
-          "description": "If this set to true, the shell's working directory will be set to user home"
+          "description": "If this set to true, the shell\u0027s working directory will be set to user home"
         },
         "zeppelin.shell.auth.type": {
           "name": "zeppelin.shell.auth.type",
@@ -1332,7 +1350,7 @@
           "name": "markdown.parser.type",
           "value": "flexmark",
           "type": "string",
-          "description": "Markdown Parser Type. Available values: pegdown, markdown4j, flexmark. Default = flexmark"
+          "description": "Markdown Parser Type. Available values: pegdown, markdown4j, flexmark. Default \u003d flexmark"
         }
       },
       "status": "READY",
@@ -1452,7 +1470,7 @@
           "name": "zeppelin.bigquery.sql_dialect",
           "value": "",
           "type": "string",
-          "description": "BigQuery SQL dialect (standardSQL or legacySQL). If empty, query prefix like '#standardSQL' can be used."
+          "description": "BigQuery SQL dialect (standardSQL or legacySQL). If empty, query prefix like \u0027#standardSQL\u0027 can be used."
         }
       },
       "status": "READY",
@@ -1582,7 +1600,7 @@
           "name": "hbase.ruby.sources",
           "value": "lib/ruby",
           "type": "string",
-          "description": "Path to Ruby scripts relative to 'hbase.home'"
+          "description": "Path to Ruby scripts relative to \u0027hbase.home\u0027"
         },
         "zeppelin.hbase.test.mode": {
           "name": "zeppelin.hbase.test.mode",
@@ -1806,7 +1824,7 @@
           "name": "zeppelin.kotlin.shortenTypes",
           "value": true,
           "type": "checkbox",
-          "description": "Show short types instead of full, e.g. List<String> or kotlin.collections.List<kotlin.String>"
+          "description": "Show short types instead of full, e.g. List\u003cString\u003e or kotlin.collections.List\u003ckotlin.String\u003e"
         }
       },
       "status": "READY",
@@ -1874,7 +1892,7 @@
       "properties": {
         "FLINK_HOME": {
           "name": "FLINK_HOME",
-          "value": "/home/lzzhang/bigdata/flink-bin-download/flink-1.11.2",
+          "value": "zzzzzzzzzz",
           "type": "string",
           "description": "Location of flink distribution"
         },
@@ -1892,31 +1910,31 @@
         },
         "flink.execution.mode": {
           "name": "flink.execution.mode",
-          "value": "remote",
+          "value": "local",
           "type": "string",
           "description": "Execution mode, it could be local|remote|yarn"
         },
         "flink.execution.remote.host": {
           "name": "flink.execution.remote.host",
-          "value": "127.0.0.1",
+          "value": "",
           "type": "string",
           "description": "Host name of running JobManager. Only used for remote mode"
         },
         "flink.execution.remote.port": {
           "name": "flink.execution.remote.port",
-          "value": "8081",
+          "value": "",
           "type": "number",
           "description": "Port of running JobManager. Only used for remote mode"
         },
         "flink.jm.memory": {
           "name": "flink.jm.memory",
-          "value": "512",
+          "value": "1024",
           "type": "number",
           "description": "Memory for JobManager (mb)"
         },
         "flink.tm.memory": {
           "name": "flink.tm.memory",
-          "value": "512",
+          "value": "1024",
           "type": "number",
           "description": "Memory for TaskManager (mb)"
         },
@@ -1970,7 +1988,7 @@
         },
         "flink.execution.jars": {
           "name": "flink.execution.jars",
-          "value": "/home/lzzhang/bigdata/flink-bin-download/zeppelin-0.9.0-preview2-bin-all/lib/flink-connector-jdbc_2.11-1.11.2.jar,/home/lzzhang/bigdata/flink-bin-download/zeppelin-0.9.0-preview2-bin-all/lib/mysql-connector-java-8.0.21.jar,/home/lzzhang/bigdata/flink-bin-download/zeppelin-0.9.0-preview2-bin-all/lib/postgresql-42.2.18.jar,/home/lzzhang/bigdata/flink-bin-download/zeppelin-0.9.0-preview2-bin-all/lib/flink-sql-connector-kafka_2.11-1.11.2.jar",
+          "value": "",
           "type": "string",
           "description": "Additional user jars (comma separated), these jars could be either local files or hdfs files if you have hadoop installed"
         },
@@ -2034,6 +2052,12 @@
           "type": "checkbox",
           "description": "Whether cancel flink job when closing interpreter"
         },
+        "zeppelin.flink.job.check_interval": {
+          "name": "zeppelin.flink.job.check_interval",
+          "value": "1000",
+          "type": "number",
+          "description": "Check interval (in milliseconds) to check flink job progress"
+        },
         "zeppelin.flink.concurrentBatchSql.max": {
           "name": "zeppelin.flink.concurrentBatchSql.max",
           "value": "10",
@@ -2047,7 +2071,7 @@
           "description": "Max concurrent sql of Stream Sql"
         }
       },
-      "status": "DOWNLOADING_DEPENDENCIES",
+      "status": "READY",
       "interpreterGroup": [
         {
           "name": "flink",
@@ -2422,7 +2446,7 @@
         },
         "zeppelin.R.render.options": {
           "name": "zeppelin.R.render.options",
-          "value": "out.format = 'html', comment = NA, echo = FALSE, results = 'asis', message = F, warning = F, fig.retina = 2",
+          "value": "out.format \u003d \u0027html\u0027, comment \u003d NA, echo \u003d FALSE, results \u003d \u0027asis\u0027, message \u003d F, warning \u003d F, fig.retina \u003d 2",
           "type": "textarea",
           "description": ""
         },
@@ -2491,13 +2515,25 @@
           "name": "neo4j.url",
           "value": "bolt://localhost:7687",
           "type": "string",
-          "description": "The Neo4j's BOLT url."
+          "description": "The Neo4j\u0027s BOLT url."
+        },
+        "neo4j.database": {
+          "name": "neo4j.database",
+          "value": "",
+          "type": "string",
+          "description": "The Neo4j target database, if empty use the dafault db."
+        },
+        "neo4j.multi.statement": {
+          "name": "neo4j.multi.statement",
+          "value": "true",
+          "type": "string",
+          "description": "Enables the multi statement management, if true it computes multiple queries separated by semicolon."
         },
         "neo4j.auth.type": {
           "name": "neo4j.auth.type",
           "value": "BASIC",
           "type": "string",
-          "description": "The Neo4j's authentication type (NONE, BASIC)."
+          "description": "The Neo4j\u0027s authentication type (NONE, BASIC)."
         },
         "neo4j.auth.user": {
           "name": "neo4j.auth.user",
@@ -2582,151 +2618,151 @@
           "name": "cassandra.hosts",
           "value": "localhost",
           "type": "textarea",
-          "description": "Comma separated Cassandra hosts (DNS name or IP address). Default = localhost. Ex: '192.168.0.12,node2,node3'"
+          "description": "Comma separated Cassandra hosts (DNS name or IP address). Default \u003d localhost. Ex: \u0027192.168.0.12,node2,node3\u0027"
         },
         "cassandra.native.port": {
           "name": "cassandra.native.port",
           "value": "9042",
           "type": "number",
-          "description": "Cassandra native port. Default = 9042"
+          "description": "Cassandra native port. Default \u003d 9042"
         },
         "cassandra.protocol.version": {
           "name": "cassandra.protocol.version",
           "value": "DEFAULT",
           "type": "string",
-          "description": "Cassandra protocol version. Default = auto-detect"
+          "description": "Cassandra protocol version. Default \u003d auto-detect"
         },
         "cassandra.cluster": {
           "name": "cassandra.cluster",
           "value": "Test Cluster",
           "type": "string",
-          "description": "Cassandra cluster name. Default = 'Test Cluster'"
+          "description": "Cassandra cluster name. Default \u003d \u0027Test Cluster\u0027"
         },
         "cassandra.keyspace": {
           "name": "cassandra.keyspace",
           "value": "system",
           "type": "string",
-          "description": "Cassandra keyspace name. Default = 'system'"
+          "description": "Cassandra keyspace name. Default \u003d \u0027system\u0027"
         },
         "cassandra.compression.protocol": {
           "name": "cassandra.compression.protocol",
           "value": "NONE",
           "type": "string",
-          "description": "Cassandra compression protocol. Available values: NONE, SNAPPY, LZ4. Default = NONE"
+          "description": "Cassandra compression protocol. Available values: NONE, SNAPPY, LZ4. Default \u003d NONE"
         },
         "cassandra.credentials.username": {
           "name": "cassandra.credentials.username",
           "value": "none",
           "type": "string",
-          "description": "Cassandra credentials username. Default = 'none'"
+          "description": "Cassandra credentials username. Default \u003d \u0027none\u0027"
         },
         "cassandra.credentials.password": {
           "name": "cassandra.credentials.password",
           "value": "none",
           "type": "password",
-          "description": "Cassandra credentials password. Default = 'none'"
+          "description": "Cassandra credentials password. Default \u003d \u0027none\u0027"
         },
         "cassandra.load.balancing.policy": {
           "name": "cassandra.load.balancing.policy",
           "value": "DEFAULT",
           "type": "string",
-          "description": "Class name for Load Balancing Policy. Default = DefaultLoadBalancingPolicy"
+          "description": "Class name for Load Balancing Policy. Default \u003d DefaultLoadBalancingPolicy"
         },
         "cassandra.retry.policy": {
           "name": "cassandra.retry.policy",
           "value": "DEFAULT",
           "type": "string",
-          "description": "Class name for Retry Policy. Default = DefaultRetryPolicy"
+          "description": "Class name for Retry Policy. Default \u003d DefaultRetryPolicy"
         },
         "cassandra.reconnection.policy": {
           "name": "cassandra.reconnection.policy",
           "value": "DEFAULT",
           "type": "string",
-          "description": "Class name for Reconnection Policy. Default = ExponentialReconnectionPolicy"
+          "description": "Class name for Reconnection Policy. Default \u003d ExponentialReconnectionPolicy"
         },
         "cassandra.speculative.execution.policy": {
           "name": "cassandra.speculative.execution.policy",
           "value": "DEFAULT",
           "type": "string",
-          "description": "Class name for Speculative Execution Policy. Default = NoSpeculativeExecutionPolicy"
+          "description": "Class name for Speculative Execution Policy. Default \u003d NoSpeculativeExecutionPolicy"
         },
         "cassandra.interpreter.parallelism": {
           "name": "cassandra.interpreter.parallelism",
           "value": "10",
           "type": "number",
-          "description": "Cassandra interpreter parallelism.Default = 10"
+          "description": "Cassandra interpreter parallelism.Default \u003d 10"
         },
         "cassandra.max.schema.agreement.wait.second": {
           "name": "cassandra.max.schema.agreement.wait.second",
           "value": "10",
           "type": "number",
-          "description": "Cassandra max schema agreement wait in second.Default = ProtocolOptions.DEFAULT_MAX_SCHEMA_AGREEMENT_WAIT_SECONDS"
+          "description": "Cassandra max schema agreement wait in second.Default \u003d ProtocolOptions.DEFAULT_MAX_SCHEMA_AGREEMENT_WAIT_SECONDS"
         },
         "cassandra.pooling.connection.per.host.local": {
           "name": "cassandra.pooling.connection.per.host.local",
           "value": "1",
           "type": "number",
-          "description": "Cassandra connections per host local. Protocol V3 and above default = 1"
+          "description": "Cassandra connections per host local. Protocol V3 and above default \u003d 1"
         },
         "cassandra.pooling.connection.per.host.remote": {
           "name": "cassandra.pooling.connection.per.host.remote",
           "value": "1",
           "type": "number",
-          "description": "Cassandra connections per host remote. Protocol V3 and above default = 1"
+          "description": "Cassandra connections per host remote. Protocol V3 and above default \u003d 1"
         },
         "cassandra.pooling.max.request.per.connection": {
           "name": "cassandra.pooling.max.request.per.connection",
           "value": "1024",
           "type": "number",
-          "description": "Cassandra max requests per connection. Protocol V3 and above default = 1024"
+          "description": "Cassandra max requests per connection. Protocol V3 and above default \u003d 1024"
         },
         "cassandra.pooling.pool.timeout.millisecs": {
           "name": "cassandra.pooling.pool.timeout.millisecs",
           "value": "5000",
           "type": "number",
-          "description": "Cassandra pool time out in millisecs. Default = 5000"
+          "description": "Cassandra pool time out in millisecs. Default \u003d 5000"
         },
         "cassandra.pooling.heartbeat.interval.seconds": {
           "name": "cassandra.pooling.heartbeat.interval.seconds",
           "value": "30",
           "type": "number",
-          "description": "Cassandra pool heartbeat interval in secs. Default = 30"
+          "description": "Cassandra pool heartbeat interval in secs. Default \u003d 30"
         },
         "cassandra.query.default.consistency": {
           "name": "cassandra.query.default.consistency",
           "value": "ONE",
           "type": "string",
-          "description": "Cassandra query default consistency level. Default = ONE"
+          "description": "Cassandra query default consistency level. Default \u003d ONE"
         },
         "cassandra.query.default.serial.consistency": {
           "name": "cassandra.query.default.serial.consistency",
           "value": "SERIAL",
           "type": "string",
-          "description": "Cassandra query default serial consistency level. Default = SERIAL"
+          "description": "Cassandra query default serial consistency level. Default \u003d SERIAL"
         },
         "cassandra.query.default.fetchSize": {
           "name": "cassandra.query.default.fetchSize",
           "value": "5000",
           "type": "number",
-          "description": "Cassandra query default fetch size. Default = 5000"
+          "description": "Cassandra query default fetch size. Default \u003d 5000"
         },
         "cassandra.socket.connection.timeout.millisecs": {
           "name": "cassandra.socket.connection.timeout.millisecs",
           "value": "5000",
           "type": "number",
-          "description": "Cassandra socket default connection timeout in millisecs. Default = 5000"
+          "description": "Cassandra socket default connection timeout in millisecs. Default \u003d 5000"
         },
         "cassandra.socket.read.timeout.millisecs": {
           "name": "cassandra.socket.read.timeout.millisecs",
           "value": "12000",
           "type": "number",
-          "description": "Cassandra socket read timeout in millisecs. Default = 12000"
+          "description": "Cassandra socket read timeout in millisecs. Default \u003d 12000"
         },
         "cassandra.socket.tcp.no_delay": {
           "name": "cassandra.socket.tcp.no_delay",
           "value": true,
           "type": "checkbox",
-          "description": "Cassandra socket TCP no delay. Default = true"
+          "description": "Cassandra socket TCP no delay. Default \u003d true"
         },
         "cassandra.ssl.enabled": {
           "name": "cassandra.ssl.enabled",
@@ -2738,35 +2774,35 @@
           "name": "cassandra.ssl.truststore.path",
           "value": "none",
           "type": "string",
-          "description": "Cassandra truststore path. Default = none"
+          "description": "Cassandra truststore path. Default \u003d none"
         },
         "cassandra.ssl.truststore.password": {
           "name": "cassandra.ssl.truststore.password",
           "value": "none",
           "type": "password",
-          "description": "Cassandra truststore password. Default = none"
+          "description": "Cassandra truststore password. Default \u003d none"
         },
         "cassandra.format.output": {
           "name": "cassandra.format.output",
           "value": "human",
           "type": "string",
-          "description": "Output format: human-readable, or strict CQL. Default = human"
+          "description": "Output format: human-readable, or strict CQL. Default \u003d human"
         },
         "cassandra.format.locale": {
           "name": "cassandra.format.locale",
           "value": "en_US",
           "type": "string",
-          "description": "Locale for formatting of output data. Default = en_US"
+          "description": "Locale for formatting of output data. Default \u003d en_US"
         },
         "cassandra.format.timezone": {
           "name": "cassandra.format.timezone",
           "value": "UTC",
           "type": "string",
-          "description": "Timezone for output of time/date-related values. Default = UTC"
+          "description": "Timezone for output of time/date-related values. Default \u003d UTC"
         },
         "cassandra.format.timestamp": {
           "name": "cassandra.format.timestamp",
-          "value": "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+          "value": "yyyy-MM-dd\u0027T\u0027HH:mm:ss.SSSXXX",
           "type": "string",
           "description": "Format string for timestamp columns"
         },
@@ -2786,13 +2822,19 @@
           "name": "cassandra.format.float_precision",
           "value": "5",
           "type": "number",
-          "description": "Precision for formatting of float columns"
+          "description": "Precision for formatting of float values"
         },
         "cassandra.format.double_precision": {
           "name": "cassandra.format.double_precision",
           "value": "12",
           "type": "number",
-          "description": "Precision for formatting of double columns"
+          "description": "Precision for formatting of double values"
+        },
+        "cassandra.format.decimal_precision": {
+          "name": "cassandra.format.decimal_precision",
+          "value": "-1",
+          "type": "number",
+          "description": "Precision for formatting of decimal values (by default, show everything)"
         }
       },
       "status": "READY",
@@ -2946,6 +2988,8 @@
       "id": "central",
       "type": "default",
       "url": "https://repo1.maven.org/maven2/",
+      "host": "repo1.maven.org",
+      "protocol": "https",
       "releasePolicy": {
         "enabled": true,
         "updatePolicy": "daily",
@@ -2962,7 +3006,9 @@
     {
       "id": "local",
       "type": "default",
-      "url": "file:///home/lzzhang/.m2/repository",
+      "url": "file:///root/.m2/repository",
+      "host": "",
+      "protocol": "file",
       "releasePolicy": {
         "enabled": true,
         "updatePolicy": "daily",

@@ -31,6 +31,7 @@ run_test_not_stop_on_error() {
 }
 
 run_test_stop_on_error bash ./tests/sourcemanager.sh ${PWD}/../sourcemanager
+run_test_stop_on_error bash ./tests/udfmanager.sh ${PWD}/../udfmanager
 run_test_stop_on_error bash ./tests/jobmanager.sh ${PWD}/../jobmanager
 run_test_stop_on_error bash ./tests/apiserver_jobmanager.sh ${PWD}/../apiserver
 run_test_stop_on_error bash ./tests/apiserver_sourcemanager.sh ${PWD}/../apiserver

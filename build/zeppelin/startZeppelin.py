@@ -6,7 +6,7 @@ import os
 import requests
 import time
 
-fileName = "/zeppelin/conf/interpreter.json"
+fileName = "/opt/zeppelin/conf/interpreter.json"
 TiniCmd = "/usr/bin/tini"
 zeppelinCmd = "/zeppelin/bin/zeppelin.sh"
 #libUrl = os.getenv("LIB_URL")
