@@ -437,6 +437,7 @@ services:
       - dataworkbench-db-ctrl
     environment:
       - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
+      - JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF=/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
       - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
       - JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT} #TODO this is not right address
