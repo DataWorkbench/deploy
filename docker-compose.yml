@@ -76,21 +76,6 @@ services:
         aliases:
           - dataworkbench-etcd
 
-  dataworkbench-etcdkeeper:
-    image: "deltaprojects/etcdkeeper:latest"
-    container_name: "dataworkbench-etcdkeeper"
-    ports:
-      - "8001:8080" # for test & debug
-    logging:
-      driver: "json-file"
-      options:
-        max-size: ${LOG_MAX_SIZE}
-        max-file: ${LOG_MAX_FILE}
-    networks:
-      dataworkbench-net:
-        aliases:
-          - dataworkbench-etcdkeeper
-
   dataworkbench-jaeger:
     image: "jaegertracing/all-in-one:1.22"
     container_name: "dataworkbench-jaeger"
