@@ -30,6 +30,7 @@ run_test_not_stop_on_error() {
 	fi
 }
 
+run_test_stop_on_error bash ./tests/filemanager.sh ${PWD}/../filemanager
 run_test_stop_on_error bash ./tests/sourcemanager.sh ${PWD}/../sourcemanager
 run_test_stop_on_error bash ./tests/udfmanager.sh ${PWD}/../udfmanager
 run_test_stop_on_error bash ./tests/jobmanager.sh ${PWD}/../jobmanager

@@ -54,6 +54,9 @@ COPY ./udfmanager/config/config.yaml ${DW_CONF}/udfmanager.yaml
 RUN ${COMPILE_CMD} -s zeppelinscale -o ${DW_BIN}/
 COPY ./zeppelinscale/config/config.yaml ${DW_CONF}/zeppelinscale.yaml
 
+RUN ${COMPILE_CMD} -s filemanager -o ${DW_BIN}/
+COPY ./filemanager/config/config.yaml ${DW_CONF}/filemanager.yaml
+
 # compress cmds (do not need to un-compress while run)
 RUN find ${DW_BIN} -type f -exec upx {} \;
 
