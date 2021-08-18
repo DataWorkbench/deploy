@@ -16,4 +16,5 @@ COPY ./scheduler/scripts/sql/schema/V0.0.0__scheduler_init.sql /flyway/sql/V0.0.
 COPY ./sourcemanager/scripts/sql/schema/V0.0.0__sourcemanager.sql /flyway/sql/V0.0.0.3__sourcemanager.sql
 COPY ./jobmanager/scripts/sql/schema/V0.0.0__jobmanager.sql /flyway/sql/V0.0.0.4__jobmanager.sql
 COPY ./udfmanager/scripts/sql/schema/V0.0.0__udfmanager.sql /flyway/sql/V0.0.0.5__udfmanager.sql
+COPY ./filemanager/scripts/sql/schema/V0.0.0__filemanager.sql  /flyway/sql/V0.0.0.6__filemanager.sql
 COPY ./notifier/scripts/sql/schema/V0.0.0__notifier.sql  /flyway/sql/V0.0.0.8__notifier.sql
