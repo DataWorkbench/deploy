@@ -18,8 +18,8 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.4 && \
     wget -qO ${DW_BIN}/grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x ${DW_BIN}/grpc_health_probe
 
-RUN ${COMPILE_CMD} -s apiproxy -o ${DW_BIN}/
-COPY ./apiproxy/config/config.yaml ${DW_CONF}/apiproxy.yaml
+RUN ${COMPILE_CMD} -s apigateway -o ${DW_BIN}/
+COPY ./apigateway/config/config.yaml ${DW_CONF}/apigateway.yaml
 
 RUN ${COMPILE_CMD} -s apiserver -o ${DW_BIN}/
 COPY ./apiserver/config/config.yaml ${DW_CONF}/apiserver.yaml

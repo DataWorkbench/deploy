@@ -100,27 +100,27 @@ services:
         aliases:
           - dataworkbench-jaeger
 
-  apiproxy:
+  apigateway:
     image: "dataworkbench/dataworkbench"
-    container_name: "dataworkbench-apiproxy"
-    command: "apiproxy start -c ${DATAWORKBENCH_CONF}/apiproxy.yaml"
+    container_name: "dataworkbench-apigateway"
+    command: "apigateway start -c ${DATAWORKBENCH_CONF}/apigateway.yaml"
     ports:
-     - "${API_PROXY_PORT}:${API_PROXY_PORT}"
+     - "${API_GATEWAY_PORT}:${API_GATEWAY_PORT}"
     links:
       - apiserver
     depends_on:
       - apiserver
       - dataworkbench-jaeger
     environment:
-      - API_PROXY_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
-      - API_PROXY_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
-      - API_PROXY_WRITE_TIMEOUT=${API_SERVER_WRITE_TIMEOUT}
-      - API_PROXY_DLE_TIMEOUT=${API_SERVER_DLE_TIMEOUT}
-      - API_PROXY_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
-      - API_PROXY_HTTP_SERVER_ADDRESS=0.0.0.0:${API_PROXY_PORT}
-      - API_PROXY_TRACER_SERVICE_NAME=apiproxy
-      - API_PROXY_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
-      - API_PROXY_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
+      - API_GATEWAY_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - API_GATEWAY_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
+      - API_GATEWAY_WRITE_TIMEOUT=${API_SERVER_WRITE_TIMEOUT}
+      - API_GATEWAY_DLE_TIMEOUT=${API_SERVER_DLE_TIMEOUT}
+      - API_GATEWAY_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
+      - API_GATEWAY_HTTP_SERVER_ADDRESS=0.0.0.0:${API_GATEWAY_PORT}
+      - API_GATEWAY_TRACER_SERVICE_NAME=apigateway
+      - API_GATEWAY_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - API_GATEWAY_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
     logging:
       driver: "json-file"
       options:
@@ -129,7 +129,7 @@ services:
     networks:
       dataworkbench-net:
         aliases:
-          - apiproxy
+          - apigateway
 
   apiserver:
     image: "dataworkbench/dataworkbench"
