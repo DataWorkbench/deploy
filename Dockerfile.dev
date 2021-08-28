@@ -8,7 +8,7 @@ RUN apk add --update ca-certificates && update-ca-certificates
 
 ENV DATAWORKBENCH_CONF=/etc/dataworkbench
 RUN mkdir -p ${DATAWORKBENCH_CONF}
-COPY ./apigateway/config/config.yaml ${DATAWORKBENCH_CONF}/apigateway.yaml
+COPY ./apiglobal/config/config.yaml ${DATAWORKBENCH_CONF}/apiglobal.yaml
 COPY ./apiserver/config/config.yaml ${DATAWORKBENCH_CONF}/apiserver.yaml
 COPY ./spacemanager/config/config.yaml ${DATAWORKBENCH_CONF}/spacemanager.yaml
 COPY ./flowmanager/config/config.yaml ${DATAWORKBENCH_CONF}/flowmanager.yaml
