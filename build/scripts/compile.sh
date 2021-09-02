@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
 # run this scripts in docker to compile service
-
 set -e
 
 # add serviceName here
-SERVICES=""
+SERVICES="apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,\
+jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,filemanager,\
+enginemanager"
 OUTPUT_DIR="${GOPATH}/bin"
+CONF_DIR=""
 
 usage(){
   echo "compile.sh -s services [-o output_dir] [-p program]"
@@ -14,6 +16,7 @@ usage(){
   echo "    -s required, service wanted to compile, split by comma, default all services"
   echo "    -o output dir of compiled service, default ${GOPATH}/bin"
   echo "    -p the program name of compiled service, default same as services"
+  echo "    -c the dir of the service config.yaml, if specified copy config.yaml to DIR/SERVICE.yaml , default ''"
 }
 
 while getopts ":hs:o:p:" opt;
@@ -27,6 +30,9 @@ do
       ;;
     p)
       PROGRAM=$OPTARG
+      ;;
+    c)
+      CONF_DIR=$OPTARG
       ;;
     h) #help
       usage
@@ -43,6 +49,17 @@ if [ ! -n "${SERVICES}" ]; then
   usage
   exit 1
 fi
+
+
+# setup env
+current_path=$(cd "$(dirname "${0}")" || exit 1; pwd)
+COMMON_MODULE="github.com/DataWorkbench/common/utils/buildinfo"
+if [[ "${BUILD_MODE}" == "release" ]]; then
+    TAGS="netgo jsoniter ${BUILD_MODE}"
+else
+    TAGS="netgo jsoniter"
+fi
+
 
 _compile(){
   _service=$1
@@ -61,18 +78,20 @@ _compile(){
   -X ${COMMON_MODULE}.GitCommit=$(git rev-parse --short HEAD) \
   -X ${COMMON_MODULE}.OsArch=$(uname)/$(uname -m)" \
   -v -o ${OUTPUT} .
+
+  if [ "${CONF_DIR}" == "" ]; then
+    cp ./config/config.yaml ${OUTPUT_DIR}/${_service}.yaml
+  fi
+
 }
 
-mkdir -p ${OUTPUT_DIR}
-current_path=$(cd "$(dirname "${0}")" || exit 1; pwd)
-COMMON_MODULE="github.com/DataWorkbench/common/utils/buildinfo"
 
-if [[ "${BUILD_MODE}" == "release" ]]; then
-    TAGS="netgo jsoniter ${BUILD_MODE}"
-else
-    TAGS="netgo jsoniter"
+mkdir -p "${OUTPUT_DIR}"
+if [ "${CONF_DIR}" == "" ]; then
+  mkdir -p "${CONF_DIR}"
 fi
 
+# shellcheck disable=SC2068
 for service in ${SERVICES[@]};
 do
   echo "compile service: ${service}"

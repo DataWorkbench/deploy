@@ -42,7 +42,7 @@ spec:
       - name: scheduler
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"]
+        command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/scheduler.yaml"]
         ports:
           - containerPort: {{ .Values.ports.scheduler }}
             name: service

@@ -13,12 +13,15 @@ WORKDIR ${WORKSPACE}
 
 # the protoc can't run on alpine,
 # we only need the protobuf's stdarnd library in the `/protoc/include`.
-RUN mkdir -p ./protoc && \
-    wget https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-x86_64.zip && \
-	unzip -d ./protoc protoc-3.14.0-linux-x86_64.zip
+ADD https://github.com/protocolbuffers/protobuf/releases/download/v3.14.0/protoc-3.14.0-linux-x86_64.zip ${WORKSPACE}
 
+# compress cmds (do not need to un-compress while run)
 RUN wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz && \
     tar -Jxf upx-3.95-amd64_linux.tar.xz
+
+# for zeppelin
+ADD https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz ${WORKSPACE}
+ADD https://archive.apache.org/dist/hadoop/common/hadoop-2.7.5/hadoop-2.7.5.tar.gz ${WORKSPACE}
 
 
 FROM golang:1.15.5-alpine3.12
@@ -30,5 +33,5 @@ RUN go env -w GO111MODULE=on
 RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go env -w GOCACHE=/go/cache
 
-COPY --from=builder ${WORKSPACE}/protoc/include /usr/local/include
+COPY --from=builder ${WORKSPACE}/protoc-*/include /usr/local/include
 COPY --from=builder ${WORKSPACE}/upx-*/upx /usr/bin/
