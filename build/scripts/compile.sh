@@ -5,7 +5,7 @@ set -e
 
 # add serviceName here
 SERVICES="apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,\
-jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,filemanager,\
+jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,\
 enginemanager"
 OUTPUT_DIR="${GOPATH}/bin"
 CONF_DIR=""

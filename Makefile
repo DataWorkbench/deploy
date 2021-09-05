@@ -16,7 +16,7 @@ WORKDIR_IN_DOCKER=/$(TRAG.Gopkg)
 RUN_IN_DOCKER:=docker run -it --rm -v `pwd`/..:$(WORKDIR_IN_DOCKER) -v ${LOCAL_CACHE}:/go/cache -v $(LOCAL_MODCACHE):/go/pkg -w $(WORKDIR_IN_DOCKER) $(BUILDER_IMAGE)
 
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,scheduler,sourcemanager,jobmanager,udfmanager,jobdeveloper,zeppelinscale,jobwatcher,notifier,filemanager,observer
+service=apiglobal,apiserver,spacemanager,flowmanager,scheduler,sourcemanager,jobmanager,udfmanager,jobdeveloper,zeppelinscale,jobwatcher,notifier,resourcemanager,observer
 COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=dataworkbench-db-ctrl
 
