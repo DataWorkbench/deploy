@@ -105,7 +105,7 @@ services:
     container_name: "dataworkbench-apiglobal"
     command: "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"
     ports:
-     - "${API_GLOBAL_PORT}:${API_GLOBAL_PORT}"
+      - "${API_GLOBAL_PORT}:${API_GLOBAL_PORT}"
     links:
       - apiserver
     depends_on:
@@ -136,7 +136,7 @@ services:
     container_name: "dataworkbench-apiserver"
     command: "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"
     ports:
-     - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
       - spacemanager
       - flowmanager
@@ -144,6 +144,7 @@ services:
       - sourcemanager
       - jobmanager
       - udfmanager
+      - resourcemanager
     depends_on:
       - spacemanager
       - flowmanager
@@ -182,6 +183,9 @@ services:
       - API_SERVER_OBSERVER_MANAGER_ADDRESS=observer:{OBSERVER_PORT}
       - API_SERVER_OBSERVER_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_OBSERVER_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_RESOURCE_MANAGER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
+      - API_SERVER_RESOURCE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_RESOURCE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -459,9 +463,8 @@ services:
       - JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF=/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
       - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
-      - JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT} #TODO this is not right address
       - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
-      - JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS=filemanager:${FILE_MANAGER_PORT}
+      - JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
       - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -521,31 +524,31 @@ services:
         aliases:
           - jobmanager
 
-  filemanager:
+  resourcemanager:
     image: "dataworkbench/dataworkbench"
-    container_name: "dataworkbench-filemanager"
-    command: "filemanager start -c ${DATABENCH_CONF}/filemanager.yaml"
+    container_name: "dataworkbench-resourcemanager"
+    command: "resourcemanager start -c ${DATABENCH_CONF}/resourcemanager.yaml"
     ports:
-      - "${FILE_MANAGER_PORT}:${FILE_MANAGER_PORT}"
+      - "${RESOURCE_MANAGER_PORT}:${RESOURCE_MANAGER_PORT}"
     links:
       - dataworkbench-db:dataworkbench-db
     depends_on:
       - dataworkbench-db-ctrl
     environment:
-      - FILE_MANAGER_HDFS_SERVER=hadoop:9000
-      - FILE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
-      - FILE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FILE_MANAGER_PORT}
-      - FILE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
-      - FILE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
-      - FILE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
-      - FILE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${FILE_MANAGER_METRICS_PORT}
-      - FILE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
-      - FILE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - FILE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - FILE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - FILE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
-      - FILE_MANAGER_TRACER_SERVICE_NAME=filemanager
-      - FILE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - RESOURCE_MANAGER_HDFS_SERVER=hadoop:9000
+      - RESOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - RESOURCE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${RESOURCE_MANAGER_PORT}
+      - RESOURCE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - RESOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - RESOURCE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - RESOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${RESOURCE_MANAGER_METRICS_PORT}
+      - RESOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - RESOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - RESOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
+      - RESOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - RESOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - RESOURCE_MANAGER_TRACER_SERVICE_NAME=resourcemanager
+      - RESOURCE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
@@ -554,7 +557,7 @@ services:
     networks:
       dataworkbench-net:
         aliases:
-          - filemanager
+          - resourcemanager
 
   zeppelin:
     image: "dataworkbench/zeppelin"

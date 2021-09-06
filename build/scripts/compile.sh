@@ -4,14 +4,8 @@
 set -e
 
 # setup variable env
-
-# add serviceName here for PRODUCT env
-ALL_SERVICES="apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,\
-notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,filemanager,enginemanager"
-
 BIN_DIR="${GOPATH}/bin"
 CONF_DIR=""
-
 current_path=$(cd "$(dirname "${0}")" || exit 1; pwd)
 COMMON_MODULE="github.com/DataWorkbench/common/utils/buildinfo"
 if [[ "${BUILD_MODE}" == "release" ]]; then
@@ -85,16 +79,21 @@ _compile(){
 
 }
 
+
+# handle param
 mkdir -p "${BIN_DIR}"
 if [ -n "${CONF_DIR}" ]; then
   mkdir -p "${CONF_DIR}"
 fi
 
 if [ -z "${SERVICE_PARAM}" ]; then
-  SERVICES=(${ALL_SERVICES//,/ })
+  echo "param service is required!"
+  exit 1
 else
   SERVICES=(${SERVICE_PARAM//,/ })
 fi
+
+# compile
 # shellcheck disable=SC2068
 for service in ${SERVICES[@]};
 do
