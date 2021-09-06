@@ -7,7 +7,7 @@ FROM dataworkbench/builder as builder
 ARG BIN_IN_BUILDER=/dataworkbench/bin
 ARG CONF_IN_BUILDER=/dataworkbench/conf
 ARG COMPILE_CMD=./deploy/build/scripts/compile.sh
-ARG SERVICES=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,observer,enginemanager
+ARG SERVICES=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,observer,enginemanager
 
 WORKDIR /go/src/DataWorkbench
 COPY . .
