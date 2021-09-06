@@ -8,21 +8,20 @@ TRAG.Gopkg:=DataWorkbench
 
 DOCKER_TAGS=latest
 BUILDER_IMAGE=dataworkbench/builder:latest
-BUILDER_IMAGE_ZEPPELIN=apache/zeppelin:0.9.0
+BUILDER_IMAGE_ZEPPELIN=dataworkbench/zeppelin-builder:latest
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
 WORKDIR_IN_DOCKER=/$(TRAG.Gopkg)
 RUN_IN_DOCKER:=docker run -it --rm -v `pwd`/..:$(WORKDIR_IN_DOCKER) -v ${LOCAL_CACHE}:/go/cache -v $(LOCAL_MODCACHE):/go/pkg -w $(WORKDIR_IN_DOCKER) $(BUILDER_IMAGE)
 
-# the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,scheduler,sourcemanager,jobmanager,udfmanager,jobdeveloper,zeppelinscale,jobwatcher,notifier,filemanager,observer
-COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
-COMPOSE_DB_CTRL=dataworkbench-db-ctrl
-
 comma:= ,
 empty:=
 space:= $(empty) $(empty)
+# the service that need to format/compile/build.., default all.
+service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,notifier,scheduler,sourcemanager,udfmanager,zeppelinscale,enginemanager
+COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
+COMPOSE_DB_CTRL=dataworkbench-db-ctrl
 
 .PHONY: help
 help: ## This help
@@ -36,8 +35,7 @@ update-builder: ## Pull dataworkbench-builder image
 
 .PHONY: compile
 compile:
-	@mkdir -p ./tmp/bin
-	@$(RUN_IN_DOCKER) bash -c "time ./deploy/build/scripts/compile.sh -s $(service) -o $(WORKDIR_IN_DOCKER)/deploy/tmp/bin -c $(WORKDIR_IN_DOCKER)/deploy/tmp/conf";
+	$(RUN_IN_DOCKER) bash -c "time ./deploy/build/scripts/compile.sh -s $(service) -o $(WORKDIR_IN_DOCKER)/deploy/tmp/bin -c $(WORKDIR_IN_DOCKER)/deploy/tmp/conf";
 
 .PHONY: build-flyway
 build-flyway: ## Build flyway image for database migration
@@ -45,7 +43,6 @@ build-flyway: ## Build flyway image for database migration
 
 .PHONY: build-zeppelin
 build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
-	@echo "if build zeppelin failed, please download flink to ./build/zeppelin. https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz\n"
 	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
 
 .PHONY: build-flink-utile
@@ -53,16 +50,16 @@ build-flink-utile:
 	cd ./build/flink_utile/ && docker build -t $(TARG.Name)/flinkutile:${DOCKER_TAGS} . && cd ../..
 
 .PHONY: build-dev
-build-dev: compile ## Build dataworkbench image
+build-dev: compile  ## Build dataworkbench image
 	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name) -f ./deploy/Dockerfile.dev .
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build done"
 
-.PHONY: build-all
-build-all: build-zeppelin build-flyway build-dev build-flink-utile ## Build all images
+.PHONY: build-all  ## Build all images
+build-all: build-flyway build-dev build-zeppelin build-flink-utile
 
 .PHONY: pull-images
-pull-images: ## Pull images
+pull-images: ## Pull images for docker-compose
 	docker-compose pull --ignore-pull-failures
 	@echo "pull-images done"
 

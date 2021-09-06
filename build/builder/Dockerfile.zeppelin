@@ -4,9 +4,13 @@
 
 FROM maven:3.5-jdk-8 as builder
 
-ARG WORKSPACE=/opt
-WORKDIR ${WORKSPACE}
+WORKDIR /opt
 
 # for zeppelin
-ADD https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz ${WORKSPACE}
-ADD https://archive.apache.org/dist/hadoop/common/hadoop-2.7.5/hadoop-2.7.5.tar.gz ${WORKSPACE}
+RUN wget https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz && \
+    tar -zxvf flink-1.12.3-bin-scala_2.11.tgz && \
+    rm flink-1.12.3-bin-scala_2.11.tgz
+
+RUN wget https://archive.apache.org/dist/hadoop/common/hadoop-2.7.5/hadoop-2.7.5.tar.gz && \
+    tar -zxvf hadoop-2.7.5.tar.gz && \
+    rm hadoop-2.7.5.tar.gz

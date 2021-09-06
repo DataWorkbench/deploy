@@ -1,15 +1,15 @@
 # Copyright 2020 The DataWorkbench Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
+FROM dataworkbench/builder as builder
 
 FROM alpine:3.12
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
-RUN apk add --update ca-certificates && update-ca-certificates
 
 ENV DATABENCH_CONF=/etc/dataworkbench
 RUN mkdir -p ${DATABENCH_CONF}
 
-RUN find ./deploy/tmp/bin/ -type f -exec upx {} \;
+COPY --from=builder /opt/bin/ /usr/local/bin
+
 COPY ./deploy/tmp/bin/ /usr/local/bin/
 COPY ./deploy/tmp/conf/ ${DATABENCH_CONF}/
 
