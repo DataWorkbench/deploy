@@ -43,8 +43,6 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
         env:
           - name: NOTIFIER_LOG_LEVEL
             value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
@@ -55,17 +53,9 @@ spec:
           - name: NOTIFIER_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
           - name: NOTIFIER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
+            value: '{{- include "mysql.url" . }}'
           - name: NOTIFIER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          - name: NOTIFIER_METRICS_ENABLED
-          {{- if .Values.notifier.metric.enabled }}
-            value: "true"
-          - name: NOTIFIER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.notifier.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

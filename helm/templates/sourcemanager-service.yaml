@@ -11,9 +11,9 @@ spec:
   type: {{ .Values.sourcemanager.service.type }}
   ports:
     - name: service
+      protocol: TCP
       port: {{ .Values.ports.sourcemanager }}
       targetPort: service
-      protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -37,8 +37,6 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jobdeveloper }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
         env:
           - name: JOB_DEVELOPER_LOG_LEVEL
             value: {{ coalesce .Values.jobdeveloper.logLevel .Values.common.logLevel | quote }}
@@ -54,14 +52,6 @@ spec:
             value: {{ include "service.udfmanager" . | quote }}
           - name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
             value: {{ include "service.sourcemanager" . | quote }}
-          - name: JOB_DEVELOPER_METRICS_ENABLED
-          {{- if .Values.jobdeveloper.metric.enabled }}
-            value: "true"
-          - name: JOB_DEVELOPER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.jobdeveloper.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.jobdeveloper.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

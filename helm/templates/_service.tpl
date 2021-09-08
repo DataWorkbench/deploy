@@ -27,6 +27,8 @@ Service Addresses For ApiServer
 {{- end -}}
 {{- define "service.zeppelin" -}}
 {{ .Release.Name }}-zeppelin:{{ .Values.ports.zeppelin }}
+{{- define "service.hdfs" -}}
+{{ .Release.Name }}-hdfs:{{ .Values.ports.hdfs }}
 {{- end -}}
 
 {{- define "apiserver.link.services" -}}
@@ -56,7 +58,7 @@ Mysql Settings
 {{ .Values.ports.mysql }}
 {{- end -}}
 
-{{- define "mysql.hostPort" -}}
+{{- define "mysql.url" -}}
 {{ .Release.Name }}-mysql:{{- .Values.ports.mysql }}
 {{- end -}}
 

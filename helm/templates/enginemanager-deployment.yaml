@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-enginemanager
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: enginemanager
+annotations:
+  {{- range $key, $value := .Values.enginemanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.enginemanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.enginemanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: enginemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: enginemanager
+      annotations:
+      {{- range $key, $value := .Values.enginemanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: enginemanager
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.enginemanager }}
+            name: service
+        env:
+          - name: ENGINE_MANAGER_LOG_LEVEL
+            value: {{ coalesce .Values.enginemanager.logLevel .Values.common.logLevel | quote }}
+          - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.enginemanager }}"
+          - name: ENGINE_MANAGER_GRPC_SERVER_LOG_LEVEL
+            value: {{ coalesce .Values.enginemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+          - name: ENGINE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
+            value: {{ coalesce .Values.enginemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+          - name: ENGINE_MANAGER_MYSQL_HOSTS
+            value: '{{- include "mysql.url" . }}'
+          - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
+            value: '{{- include "service.hdfs" . }}'
+          - name: ENGINE_MANAGER_MYSQL_PASSWORD
+            value: {{ include "mysql.root.password" . | quote }}
+          {{- range $ename, $evalue := .Values.enginemanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
+          {{- if .Values.enginemanager.readinessProbe }}
+          periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}" ]
+          {{- if .Values.enginemanager.livenessProbe }}
+          periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

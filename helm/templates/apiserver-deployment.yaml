@@ -37,8 +37,6 @@ spec:
           ports:
             - containerPort: {{ .Values.ports.apiserver }}
               name: service
-            - containerPort: {{ .Values.ports.jaeger }}
-              name: jaeger
           env:
             - name: API_SERVER_LOG_LEVEL
               value: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel | quote }}

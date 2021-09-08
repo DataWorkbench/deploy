@@ -6,8 +6,8 @@ image:
   pullPolicy: IfNotPresent
 #  pullPolicy: Always
   dataworkbench: dataworkbench/dataworkbench:dev
-  flyway: dataworkbench/flyway:latest
-  zeppelin: dataworkbench/zeppelin:latest
+  flyway: dataworkbench/flyway:dev
+  zeppelin: dataworkbench/zeppelin:dev
   jaeger: jaegertracing/all-in-one:1.22
 
 
@@ -17,18 +17,26 @@ ports:
   jaegerweb: 16686
   mysql: 3306
   etcd: 2379
-  apiserver: 9101
-  spacemanager: 9102
-  flowmanager: 9103
-  scheduler: 9104
-  sourcemanager: 9105
-  jobmanager: 9106
-  jobdeveloper: 9107
+  zeppelin: 8080
+  hdfs: 8020
+
+  apiglobal: 8001
+  apiserver: 9001
+  spacemanager: 9101
+  flowmanager: 9102
+  scheduler: 9103
+  sourcemanager: 9104
+  jobmanager: 9105
+  udfmanager: 9106
+  zeppelinscale: 9107
   jobwatcher: 9108
-  udfmanager: 9109
-  zeppelinscale: 9111
-  zeppelin: 9112
+  jobdeveloper: 9109
+  account: 9110
+  resourcemanager: 9111
+  observer: 9112
   notifier: 9113
+  enginemanager: 9114
+
 
 ## mysql settings
 mysql:
@@ -54,11 +62,30 @@ common:
   readinessProbe:
     periodSeconds: 10
     initialDelaySeconds: 20
+  service:
+    type: ClusterIP
+
+# apiserver settings
+apiglobal:
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
+    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
+    API_GLOBAL_REGIONS: "staging:http://127.0.0.1:9001|zh_cn:开发测试区,en_us:staging mock:http://127.0.0.1:9002|zh_cn:模拟测试用,en_us:mock"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 60
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 60
 
 # apiserver settings
 apiserver:
-  annotations: {}
-  podAnnotations: {}
   service:
     type: ClusterIP
     annotations: {}
@@ -89,10 +116,6 @@ spacemanager:
     SPACE_MANAGER_MYSQL_LOG_LEVEL: 4
     SPACE_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
     SPACE_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
-  metric:
-    enabled: false
-    address: "0.0.0.0:9201"
-    urlPath: "/metrics"
 
 # flowmanager settings
 flowmanager:
@@ -108,10 +131,6 @@ flowmanager:
     FLOW_MANAGER_MYSQL_LOG_LEVEL: 4
     FLOW_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
     FLOW_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
-    urlPath: "/metrics"
 
 # jobdeveloper settings
 jobdeveloper:
@@ -124,9 +143,6 @@ jobdeveloper:
     JOB_DEVELOPER_TRACER_SERVICE_NAME: jobdeveloper
     JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
     JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # jobmanager settings
 jobmanager:
@@ -140,9 +156,6 @@ jobmanager:
     JOB_MANAGER_MYSQL_USERS: root
     JOB_MANAGER_MYSQL_DATABASE: data_workbench
     JOB_MANAGER_MYSQL_LOG_LEVEL: 4
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # jobwatcher settings
 jobwatcher:
@@ -158,24 +171,6 @@ jobwatcher:
     JOB_WATCHER_MYSQL_USERS: root
     JOB_WATCHER_MYSQL_DATABASE: data_workbench
     JOB_WATCHER_MYSQL_LOG_LEVEL: 4
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
-
-# notifier settings
-notifier:
-  enabled: false
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
-  envs:
-    NOTIFIER_MYSQL_DATABASE: data_workbench
-    NOTIFIER_MYSQL_LOG_LEVEL: 4
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # scheduler settings
 scheduler:
@@ -189,9 +184,6 @@ scheduler:
     SCHEDULER_MYSQL_DATABASE: data_workbench
     SCHEDULER_MYSQL_LOG_LEVEL: 4
     SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # sourcemanager settings
 sourcemanager:
@@ -205,9 +197,6 @@ sourcemanager:
     SOURCE_MANAGER_MYSQL_USERS: root
     SOURCE_MANAGER_MYSQL_DATABASE: data_workbench
     SOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # udfmanager settings
 udfmanager:
@@ -221,9 +210,6 @@ udfmanager:
     UDF_MANAGER_MYSQL_USERS: root
     UDF_MANAGER_MYSQL_DATABASE: data_workbench
     UDF_MANAGER_MYSQL_LOG_LEVEL: 4
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # zeppelinscale settings
 zeppelinscale:
@@ -234,9 +220,6 @@ zeppelinscale:
     annotations: {}
   envs:
     ZEPPELIN_SCALE_TRACER_SERVICE_NAME: zeppelinscale
-  metric:
-    enabled: false
-    address: "0.0.0.0:9203"
 
 # zeppelin settings
 zeppelin:
@@ -250,6 +233,28 @@ zeppelin:
     LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
     LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
 
+# notifier settings
+notifier:
+  enabled: false
+  annotations: {}
+  podAnnotations: {}
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    NOTIFIER_MYSQL_DATABASE: data_workbench
+    NOTIFIER_MYSQL_LOG_LEVEL: 4
+
+# observer settings
+observer:
+  service:
+    type: ClusterIP
+    annotations: {}
+  envs:
+    OBSERVER_MYSQL_DATABASE: data_workbench
+    OBSERVER_MYSQL_USERS: root
+    OBSERVER_MYSQL_LOG_LEVEL: 4
+
 # jaeger settings
 jaeger:
   annotations: {}
@@ -259,3 +264,28 @@ jaeger:
     annotations: {}
   envs:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+
+# resourcemanager settings
+resourcemanager:
+  envs:
+    RESOURCE_MANAGER_MYSQL_USERS: root
+    RESOURCE_MANAGER_MYSQL_DATABASE: data_workbench
+    RESOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
+
+# enginemanager settings
+enginemanager:
+  envs:
+    ENGINE_MANAGER_MYSQL_USERS: root
+    ENGINE_MANAGER_MYSQL_DATABASE: data_workbench
+    ENGINE_MANAGER_MYSQL_LOG_LEVEL: 4
+    ENGINE_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
+    ENGINE_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
+
+    ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH: "/root/.kube/config"
+    ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
+    ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
+    ENGINE_MANAGER_HELM_DRIVER: ""
+    ENGINE_MANAGER_HELM_DEBUG: false
+    ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
+
+    ENGINE_MANAGER_FLINK_ENGINE_CHART_NAME: "flink-0.1.0.tgz"

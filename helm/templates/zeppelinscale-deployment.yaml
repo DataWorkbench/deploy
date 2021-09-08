@@ -37,8 +37,6 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.zeppelinscale }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
         env:
           - name: ZEPPELIN_SCALE_LOG_LEVEL
             value: {{ coalesce .Values.zeppelinscale.logLevel .Values.common.logLevel | quote }}
@@ -52,14 +50,6 @@ spec:
             value: '{{ include "service.jaeger" . }}'
           - name: ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS
             value: {{ include "service.zeppelin" . | quote }}
-          - name: ZEPPELIN_SCALE_METRICS_ENABLED
-          {{- if .Values.zeppelinscale.metric.enabled }}
-            value: "true"
-          - name: ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS
-            value: {{ .Values.zeppelinscale.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.zeppelinscale.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

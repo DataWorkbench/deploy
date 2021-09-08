@@ -46,8 +46,6 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.scheduler }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
         env:
           - name: SCHEDULER_LOG_LEVEL
             value: {{ coalesce .Values.scheduler.logLevel .Values.common.logLevel | quote }}
@@ -60,7 +58,7 @@ spec:
           - name: SCHEDULER_TRACER_LOCAL_AGENT
             value: '{{ include "service.jaeger" . }}'
           - name: SCHEDULER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
+            value: '{{- include "mysql.url" . }}'
           - name: SCHEDULER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           - name: SCHEDULER_FLOW_MANAGER_ADDRESS
@@ -69,14 +67,6 @@ spec:
             value: {{ include "service.jobmanager" . | quote }}
           - name: SCHEDULER_ETCD_ENDPOINTS
             value: {{ include "etcd.endpoints" . | quote }}
-          - name: SCHEDULER_METRICS_ENABLED
-          {{- if .Values.scheduler.metric.enabled }}
-            value: "true"
-          - name: SCHEDULER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.scheduler.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.scheduler.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

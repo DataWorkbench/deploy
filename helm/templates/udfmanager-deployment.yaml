@@ -42,8 +42,7 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.udfmanager }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+
         env:
           - name: UDF_MANAGER_LOG_LEVEL
             value: {{ coalesce .Values.udfmanager.logLevel .Values.common.logLevel | quote }}
@@ -56,17 +55,9 @@ spec:
           - name: UDF_MANAGER_TRACER_LOCAL_AGENT
             value: '{{ include "service.jaeger" . }}'
           - name: UDF_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
+            value: '{{- include "mysql.url" . }}'
           - name: UDF_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          - name: UDF_MANAGER_METRICS_ENABLED
-          {{- if .Values.udfmanager.metric.enabled }}
-            value: "true"
-          - name: UDF_MANAGER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.udfmanager.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.udfmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

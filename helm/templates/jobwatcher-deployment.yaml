@@ -42,8 +42,6 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jobwatcher }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
         env:
           - name: JOB_WATCHER_LOG_LEVEL
             value: {{ coalesce .Values.jobwatcher.logLevel .Values.common.logLevel | quote }}
@@ -58,17 +56,9 @@ spec:
           - name: JOB_WATCHER_TRACER_LOCAL_AGENT
             value: '{{ include "service.jaeger" . }}'
           - name: JOB_WATCHER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
+            value: '{{- include "mysql.url" . }}'
           - name: JOB_WATCHER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          - name: JOB_WATCHER_METRICS_ENABLED
-          {{- if .Values.jobwatcher.metric.enabled }}
-            value: "true"
-          - name: JOB_WATCHER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.jobwatcher.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
           {{- range $ename, $evalue := .Values.jobwatcher.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

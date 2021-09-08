@@ -40,10 +40,8 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.jobmanager }}
-            name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+          - name: service
+            containerPort: {{ .Values.ports.jobmanager }}
         env:
           - name: JOB_MANAGER_LOG_LEVEL
             value: {{ coalesce .Values.jobmanager.logLevel .Values.common.logLevel | quote }}
@@ -62,18 +60,10 @@ spec:
           - name: JOB_MANAGER_TRACER_LOCAL_AGENT
             value: '{{ include "service.jaeger" . }}'
           - name: JOB_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
+            value: '{{- include "mysql.url" . }}'
           - name: JOB_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          - name: JOB_MANAGER_METRICS_ENABLED
-          {{- if .Values.jobmanager.metric.enabled }}
-            value: "true"
-          - name: JOB_MANAGER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.jobmanager.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
-          {{- range $ename, $evalue := .Values.jobmanager.envs }}
+          {{- range s$ename, $evalue := .Values.jobmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}

@@ -1,20 +1,20 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-scheduler
+  name: {{ .Release.Name }}-apiglobal
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: scheduler
+    component: apiglobal
   annotations:
-    {{ toYaml .Values.scheduler.service.annotations | indent 4 }}
+    {{ toYaml .Values.apiglobal.service.annotations | indent 4 }}
 spec:
-  type: {{ .Values.scheduler.service.type }}
+  type: {{ .Values.apiglobal.service.type }}
   ports:
     - name: service
-      protocol: TCP
-      port: {{ .Values.ports.scheduler }}
+      port: {{ .Values.ports.apiglobal }}
       targetPort: service
+      protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
-    component: scheduler
+    component: apiglobal
