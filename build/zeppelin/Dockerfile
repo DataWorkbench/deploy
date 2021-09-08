@@ -1,10 +1,20 @@
-FROM apache/zeppelin:0.9.0
-COPY startZeppelin.py /zeppelin/bin/
-COPY interpreter.json /zeppelin/conf/
-ADD flink-1.12.3-bin-scala_2.11.tgz /zeppelin/flink/
-ADD 1.12_lib /zeppelin/flink/1.12_lib/
+FROM dataworkbench/builder:zeppelin as builder
 
-CMD ["bin/zeppelin.sh"]
+
+FROM apache/zeppelin:0.9.0
+
+ENV HADOOP_HOME /zeppelin/hadoop/hadoop-2.7.5
+ENV PATH $PATH:$HADOOP_HOME/bin
+
+COPY --from=builder /opt/flink-* /zeppelin/flink/
+COPY --from=builder /opt/hadoop-* /zeppelin/hadoop/
+
+COPY startZeppelin.py /zeppelin/bin/
+COPY interpreter.json /opt/zeppelin/conf/
+COPY 1.12_lib /zeppelin/flink/
+COPY core-site.xml ${HADOOP_HOME}/etc/hadoop/
 
 USER root:root
 ENTRYPOINT ["/zeppelin/bin/startZeppelin.py"]
+
+CMD ["bin/zeppelin.sh"]

@@ -38,7 +38,7 @@ spec:
       - name: jobwatcher
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"]
+        command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/jobwatcher.yaml"]
         ports:
           - containerPort: {{ .Values.ports.jobwatcher }}
             name: service

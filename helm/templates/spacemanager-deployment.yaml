@@ -38,7 +38,7 @@ spec:
       - name: spacemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"]
+        command: ["sh", "-c", "spacemanager start -c ${DATABENCH_CONF}/spacemanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.spacemanager }}
             name: service

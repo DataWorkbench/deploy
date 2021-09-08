@@ -38,7 +38,7 @@ spec:
       - name: sourcemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"]
+        command: ["sh", "-c", "sourcemanager start -c ${DATABENCH_CONF}/sourcemanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.sourcemanager }}
             name: service

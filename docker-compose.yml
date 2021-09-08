@@ -76,21 +76,6 @@ services:
         aliases:
           - dataworkbench-etcd
 
-  dataworkbench-etcdkeeper:
-    image: "deltaprojects/etcdkeeper:latest"
-    container_name: "dataworkbench-etcdkeeper"
-    ports:
-      - "8001:8080" # for test & debug
-    logging:
-      driver: "json-file"
-      options:
-        max-size: ${LOG_MAX_SIZE}
-        max-file: ${LOG_MAX_FILE}
-    networks:
-      dataworkbench-net:
-        aliases:
-          - dataworkbench-etcdkeeper
-
   dataworkbench-jaeger:
     image: "jaegertracing/all-in-one:1.22"
     container_name: "dataworkbench-jaeger"
@@ -115,12 +100,43 @@ services:
         aliases:
           - dataworkbench-jaeger
 
+  apiglobal:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-apiglobal"
+    command: "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"
+    ports:
+      - "${API_GLOBAL_PORT}:${API_GLOBAL_PORT}"
+    links:
+      - apiserver
+    depends_on:
+      - apiserver
+      - dataworkbench-jaeger
+    environment:
+      - API_GLOBAL_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - API_GLOBAL_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
+      - API_GLOBAL_WRITE_TIMEOUT=${API_SERVER_WRITE_TIMEOUT}
+      - API_GLOBAL_DLE_TIMEOUT=${API_SERVER_DLE_TIMEOUT}
+      - API_GLOBAL_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
+      - API_GLOBAL_HTTP_SERVER_ADDRESS=0.0.0.0:${API_GLOBAL_PORT}
+      - API_GLOBAL_TRACER_SERVICE_NAME=apiglobal
+      - API_GLOBAL_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - API_GLOBAL_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - apiglobal
+
   apiserver:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-apiserver"
-    command: "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"
+    command: "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"
     ports:
-     - "${API_SERVER_PORT}:${API_SERVER_PORT}"
+      - "${API_SERVER_PORT}:${API_SERVER_PORT}"
     links:
       - spacemanager
       - flowmanager
@@ -128,6 +144,7 @@ services:
       - sourcemanager
       - jobmanager
       - udfmanager
+      - resourcemanager
     depends_on:
       - spacemanager
       - flowmanager
@@ -160,6 +177,15 @@ services:
       - API_SERVER_JOB_MANAGER_ADDRESS=jobmanager:${JOB_MANAGER_PORT}
       - API_SERVER_JOB_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_JOB_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_UDF_MANAGER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
+      - API_SERVER_UDF_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_UDF_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_OBSERVER_MANAGER_ADDRESS=observer:{OBSERVER_PORT}
+      - API_SERVER_OBSERVER_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_OBSERVER_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_RESOURCE_MANAGER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
+      - API_SERVER_RESOURCE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_RESOURCE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -173,7 +199,7 @@ services:
   spacemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-spacemanager"
-    command: "spacemanager start -c ${DATAWORKBENCH_CONF}/spacemanager.yaml"
+    command: "spacemanager start -c ${DATABENCH_CONF}/spacemanager.yaml"
     ports:
       - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
     links:
@@ -207,7 +233,7 @@ services:
   flowmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-flowmanager"
-    command: "flowmanager start -c ${DATAWORKBENCH_CONF}/flowmanager.yaml"
+    command: "flowmanager start -c ${DATABENCH_CONF}/flowmanager.yaml"
     ports:
       - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
     links:
@@ -245,7 +271,7 @@ services:
   scheduler:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-scheduler"
-    command: "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"
+    command: "scheduler start -c ${DATABENCH_CONF}/scheduler.yaml"
     ports:
       - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
     links:
@@ -289,7 +315,7 @@ services:
   sourcemanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-sourcemanager"
-    command: "sourcemanager start -c ${DATAWORKBENCH_CONF}/sourcemanager.yaml"
+    command: "sourcemanager start -c ${DATABENCH_CONF}/sourcemanager.yaml"
     ports:
       - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
     links:
@@ -324,7 +350,7 @@ services:
   udfmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-udfmanager"
-    command: "udfmanager start -c ${DATAWORKBENCH_CONF}/udfmanager.yaml"
+    command: "udfmanager start -c ${DATABENCH_CONF}/udfmanager.yaml"
     ports:
       - "${UDF_MANAGER_PORT}:${UDF_MANAGER_PORT}"
     links:
@@ -358,7 +384,7 @@ services:
   zeppelinscale:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-zeppelinscale"
-    command: "zeppelinscale start -c ${DATAWORKBENCH_CONF}/zeppelinscale.yaml"
+    command: "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"
     ports:
       - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
     links:
@@ -388,7 +414,7 @@ services:
   jobwatcher:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobwatcher"
-    command: "jobwatcher start -c ${DATAWORKBENCH_CONF}/jobwatcher.yaml"
+    command: "jobwatcher start -c ${DATABENCH_CONF}/jobwatcher.yaml"
     ports:
       - "${JOB_WATCHER_PORT}:${JOB_WATCHER_PORT}"
     links:
@@ -425,7 +451,7 @@ services:
   jobdeveloper:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobdeveloper"
-    command: "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"
+    command: "jobdeveloper start -c ${DATABENCH_CONF}/jobdeveloper.yaml"
     ports:
       - "${JOB_DEVELOPER_PORT}:${JOB_DEVELOPER_PORT}"
     links:
@@ -434,9 +460,11 @@ services:
       - dataworkbench-db-ctrl
     environment:
       - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar
+      - JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF=/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
       - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
+      - JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - JOB_DEVELOPER_GRPC_SERVER_ADDRESS=0.0.0.0:${JOB_DEVELOPER_PORT}
       - JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
@@ -458,7 +486,7 @@ services:
   jobmanager:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-jobmanager"
-    command: "jobmanager start -c ${DATAWORKBENCH_CONF}/jobmanager.yaml"
+    command: "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"
     ports:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
@@ -496,6 +524,41 @@ services:
         aliases:
           - jobmanager
 
+  resourcemanager:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-resourcemanager"
+    command: "resourcemanager start -c ${DATABENCH_CONF}/resourcemanager.yaml"
+    ports:
+      - "${RESOURCE_MANAGER_PORT}:${RESOURCE_MANAGER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - RESOURCE_MANAGER_HDFS_SERVER=hadoop:9000
+      - RESOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - RESOURCE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${RESOURCE_MANAGER_PORT}
+      - RESOURCE_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - RESOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - RESOURCE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - RESOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${RESOURCE_MANAGER_METRICS_PORT}
+      - RESOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - RESOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - RESOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
+      - RESOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - RESOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - RESOURCE_MANAGER_TRACER_SERVICE_NAME=resourcemanager
+      - RESOURCE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - resourcemanager
+
   zeppelin:
     image: "dataworkbench/zeppelin"
     container_name: "dataworkbench-zeppelin"
@@ -520,7 +583,8 @@ services:
           - zeppelin
 
   flinkjobmanager:
-    image: "flink:1.12.3-scala_2.11"
+    #image: "flink:1.12.3-scala_2.11"
+    image: "dataworkbench/flinkutile"
     container_name: "dataworkbench-flink-jobmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -537,7 +601,8 @@ services:
           - flinkjobmanager
 
   flinktaskmanager:
-    image: "flink:1.12.3-scala_2.11"
+    #image: "flink:1.12.3-scala_2.11"
+    image: "dataworkbench/flinkutile"
     container_name: "dataworkbench-flink-taskmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -595,7 +660,7 @@ services:
   notifier:
     image: "dataworkbench/dataworkbench"
     container_name: "dataworkbench-notifier"
-    command: "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"
+    command: "notifier start -c ${DATABENCH_CONF}/notifier.yaml"
     ports:
       - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
     links:
@@ -625,7 +690,7 @@ services:
 
   hbase:
     image: "harisekhon/hbase:2.1"
-    container_name: "hbase"
+    container_name: "dataworkbench-hbase-for-test"
     ports:
       - "2182:2181"
       # - "8080:8080"
@@ -647,3 +712,58 @@ services:
       dataworkbench-net:
         aliases:
           - hbase
+
+  hadoop:
+    image: "sequenceiq/hadoop-docker:2.7.0"
+    container_name: "dataworkbench-hadoop-for-test"
+    ports:
+      - "50070:50070"
+      - "9000:9000"
+      - "8088:8088"
+      - "8040:8040"
+      - "8042:8042"
+      - "49707:49707"
+      - "50010:50010"
+      - "50075:50075"
+      - "50090:50090"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - hadoop
+
+
+  observer:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-observer"
+    command: "observer start -c ${DATABENCH_CONF}/observer.yaml"
+    ports:
+      - "${OBSERVER_PORT}:${OBSERVER_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - OBSERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - OBSERVER_GRPC_SERVER_ADDRESS=0.0.0.0:${OBSERVER_PORT}
+      - OBSERVER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - OBSERVER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - OBSERVER_METRICS_ENABLED=${METRICS_ENABLED}
+      - OBSERVER_METRICS_SERVER_ADDRESS=0.0.0.0:${OBSERVER_METRICS_PORT}
+      - OBSERVER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - OBSERVER_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - OBSERVER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - OBSERVER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - observer

@@ -6,7 +6,7 @@ import os
 import requests
 import time
 
-fileName = "/zeppelin/conf/interpreter.json"
+fileName = "/opt/zeppelin/conf/interpreter.json"
 TiniCmd = "/usr/bin/tini"
 zeppelinCmd = "/zeppelin/bin/zeppelin.sh"
 #libUrl = os.getenv("LIB_URL")
@@ -52,6 +52,7 @@ def main(arg):
         log(err)
         sys.exit(1)
 
+// TODO: compile to cmd
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         arg = zeppelinCmd

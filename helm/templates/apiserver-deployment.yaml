@@ -33,7 +33,7 @@ spec:
         - name: apiserver
           image: {{ .Values.image.dataworkbench | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/sh", "-c", "apiserver start -c ${DATAWORKBENCH_CONF}/apiserver.yaml"]
+          command: ["/bin/sh", "-c", "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"]
           ports:
             - containerPort: {{ .Values.ports.apiserver }}
               name: service
