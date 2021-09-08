@@ -38,7 +38,7 @@ spec:
       - name: udfmanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "udfmanager start -c ${DATAWORKBENCH_CONF}/udfmanager.yaml"]
+        command: ["sh", "-c", "udfmanager start -c ${DATABENCH_CONF}/udfmanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.udfmanager }}
             name: service

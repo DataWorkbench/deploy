@@ -38,7 +38,7 @@ spec:
       - name: jobmanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobmanager start -c ${DATAWORKBENCH_CONF}/jobmanager.yaml"]
+        command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"]
         ports:
           - containerPort: {{ .Values.ports.jobmanager }}
             name: service

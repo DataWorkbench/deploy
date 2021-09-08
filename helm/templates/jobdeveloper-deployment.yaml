@@ -33,7 +33,7 @@ spec:
       - name: jobdeveloper
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"]
+        command: ["sh", "-c", "jobdeveloper start -c ${DATABENCH_CONF}/jobdeveloper.yaml"]
         ports:
           - containerPort: {{ .Values.ports.jobdeveloper }}
             name: service

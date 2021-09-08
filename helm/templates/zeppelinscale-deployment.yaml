@@ -33,7 +33,7 @@ spec:
       - name: zeppelinscale
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "zeppelinscale start -c ${DATAWORKBENCH_CONF}/zeppelinscale.yaml"]
+        command: ["sh", "-c", "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"]
         ports:
           - containerPort: {{ .Values.ports.zeppelinscale }}
             name: service
