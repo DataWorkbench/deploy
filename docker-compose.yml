@@ -767,3 +767,54 @@ services:
       dataworkbench-net:
         aliases:
           - observer
+
+  dataworkbench-redis:
+    image: "redis:5.0.0"
+    container_name: "dataworkbench-redis"
+    volumes:
+      - ${DATA_PATH}/redis:/var/lib/redis
+    command: redis-server --requirepass 123456
+    ports:
+      - "6379:${REDIS_PORT}" # for test & debug
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - dataworkbench-redis
+
+  account:
+    image: "dataworkbench/dataworkbench"
+    container_name: "dataworkbench-account"
+    command: "account start -c ${DATABENCH_CONF}/account.yaml"
+    ports:
+      - "${ACCOUNT_PORT}:${ACCOUNT_PORT}"
+    links:
+      - dataworkbench-db:dataworkbench-db
+      - dataworkbench-redis:dataworkbench-redis
+    depends_on:
+      - dataworkbench-db-ctrl
+    environment:
+      - ACCOUNT_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - ACCOUNT_GRPC_SERVER_ADDRESS=0.0.0.0:${ACCOUNT_PORT}
+      - ACCOUNT_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - ACCOUNT_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - ACCOUNT_METRICS_ENABLED=${METRICS_ENABLED}
+      - ACCOUNT_METRICS_SERVER_ADDRESS=0.0.0.0:${ACCOUNT_METRICS_PORT}
+      - ACCOUNT_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - ACCOUNT_MYSQL_DATABASE=${MYSQL_DATABASE}
+      - ACCOUNT_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - ACCOUNT_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+      - ACCOUNT_REDIS_HOSTS=dataworkbench-redis:${REDIS_PORT}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - account
