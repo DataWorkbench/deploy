@@ -8,7 +8,7 @@ TRAG.Gopkg:=DataWorkbench
 
 DOCKER_TAGS=latest
 BUILDER_IMAGE=dataworkbench/builder:latest
-BUILDER_IMAGE_ZEPPELIN=dataworkbench/zeppelin-builder:latest
+BUILDER_IMAGE_ZEPPELIN=dataworkbench/builder:zeppelin
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
