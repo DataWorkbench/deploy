@@ -1,0 +1,9 @@
+apiVersion: v1ss
+appVersion: 0.0.1
+description: Helm Charts For DataWorkbench Service
+name: dataworkbench
+version: 0.0.1
+maintainers:
+  - name: QingCloud Appcenter
+    email: appcenter@yunify.com
+home: https://github.com/DataWorkbench
