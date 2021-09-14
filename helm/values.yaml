@@ -65,6 +65,10 @@ common:
   service:
     type: ClusterIP
 
+redisoperator:
+  rbac:
+    install: true
+
 # apiserver settings
 apiglobal:
   service:
@@ -101,6 +105,7 @@ apiserver:
   readinessProbe:
     initialDelaySeconds: 20
     periodSeconds: 60
+
 
 # spacemanager settings
 spacemanager:
