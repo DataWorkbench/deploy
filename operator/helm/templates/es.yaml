@@ -1,0 +1,118 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: {{ .Release.Name }}
+spec:
+  version: {{ .Values.esMaster.version }}
+#  http:
+#    service:
+#      spec:
+#        type: NodePort   # defalut ClusterIP
+#    tls:
+#      selfSignedCertificate:
+#        disabled: true
+  nodeSets:
+  - name: {{ .Values.esMaster.name }}
+    count: {{ .Values.esMaster.replicas }}
+    volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.esVolumeClaimTemplates.name }}
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.esVolumeClaimTemplates.storage }}
+        storageClassName: {{ .Values.esVolumeClaimTemplates.storageClass }}
+    podTemplate:
+      spec:
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+        containers:
+        - name: elasticsearch
+          readinessProbe:
+            exec:
+              command:
+              - bash
+              - -c
+              - /mnt/elastic-internal/scripts/readiness-probe-script.sh
+            failureThreshold: 3
+            initialDelaySeconds: 100
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 20
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms1g -Xmx1g
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+    config:
+      node.master: {{ .Values.esMaster.masterNode }}
+      node.data: {{ .Values.esMaster.dataNode }}
+      node.store.allow_mmap: true
+      indices.breaker.total.use_real_memory: false
+      indices.fielddata.cache.size: 40%
+      indices.query.bool.max_clause_count: 4096
+      indices.memory.index_buffer_size: "25%"
+  - name: {{ .Values.esData.name }}
+    count: {{ .Values.esData.replicas }}
+    volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.esVolumeClaimTemplates.name }}
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.esVolumeClaimTemplates.storage }}
+        storageClassName: {{ .Values.esVolumeClaimTemplates.storageClass }}
+    podTemplate:
+      spec:
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+        - name: increase-fd-ulimit
+          securityContext:
+            privileged: true
+          command: ["sh", "-c", "ulimit -n 65536"]
+        containers:
+        - name: elasticsearch
+          readinessProbe:
+            exec:
+              command:
+              - bash
+              - -c
+              - /mnt/elastic-internal/scripts/readiness-probe-script.sh
+            failureThreshold: 3
+            initialDelaySeconds: 100
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 20
+          env:
+          - name: ES_JAVA_OPTS
+            value: -Xms1g -Xmx1g
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+    config:
+      node.master: {{ .Values.esData.masterNode }}
+      node.data: {{ .Values.esData.dataNode }}
+      node.store.allow_mmap: true
+      indices.breaker.total.use_real_memory: false
+      indices.fielddata.cache.size: 40%
+      indices.query.bool.max_clause_count: 4096
+      indices.memory.index_buffer_size: "25%"

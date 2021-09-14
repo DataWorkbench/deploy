@@ -1,0 +1,42 @@
+# Default values for dataworkbench.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+## es-cluster specific values
+esMaster:
+  version: 7.6.2
+  name: master
+  masterNode: true
+  dataNode: false
+  replicas: 1
+
+esData:
+  name: data
+  masterNode: false
+  dataNode: true
+  replicas: 2
+
+esVolumeClaimTemplates:
+  name: es
+  storage: 10Gi
+  storageClass: csi-ssd-enterprise # or local volume
+
+## kafka-cluster specific values
+kafka:
+  version: 2.7.0
+  replicas: 3
+  storageClass: csi-ssd-enterprise
+  storage: 10Gi
+
+zookeeper:
+  replicas: 3
+  storageClass: csi-ssd-enterprise
+  storage: 1Gi
+
+## etcd-cluster specific values
+etcdCluster:
+  replicas: 3
+  version: 3.2.13
+  storageClass: csi-ssd-enterprise
+  accessModes: ReadWriteOnce
+  storage: 10Gi
