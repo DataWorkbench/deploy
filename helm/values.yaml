@@ -45,10 +45,6 @@ mysql:
   database: data_workbench
   logLevel: 4
 
-## etcd settings
-etcd:
-  dial_timeout: 5s
-
 # common settings for all service
 common:
   replicas: 3

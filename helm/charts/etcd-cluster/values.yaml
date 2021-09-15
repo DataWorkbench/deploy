@@ -1,0 +1,16 @@
+# Default values for etcd-cluster.
+
+replicaCount: 3
+
+resources:
+   limits:
+     cpu: 500m
+     memory: 2048Mi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+
+persistent:
+  size: 10Gi
+  accessModes:
+    - ReadWriteOnce
