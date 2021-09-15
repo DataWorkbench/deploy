@@ -25,7 +25,7 @@ spec:
       serviceAccountName: {{ include "name" . | quote }}
 {{- end }}
       containers:
-      - name: "{{ .Values.containerName }}"
+      - name: {{ include "name" . | quote }}
         image: {{ include "image" . | quote }}
         imagePullPolicy: {{ .Values.pullPolicy }}
         resources:
