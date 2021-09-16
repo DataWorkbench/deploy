@@ -61,6 +61,13 @@ spec:
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: helm-repo-volume
+            mountPath: {{ .Values.enginemanager.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+            readOnly: true
+          - name: kube-config-volume
+            mountPath: {{ .Values.enginemanager.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
+            readOnly: true
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
@@ -81,3 +88,12 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: helm-repo-volume
+          hostPath:
+            path: {{ .Values.enginemanager.helmRepoPath }}
+            type: Directory
+        - name: kube-config-volume
+          hostPath:
+            path: {{ .Values.enginemanager.kubeConfigPath }}
+            type: File

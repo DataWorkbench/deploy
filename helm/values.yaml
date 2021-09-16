@@ -45,6 +45,10 @@ mysql:
   database: data_workbench
   logLevel: 4
 
+## hdfs settings
+hdfs:
+  service: "my-hdfs-namenode"
+
 # common settings for all service
 common:
   replicas: 3
@@ -275,6 +279,8 @@ resourcemanager:
 
 # enginemanager settings
 enginemanager:
+  helmRepoPath: "/root/.cache/helm/repository"
+  kubConfigPath: "/root/.kube/config"
   envs:
     ENGINE_MANAGER_MYSQL_USERS: root
     ENGINE_MANAGER_MYSQL_DATABASE: data_workbench
@@ -286,7 +292,7 @@ enginemanager:
     ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
     ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
     ENGINE_MANAGER_HELM_DRIVER: ""
-    ENGINE_MANAGER_HELM_DEBUG: false
+    ENGINE_MANAGER_HELM_DEBUG: true
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
     ENGINE_MANAGER_FLINK_ENGINE_CHART_NAME: "flink-0.1.0.tgz"

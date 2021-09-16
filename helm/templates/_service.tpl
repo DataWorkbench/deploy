@@ -28,7 +28,7 @@ Service Addresses For ApiServer
 {{- define "service.zeppelin" -}}
 {{ .Release.Name }}-zeppelin:{{ .Values.ports.zeppelin }}
 {{- define "service.hdfs" -}}
-{{ .Release.Name }}-hdfs:{{ .Values.ports.hdfs }}
+hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
 {{- end -}}
 
 {{- define "apiserver.link.services" -}}
