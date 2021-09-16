@@ -16,7 +16,7 @@ rbac:
 ## Service account name and whether to create it
 serviceAccount:
   create: true
-  name:
+  name: etcdoperator
 
 # Select what to deploy
 deployments:
@@ -46,8 +46,8 @@ etcdOperator:
     tag: v0.9.4
     pullPolicy: Always
   resources:
-    cpu: 100m
-    memory: 128Mi
+    cpu: 200m
+    memory: 256Mi
   ## Node labels for etcd-operator pod assignment
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
@@ -57,14 +57,14 @@ etcdOperator:
   tolerations: []
   ## Configurable health checks against the /readyz endpoint that etcd-operator exposes
   readinessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 0
     periodSeconds: 10
     timeoutSeconds: 1
     successThreshold: 1
     failureThreshold: 3
   livenessProbe:
-    enabled: false
+    enabled: true
     initialDelaySeconds: 0
     periodSeconds: 10
     timeoutSeconds: 1

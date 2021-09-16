@@ -8,7 +8,7 @@ metadata:
   #   etcd.database.coreos.com/scope: clusterwide
 spec:
   size: {{ .Values.replicaCount }}
-  version: {{ .Chart.appVersion | quote }}
+  version: {{ .Chart.AppVersion | quote }}
   resources:
     {{ toYaml .Values.resources | indent 4 }}
   pod:
