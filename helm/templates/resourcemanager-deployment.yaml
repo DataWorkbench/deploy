@@ -1,14 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-resourcemanager
+  name: {{ include "databench.fullname" . }}-resourcemanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: resourcemanager
-annotations:
-  {{- range $key, $value := .Values.resourcemanager.annotations }}
-  {{ $key | quote }}: {{ $value | quote }}
-  {{- end }}
 spec:
   replicas: {{ coalesce .Values.common.replicas .Values.resourcemanager.replicas }}
   strategy:

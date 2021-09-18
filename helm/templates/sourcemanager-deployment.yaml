@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-sourcemanager
+  name: {{ include "databench.fullname" . }}-sourcemanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: sourcemanager
@@ -42,8 +42,6 @@ spec:
         ports:
           - name: service
             containerPort: {{ .Values.ports.sourcemanager }}
-          - name: metrics
-            containerPort: {{ .Values.ports.sourcemanagerMetrics }}
         env:
           - name: SOURCE_MANAGER_LOG_LEVEL
             value: {{ coalesce .Values.sourcemanager.logLevel .Values.common.logLevel | quote }}

@@ -1,15 +1,16 @@
-{{- if .Values.notifier.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-notifier
+  name: {{ include "databench.fullname" . }}-notifier
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: notifier
-  annotations:
-    {{ toYaml .Values.notifier.service.annotations | indent 4 }}
+    component: notifier-service
 spec:
-  type: {{ .Values.notifier.service.type }}
+  {{- if .Values.notifier.service }}
+  type: {{ coalesce .Values.notifier.service.type .Values.common.service.type }}
+  {{- else }}
+  type: {{ .Values.common.service.type }}
+  {{- end }}
   ports:
     - name: service
       port: {{ .Values.ports.notifier }}
@@ -19,4 +20,3 @@ spec:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     component: notifier
-{{- end }}

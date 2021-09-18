@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-db-init-job
+  name: {{ include "databench.fullname" . }}-db-init-job
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: db-init-job

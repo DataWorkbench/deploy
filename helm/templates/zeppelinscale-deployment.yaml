@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-zeppelinscale
+  name: {{ include "databench.fullname" . }}-zeppelinscale
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: zeppelinscale

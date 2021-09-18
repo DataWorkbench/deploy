@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-jobmanager
+  name: {{ include "databench.fullname" . }}-jobmanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: jobmanager
@@ -63,7 +63,7 @@ spec:
             value: '{{- include "mysql.url" . }}'
           - name: JOB_MANAGER_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
-          {{- range s$ename, $evalue := .Values.jobmanager.envs }}
+          {{- range $ename, $evalue := .Values.jobmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}

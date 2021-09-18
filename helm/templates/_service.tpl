@@ -2,31 +2,41 @@
 Service Addresses For ApiServer
 */}}
 {{- define "service.jaeger" -}}
-{{ .Release.Name }}-jaeger:{{ .Values.ports.jaeger }}
+{{ include "databench.fullname" . }}-jaeger:{{ .Values.ports.jaeger }}
 {{- end -}}
+
 {{- define "service.udfmanager" -}}
-{{ .Release.Name }}-udfmanager:{{ .Values.ports.udfmanager }}
+{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
 {{- end -}}
+
 {{- define "service.flowmanager" -}}
-{{ .Release.Name }}-flowmanager:{{ .Values.ports.flowmanager }}
+{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
 {{- end -}}
+
 {{- define "service.sourcemanager" -}}
-{{ .Release.Name }}-sourcemanager:{{ .Values.ports.sourcemanager }}
+{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
 {{- end -}}
+
 {{- define "service.jobdeveloper" -}}
-{{ .Release.Name }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
+{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
 {{- end -}}
+
 {{- define "service.jobwatcher" -}}
-{{ .Release.Name }}-jobwatcher:{{ .Values.ports.jobwatcher }}
+{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
 {{- end -}}
+
 {{- define "service.jobmanager" -}}
-{{ .Release.Name }}-jobmanager:{{ .Values.ports.jobmanager }}
+{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
 {{- end -}}
+
 {{- define "service.zeppelinscale" -}}
-{{ .Release.Name }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
+{{ include "databench.fullname" . }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
 {{- end -}}
+
 {{- define "service.zeppelin" -}}
-{{ .Release.Name }}-zeppelin:{{ .Values.ports.zeppelin }}
+{{ include "databench.fullname" . }}-zeppelin:{{ .Values.ports.zeppelin }}
+{{- end -}}
+
 {{- define "service.hdfs" -}}
 hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
 {{- end -}}
@@ -35,11 +45,11 @@ hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
 - name: API_SERVER_TRACER_LOCAL_AGENT
   value: '{{ include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
-  value: "{{ .Release.Name }}-spacemanager:{{ .Values.ports.spacemanager }}"
+  value: "{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}"
 - name: API_SERVER_FLOW_MANAGER_ADDRESS
   value: '{{- include "service.flowmanager" . }}'
 - name: API_SERVER_SCHEDULER_ADDRESS
-  value: "{{ .Release.Name }}-scheduler:{{ .Values.ports.scheduler }}"
+  value: "{{ include "databench.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}"
 - name: API_SERVER_SOURCE_MANAGER_ADDRESS
   value: '{{ include "service.sourcemanager" . }}'
 - name: API_SERVER_JOB_MANAGER_ADDRESS
@@ -76,6 +86,7 @@ Etcd Settings
 {{- define "etcd.endpoints" -}}
 {{ .Release.Name }}-client:{{- .Values.ports.etcd }}
 {{- end -}}
+
 {{- define "etcd.waiting.cmd" -}}
 until nc -z {{ .Release.Name }}-etcd {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
 {{- end -}}

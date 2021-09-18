@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-spacemanager
+  name: {{ include "databench.fullname" . }}-spacemanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: spacemanager
-  annotations:
-    {{ toYaml .Values.spacemanager.service.annotations | indent 4 }}
+    component: spacemanager-service
 spec:
-  type: {{ .Values.spacemanager.service.type }}
+  {{- if .Values.spacemanager.service }}
+  type: {{ coalesce .Values.spacemanager.service.type .Values.common.service.type }}
+  {{- else }}
+  type: {{ .Values.common.service.type }}
+  {{- end }}
   ports:
     - name: service
       port: {{ .Values.ports.spacemanager }}

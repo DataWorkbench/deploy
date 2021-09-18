@@ -11,33 +11,6 @@ image:
   jaeger: jaegertracing/all-in-one:1.22
 
 
-# serviceName: port
-ports:
-  jaeger: 6831
-  jaegerweb: 16686
-  mysql: 3306
-  etcd: 2379
-  zeppelin: 8080
-  hdfs: 8020
-
-  apiglobal: 8001
-  apiserver: 9001
-  spacemanager: 9101
-  flowmanager: 9102
-  scheduler: 9103
-  sourcemanager: 9104
-  jobmanager: 9105
-  udfmanager: 9106
-  zeppelinscale: 9107
-  jobwatcher: 9108
-  jobdeveloper: 9109
-  account: 9110
-  resourcemanager: 9111
-  observer: 9112
-  notifier: 9113
-  enginemanager: 9114
-
-
 ## mysql settings
 mysql:
   user: root
@@ -51,7 +24,7 @@ hdfs:
 
 # common settings for all service
 common:
-  replicas: 3
+  replicas: 1
   strategy: RollingUpdate
   logLevel: 1
   grpcLogLevel: 1
@@ -109,11 +82,6 @@ apiserver:
 
 # spacemanager settings
 spacemanager:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: spacemanager
     SPACE_MANAGER_MYSQL_USERS: root
@@ -124,11 +92,6 @@ spacemanager:
 
 # flowmanager settings
 flowmanager:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
     FLOW_MANAGER_MYSQL_USERS: root
@@ -139,11 +102,6 @@ flowmanager:
 
 # jobdeveloper settings
 jobdeveloper:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     JOB_DEVELOPER_TRACER_SERVICE_NAME: jobdeveloper
     JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
@@ -151,11 +109,6 @@ jobdeveloper:
 
 # jobmanager settings
 jobmanager:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     JOB_MANAGER_TRACER_SERVICE_NAME: jobmanager
     JOB_MANAGER_MYSQL_USERS: root
@@ -164,11 +117,6 @@ jobmanager:
 
 # jobwatcher settings
 jobwatcher:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     JOB_WATCHER_JOB_WORKS: 16
     JOB_WATCHER_PICKUP_ALONE_JOBS: 1
@@ -179,11 +127,6 @@ jobwatcher:
 
 # scheduler settings
 scheduler:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     SCHEDULER_TRACER_SERVICE_NAME: scheduler
     SCHEDULER_MYSQL_DATABASE: data_workbench
@@ -192,11 +135,6 @@ scheduler:
 
 # sourcemanager settings
 sourcemanager:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     SOURCE_MANAGER_TRACER_SERVICE_NAME: sourcemanager
     SOURCE_MANAGER_MYSQL_USERS: root
@@ -205,11 +143,6 @@ sourcemanager:
 
 # udfmanager settings
 udfmanager:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     UDF_MANAGER_TRACER_SERVICE_NAME: udfmanager
     UDF_MANAGER_MYSQL_USERS: root
@@ -218,43 +151,24 @@ udfmanager:
 
 # zeppelinscale settings
 zeppelinscale:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     ZEPPELIN_SCALE_TRACER_SERVICE_NAME: zeppelinscale
 
 # zeppelin settings
 zeppelin:
   enabled: false
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
     LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
 
 # notifier settings
 notifier:
-  enabled: false
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     NOTIFIER_MYSQL_DATABASE: data_workbench
     NOTIFIER_MYSQL_LOG_LEVEL: 4
 
 # observer settings
 observer:
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     OBSERVER_MYSQL_DATABASE: data_workbench
     OBSERVER_MYSQL_USERS: root
@@ -262,11 +176,6 @@ observer:
 
 # jaeger settings
 jaeger:
-  annotations: {}
-  podAnnotations: {}
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
@@ -280,7 +189,7 @@ resourcemanager:
 # enginemanager settings
 enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
-  kubConfigPath: "/root/.kube/config"
+  kubeConfigPath: "/root/.kube/config"
   envs:
     ENGINE_MANAGER_MYSQL_USERS: root
     ENGINE_MANAGER_MYSQL_DATABASE: data_workbench
@@ -296,3 +205,30 @@ enginemanager:
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
     ENGINE_MANAGER_FLINK_ENGINE_CHART_NAME: "flink-0.1.0.tgz"
+
+
+# serviceName: port
+ports:
+  jaeger: 6831
+  jaegerweb: 16686
+  mysql: 3306
+  etcd: 2379
+  zeppelin: 8080
+  hdfs: 8020
+
+  apiglobal: 8001
+  apiserver: 9001
+  spacemanager: 9101
+  flowmanager: 9102
+  scheduler: 9103
+  sourcemanager: 9104
+  jobmanager: 9105
+  udfmanager: 9106
+  zeppelinscale: 9107
+  jobwatcher: 9108
+  jobdeveloper: 9109
+  account: 9110
+  resourcemanager: 9111
+  observer: 9112
+  notifier: 9113
+  enginemanager: 9114

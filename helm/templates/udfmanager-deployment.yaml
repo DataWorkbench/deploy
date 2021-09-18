@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-udfmanager
+  name: {{ include "databench.fullname" . }}-udfmanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: udfmanager

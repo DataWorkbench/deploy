@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-jobwatcher
+  name: {{ include "databench.fullname" . }}-jobwatcher
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: jobwatcher
-  annotations:
-    {{ toYaml .Values.jobwatcher.service.annotations | indent 4 }}
+    component: jobwatcher-service
 spec:
-  type: {{ .Values.jobwatcher.service.type }}
+  {{- if .Values.jobwatcher.service }}
+  type: {{ coalesce .Values.jobwatcher.service.type .Values.common.service.type }}
+  {{- else }}
+  type: {{ .Values.common.service.type }}
+  {{- end }}
   ports:
     - name: service
       port: {{ .Values.ports.jobwatcher }}

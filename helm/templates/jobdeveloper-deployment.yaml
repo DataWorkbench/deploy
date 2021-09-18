@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-jobdeveloper
+  name: {{ include "databench.fullname" . }}-jobdeveloper
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: jobdeveloper

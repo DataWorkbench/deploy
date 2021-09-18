@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-mysql
+  name: {{ include "databench.fullname" . }}-mysql
   labels:
     component: mysql
 {{ include "dataworkbench.labels" . | indent 4 }}
@@ -21,7 +21,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-mysql
+  name: {{ include "databench.fullname" . }}-mysql
   labels:
     component: mysql
 {{ include "dataworkbench.labels" . | indent 4 }}
@@ -40,7 +40,7 @@ spec:
 {{ include "dataworkbench.labels" . | indent 8 }}
     spec:
       containers:
-      - name: {{ .Release.Name }}-mysql
+      - name: {{ include "databench.fullname" . }}-mysql
         image: mysql:8.0
         imagePullPolicy: IfNotPresent
         lifecycle:

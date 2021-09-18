@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-apiglobal
+  name: {{ include "databench.fullname" . }}-apiglobal
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: apiglobal
+    component: apiglobal-service
   annotations:
     {{ toYaml .Values.apiglobal.service.annotations | indent 4 }}
 spec:

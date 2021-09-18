@@ -1,8 +1,7 @@
-{{- if .Values.notifier.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-notifier
+  name: {{ include "databench.fullname" . }}-notifier
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: notifier
@@ -80,4 +79,3 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
-{{- end }}

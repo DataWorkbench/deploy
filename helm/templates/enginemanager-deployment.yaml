@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-enginemanager
+  name: {{ include "databench.fullname" . }}-enginemanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: enginemanager
@@ -63,10 +63,10 @@ spec:
           {{- end }}
         volumeMounts:
           - name: helm-repo-volume
-            mountPath: {{ .Values.enginemanager.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
             readOnly: true
           - name: kube-config-volume
-            mountPath: {{ .Values.enginemanager.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
             readOnly: true
         readinessProbe:
           exec:

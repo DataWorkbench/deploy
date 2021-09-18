@@ -1,8 +1,7 @@
-{{- if .Values.observer.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-observer
+  name: {{ include "databench.fullname" . }}-observer
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: observer
@@ -80,4 +79,3 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
-{{- end }}

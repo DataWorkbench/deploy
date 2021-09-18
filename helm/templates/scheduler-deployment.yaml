@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-scheduler
+  name: {{ include "databench.fullname" . }}-scheduler
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: scheduler
