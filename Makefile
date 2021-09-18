@@ -6,7 +6,7 @@ TARG.Name:=dataworkbench
 TRAG.Gopkg:=DataWorkbench
 #TRAG.Version:=$(TRAG.Gopkg)/pkg/version
 
-DOCKER_TAGS=latest
+DOCKER_TAGS=dev
 BUILDER_IMAGE=dataworkbench/builder:latest
 BUILDER_IMAGE_ZEPPELIN=dataworkbench/builder:zeppelin
 
@@ -19,7 +19,7 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,observer,enginemanager,account
+service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,observer,enginemanager,account,logmanager
 COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=dataworkbench-db-ctrl
 
@@ -51,7 +51,7 @@ build-flink-utile:
 
 .PHONY: build-dev
 build-dev: compile  ## Build dataworkbench image
-	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name) -f ./deploy/Dockerfile.dev .
+	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name):$(DOCKER_TAGS) -f ./deploy/Dockerfile.dev .
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build done"
 

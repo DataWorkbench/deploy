@@ -29,7 +29,7 @@ services:
           - dataworkbench-db
 
   dataworkbench-db-init:
-    image: "dataworkbench/flyway:latest"
+    image: "dataworkbench/flyway:dev"
     container_name: "dataworkbench-db-init"
     entrypoint: "sh"
     command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
@@ -45,7 +45,7 @@ services:
           - dataworkbench-db-init
 
   dataworkbench-db-ctrl:
-    image: "dataworkbench/flyway:latest"
+    image: "dataworkbench/flyway:dev"
     container_name: "dataworkbench-db-ctrl"
     command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
     links:
@@ -101,7 +101,7 @@ services:
           - dataworkbench-jaeger
 
   apiglobal:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-apiglobal"
     command: "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"
     ports:
@@ -132,7 +132,7 @@ services:
           - apiglobal
 
   apiserver:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-apiserver"
     command: "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"
     ports:
@@ -197,7 +197,7 @@ services:
           - apiserver
 
   spacemanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-spacemanager"
     command: "spacemanager start -c ${DATABENCH_CONF}/spacemanager.yaml"
     ports:
@@ -231,7 +231,7 @@ services:
           - spacemanager
 
   flowmanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-flowmanager"
     command: "flowmanager start -c ${DATABENCH_CONF}/flowmanager.yaml"
     ports:
@@ -269,7 +269,7 @@ services:
           - flowmanager
 
   scheduler:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-scheduler"
     command: "scheduler start -c ${DATABENCH_CONF}/scheduler.yaml"
     ports:
@@ -313,7 +313,7 @@ services:
           - scheduler
 
   sourcemanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-sourcemanager"
     command: "sourcemanager start -c ${DATABENCH_CONF}/sourcemanager.yaml"
     ports:
@@ -348,7 +348,7 @@ services:
           - sourcemanager
 
   udfmanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-udfmanager"
     command: "udfmanager start -c ${DATABENCH_CONF}/udfmanager.yaml"
     ports:
@@ -382,7 +382,7 @@ services:
           - udfmanager
 
   zeppelinscale:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-zeppelinscale"
     command: "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"
     ports:
@@ -412,7 +412,7 @@ services:
           - zeppelinscale
 
   jobwatcher:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-jobwatcher"
     command: "jobwatcher start -c ${DATABENCH_CONF}/jobwatcher.yaml"
     ports:
@@ -449,7 +449,7 @@ services:
           - jobwatcher
 
   jobdeveloper:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-jobdeveloper"
     command: "jobdeveloper start -c ${DATABENCH_CONF}/jobdeveloper.yaml"
     ports:
@@ -484,7 +484,7 @@ services:
           - jobdeveloper
 
   jobmanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-jobmanager"
     command: "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"
     ports:
@@ -525,7 +525,7 @@ services:
           - jobmanager
 
   resourcemanager:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-resourcemanager"
     command: "resourcemanager start -c ${DATABENCH_CONF}/resourcemanager.yaml"
     ports:
@@ -658,7 +658,7 @@ services:
           - dataworkbench-kafka-for-test
 
   notifier:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-notifier"
     command: "notifier start -c ${DATABENCH_CONF}/notifier.yaml"
     ports:
@@ -738,7 +738,7 @@ services:
 
 
   observer:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-observer"
     command: "observer start -c ${DATABENCH_CONF}/observer.yaml"
     ports:
@@ -787,7 +787,7 @@ services:
           - dataworkbench-redis
 
   account:
-    image: "dataworkbench/dataworkbench"
+    image: "dataworkbench/dataworkbench:dev"
     container_name: "dataworkbench-account"
     command: "account start -c ${DATABENCH_CONF}/account.yaml"
     ports:
