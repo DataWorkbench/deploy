@@ -10,11 +10,10 @@ spec:
   size: {{ .Values.replicaCount }}
   version: {{ .Chart.AppVersion | quote }}
   resources:
-    {{ toYaml .Values.resources | indent 4 }}
+{{ toYaml .Values.resources | indent 4 }}
   pod:
     persistentVolumeClaimSpec:
-      accessModes:
-        {{ toYaml .Values.persistent.accessModes | indent 8 }}
+      accessModes: {{ .Values.persistent.accessModes }}
       resources:
         requests:
           storage: {{ .Values.persistent.size }}

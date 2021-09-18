@@ -12,5 +12,4 @@ resources:
 
 persistent:
   size: 10Gi
-  accessModes:
-    - ReadWriteOnce
+  accessModes: ["ReadWriteOnce"]

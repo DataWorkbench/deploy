@@ -33,5 +33,4 @@ redis:
   persistent:
     enable: true
     size: 10Gi
-    accessModes:
-      - ReadWriteOnce
+    accessModes: ["ReadWriteOnce"]

@@ -12,17 +12,17 @@ spec:
     imagePullPolicy: IfNotPresent
     replicas: {{ .Values.sentinel.replicaCount }}
     resources:
-      {{ toYaml .Values.sentinel.resource | indent 6 }}
+{{ toYaml .Values.sentinel.resource | indent 6 }}
     customConfig:
-      {{ toYaml .Values.sentinel.config | indent 6 }}
+{{ toYaml .Values.sentinel.config | indent 6 }}
   redis:
     image: {{ include "sentinel.image" . }}
     imagePullPolicy: IfNotPresent
     replicas: {{ .Values.redis.replicaCount }}
     resources:
-      {{ toYaml .Values.redis.resource | indent 6 }}
+{{ toYaml .Values.redis.resource | indent 6 }}
     customConfig:
-      {{ toYaml .Values.redis.config | indent 6 }}
+{{ toYaml .Values.redis.config | indent 6 }}
     {{- if .Values.redis.persistent.enable }}
     storage:
       keepAfterDeletion: true
@@ -30,8 +30,7 @@ spec:
         metadata:
           name: {{ include "redis-cluster.fullname" . }}-persistent
         spec:
-          accessModes:
-            {{ toYaml .Values.redis.persistent.accessModes | indent 12 }}
+          accessModes: {{ .Values.redis.persistent.accessModes }}
           resources:
             requests:
               storage: {{ .Values.redis.persistent.size }}
