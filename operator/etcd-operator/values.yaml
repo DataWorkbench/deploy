@@ -44,7 +44,7 @@ etcdOperator:
   image:
     repository: quay.io/coreos/etcd-operator
     tag: v0.9.4
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   resources:
     cpu: 200m
     memory: 256Mi
@@ -79,7 +79,7 @@ backupOperator:
   image:
     repository: quay.io/coreos/etcd-operator
     tag: v0.9.4
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   resources:
     cpu: 100m
     memory: 128Mi
@@ -105,7 +105,7 @@ restoreOperator:
   image:
     repository: quay.io/coreos/etcd-operator
     tag: v0.9.4
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   port: 19999
   resources:
     cpu: 100m
@@ -133,7 +133,7 @@ etcdCluster:
   image:
     repository: quay.io/coreos/etcd
     tag: v3.2.25
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
   enableTLS: false
   # TLS configs
   tls:
