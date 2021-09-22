@@ -43,17 +43,17 @@ spec:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
         env:
-          - name: NOTIFIER_LOG_LEVEL
+          - name: NOTIFICATION_LOG_LEVEL
             value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
-          - name: NOTIFIER_GRPC_SERVER_ADDRESS
+          - name: NOTIFICATION_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifier }}"
-          - name: NOTIFIER_GRPC_SERVER_LOG_LEVEL
+          - name: NOTIFICATION_GRPC_SERVER_LOG_LEVEL
             value: {{ coalesce .Values.notifier.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: NOTIFIER_GRPC_SERVER_LOG_VERBOSITY
+          - name: NOTIFICATION_GRPC_SERVER_LOG_VERBOSITY
             value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: NOTIFIER_MYSQL_HOSTS
+          - name: NOTIFICATION_MYSQL_HOSTS
             value: '{{- include "mysql.url" . }}'
-          - name: NOTIFIER_MYSQL_PASSWORD
+          - name: NOTIFICATION_MYSQL_PASSWORD
             value: {{ include "mysql.root.password" . | quote }}
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}
