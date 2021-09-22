@@ -28,7 +28,7 @@ spec:
       keepAfterDeletion: true
       persistentVolumeClaim:
         metadata:
-          name: {{ include "redis-cluster.fullname" . }}-persistent
+          name: {{ .Release.Name }}-persistent
         spec:
           accessModes: {{ .Values.redis.persistent.accessModes }}
           resources:
