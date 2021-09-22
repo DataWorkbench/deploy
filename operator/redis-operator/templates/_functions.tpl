@@ -12,7 +12,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 
 {{/* Build wide-used variables the application */}}
 {{ define "name" -}}
-{{ printf "%s-%s" .Release.Name .Chart.Name }}
+{{- if contains .Chart.Name .Release.Name }}
+{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-%s" .Release.Name .Chart.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
 {{- end }}
 
 {{ define "image" -}}
