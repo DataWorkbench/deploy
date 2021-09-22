@@ -84,9 +84,9 @@ until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waitin
 Etcd Settings
 */}}
 {{- define "etcd.endpoints" -}}
-{{ .Release.Name }}-client:{{- .Values.ports.etcd }}
+{{ .Release.Name }}-etcd-cluster-client:{{- .Values.ports.etcd }}
 {{- end -}}
 
 {{- define "etcd.waiting.cmd" -}}
-until nc -z {{ .Release.Name }}-etcd {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
+until nc -z {{ .Release.Name }}-etcd-cluster-client {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
 {{- end -}}
