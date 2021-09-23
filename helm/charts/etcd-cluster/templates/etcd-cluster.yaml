@@ -4,8 +4,8 @@ metadata:
   name: {{ include "etcd-cluster.fullname" . }}
   ## Adding this annotation make this cluster managed by clusterwide operators
   ## namespaced operators ignore it
-  # annotations:
-  #   etcd.database.coreos.com/scope: clusterwide
+  annotations:
+    etcd.database.coreos.com/scope: clusterwide
 spec:
   size: {{ .Values.replicaCount }}
   version: {{ .Chart.AppVersion | quote }}

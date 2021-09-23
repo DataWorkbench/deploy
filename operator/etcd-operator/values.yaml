@@ -7,6 +7,7 @@ global:
   ##
   imagePullSecrets: []
   # - name: "image-pull-secret"
+  clusterWide: true
 
 ## Install Default RBAC roles and bindings
 rbac:

@@ -33,6 +33,9 @@ spec:
         imagePullPolicy: {{ .Values.etcdOperator.image.pullPolicy }}
         command:
         - etcd-operator
+        {{- if .Values.global.clusterWide }}
+        - -cluster-wide
+        {{- end }}
 {{- range $key, $value := .Values.etcdOperator.commandArgs }}
         - "--{{ $key }}={{ $value }}"
 {{- end }}
