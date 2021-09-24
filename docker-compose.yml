@@ -108,9 +108,11 @@ services:
       - "${API_GLOBAL_PORT}:${API_GLOBAL_PORT}"
     links:
       - apiserver
+      - account
     depends_on:
       - apiserver
       - dataworkbench-jaeger
+      - account
     environment:
       - API_GLOBAL_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_GLOBAL_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -121,7 +123,8 @@ services:
       - API_GLOBAL_TRACER_SERVICE_NAME=apiglobal
       - API_GLOBAL_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
       - API_GLOBAL_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
-    logging:
+      - API_GLOBAL_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_PORT}
+      logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
@@ -145,6 +148,7 @@ services:
       - jobmanager
       - udfmanager
       - resourcemanager
+      - account
     depends_on:
       - spacemanager
       - flowmanager
@@ -153,6 +157,7 @@ services:
       - jobmanager
       - udfmanager
       - dataworkbench-jaeger
+      - account
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -186,6 +191,9 @@ services:
       - API_SERVER_RESOURCE_MANAGER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
       - API_SERVER_RESOURCE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_RESOURCE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_SERVER_PORT}
+      - API_SERVER_ACCOUNT_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_ACCOUNT_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -808,7 +816,7 @@ services:
       - ACCOUNT_MYSQL_DATABASE=${MYSQL_DATABASE}
       - ACCOUNT_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - ACCOUNT_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
-      - ACCOUNT_REDIS_HOSTS=dataworkbench-redis:${REDIS_PORT}
+      - ACCOUNT_REDIS_ADDR=dataworkbench-redis:${REDIS_PORT}
     logging:
       driver: "json-file"
       options:
