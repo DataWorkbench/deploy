@@ -124,7 +124,7 @@ services:
       - API_GLOBAL_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
       - API_GLOBAL_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
       - API_GLOBAL_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_PORT}
-      logging:
+    logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
