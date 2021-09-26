@@ -38,25 +38,24 @@ spec:
       - name: enginemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"]
+        command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.enginemanager }}
+          - containerPort: {{ .Values.ports.engineManager }}
             name: service
+          - containerPort: {{ .Values.ports.engineManagerMetrics }}
+            name: metrics
         env:
-          - name: ENGINE_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.enginemanager.logLevel .Values.common.logLevel | quote }}
           - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.enginemanager }}"
-          - name: ENGINE_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.enginemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: ENGINE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.enginemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: ENGINE_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+            value: "0.0.0.0:{{- .Values.ports.engineManager }}"
+          - name: ENGINE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.engineManagerMetrics }}"
+          - name: ENGINE_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
             value: '{{- include "service.hdfs" . }}'
-          - name: ENGINE_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -68,9 +67,12 @@ spec:
           - name: kube-config-volume
             mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
             readOnly: true
+          - name: databench-config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}"]
           {{- if .Values.enginemanager.readinessProbe }}
           periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
@@ -80,7 +82,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}" ]
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}" ]
           {{- if .Values.enginemanager.livenessProbe }}
           periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}
@@ -97,3 +99,9 @@ spec:
           hostPath:
             path: {{ .Values.enginemanager.kubeConfigPath }}
             type: File
+        - name: databench-config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

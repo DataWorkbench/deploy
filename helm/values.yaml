@@ -11,24 +11,22 @@ image:
   jaeger: jaegertracing/all-in-one:1.22
 
 
-## mysql settings
-mysql:
-  user: root
-  password: zhu88jie
-  database: data_workbench
-  logLevel: 4
-
 ## hdfs settings
 hdfs:
   service: "my-hdfs-namenode"
+
 
 # common settings for all service
 common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1
-  grpcLogLevel: 1
-  grpcLogVerbosity: 99
+  grpcLog:
+    level: 1
+    verbosity: 99
+  metrics:
+    enabled: true
+    urlPath: "/metrics"
   livenessProbe:
     initialDelaySeconds: 10
     periodSeconds: 15
@@ -38,9 +36,26 @@ common:
   service:
     type: ClusterIP
 
+
+## mysql settings
+mysql:
+  user: "root"
+  database: "data_workbench"
+  maxIdleConn: 16
+  maxOpenConn: 128
+  connMaxLifetime: 10m
+  logLevel: 4
+  slowTshreshold: 2s
+
+
+# redis settings
 redisoperator:
   rbac:
     install: true
+
+redis:
+  database: 0
+  masterName: "mymaster"
 
 # apiserver settings
 apiglobal:
@@ -63,172 +78,174 @@ apiglobal:
 
 # apiserver settings
 apiserver:
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     API_SERVER_READ_TIMEOUT: 30s
     API_SERVER_WRITE_TIMEOUT: 30s
     API_SERVER_DLE_TIMEOUT: 30s
     API_SERVER_EXIT_TIMEOUT: 5m
-    API_SERVER_TRACER_SERVICE_NAME: apiserver
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 60
-  readinessProbe:
-    initialDelaySeconds: 20
-    periodSeconds: 60
+    API_SERVER_TRACER_SERVICE_NAME: "apiserver"
 
-
-# spacemanager settings
-spacemanager:
+# account settings
+account:
   envs:
-    SPACE_MANAGER_TRACER_SERVICE_NAME: spacemanager
-    SPACE_MANAGER_MYSQL_USERS: root
-    SPACE_MANAGER_MYSQL_DATABASE: data_workbench
-    SPACE_MANAGER_MYSQL_LOG_LEVEL: 4
-    SPACE_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
-    SPACE_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
-
-# flowmanager settings
-flowmanager:
-  envs:
-    FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
-    FLOW_MANAGER_MYSQL_USERS: root
-    FLOW_MANAGER_MYSQL_DATABASE: data_workbench
-    FLOW_MANAGER_MYSQL_LOG_LEVEL: 4
-    FLOW_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
-    FLOW_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
-
-# jobdeveloper settings
-jobdeveloper:
-  envs:
-    JOB_DEVELOPER_TRACER_SERVICE_NAME: jobdeveloper
-    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: /zeppelin/flink/flink-1.11.2
-    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar
-
-# jobmanager settings
-jobmanager:
-  envs:
-    JOB_MANAGER_TRACER_SERVICE_NAME: jobmanager
-    JOB_MANAGER_MYSQL_USERS: root
-    JOB_MANAGER_MYSQL_DATABASE: data_workbench
-    JOB_MANAGER_MYSQL_LOG_LEVEL: 4
-
-# jobwatcher settings
-jobwatcher:
-  envs:
-    JOB_WATCHER_JOB_WORKS: 16
-    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
-    JOB_WATCHER_TRACER_SERVICE_NAME: jobwatcher
-    JOB_WATCHER_MYSQL_USERS: root
-    JOB_WATCHER_MYSQL_DATABASE: data_workbench
-    JOB_WATCHER_MYSQL_LOG_LEVEL: 4
-
-# scheduler settings
-scheduler:
-  envs:
-    SCHEDULER_TRACER_SERVICE_NAME: scheduler
-    SCHEDULER_MYSQL_DATABASE: data_workbench
-    SCHEDULER_MYSQL_LOG_LEVEL: 4
-    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
-
-# sourcemanager settings
-sourcemanager:
-  envs:
-    SOURCE_MANAGER_TRACER_SERVICE_NAME: sourcemanager
-    SOURCE_MANAGER_MYSQL_USERS: root
-    SOURCE_MANAGER_MYSQL_DATABASE: data_workbench
-    SOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
-
-# udfmanager settings
-udfmanager:
-  envs:
-    UDF_MANAGER_TRACER_SERVICE_NAME: udfmanager
-    UDF_MANAGER_MYSQL_USERS: root
-    UDF_MANAGER_MYSQL_DATABASE: data_workbench
-    UDF_MANAGER_MYSQL_LOG_LEVEL: 4
-
-# zeppelinscale settings
-zeppelinscale:
-  envs:
-    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: zeppelinscale
-
-# zeppelin settings
-zeppelin:
-  enabled: false
-  envs:
-    LIB_URL: https://dataworkbench.gd2.qingstor.com/zeppelin_lib/
-    LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
-
-# notifier settings
-notifier:
-  envs:
-    NOTIFIER_MYSQL_DATABASE: data_workbench
-    NOTIFIER_MYSQL_LOG_LEVEL: 4
-
-# observer settings
-observer:
-  envs:
-    OBSERVER_MYSQL_DATABASE: data_workbench
-    OBSERVER_MYSQL_USERS: root
-    OBSERVER_MYSQL_LOG_LEVEL: 4
-
-# jaeger settings
-jaeger:
-  envs:
-    COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-
-# resourcemanager settings
-resourcemanager:
-  envs:
-    RESOURCE_MANAGER_MYSQL_USERS: root
-    RESOURCE_MANAGER_MYSQL_DATABASE: data_workbench
-    RESOURCE_MANAGER_MYSQL_LOG_LEVEL: 4
+    ACCOUNT_SOURCE: "qingcloud"
+    ACCOUNT_QINGCLOUD_CONFIG_ACCESS_KEY_ID: "NHYIAFWQGTUOYJAPQZTK"
+    ACCOUNT_QINGCLOUD_CONFIG_SECRET_ACCESS_KEY: "xl7G25CjeEZ5gQIjC6GbHZsXDmqUfl9iOVAUcQIx"
+    ACCOUNT_QINGCLOUD_CONFIG_HOST: "api.qingcloud.com"
+    ACCOUNT_QINGCLOUD_CONFIG_PORT: "443"
+    ACCOUNT_QINGCLOUD_CONFIG_PROTOCOL: "https"
+    ACCOUNT_QINGCLOUD_CONFIG_URI: "/iaas"
 
 # enginemanager settings
 enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
-    ENGINE_MANAGER_MYSQL_USERS: root
-    ENGINE_MANAGER_MYSQL_DATABASE: data_workbench
-    ENGINE_MANAGER_MYSQL_LOG_LEVEL: 4
-    ENGINE_MANAGER_MYSQL_SLOW_THRESHOLD: 2s
-    ENGINE_MANAGER_MYSQL_CONN_MAX_LIFETIME: 10m
-
+    ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
     ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH: "/root/.kube/config"
     ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
     ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
     ENGINE_MANAGER_HELM_DRIVER: ""
-    ENGINE_MANAGER_HELM_DEBUG: true
+    ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
     ENGINE_MANAGER_FLINK_ENGINE_CHART_NAME: "flink-0.1.0.tgz"
+
+# flowmanager settings
+flowmanager:
+  envs:
+    FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
+
+# jobdeveloper settings
+jobdeveloper:
+  envs:
+    JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
+    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: "/zeppelin/flink/flink-1.11.2"
+    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar"
+    JOB_DEVELOPER_ZEPPELIN_ZEPPELIN_FLINK_HOME: "/opt/homebrew/Cellar/hadoop/3.3.1/libexec/etc/hadoop"
+
+# jobmanager settings
+jobmanager:
+  envs:
+    JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
+
+# jobwatcher settings
+jobwatcher:
+  envs:
+    JOB_WATCHER_JOB_WORKS: 16
+    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
+    JOB_WATCHER_TRACER_SERVICE_NAME: "jobwatcher"
+
+# logmanager settings
+logmanager:
+  envs:
+    LOG_MANAGER_TRACER_SERVICE_NAME: "logmanager"
+    LOG_MANAGER_HDFS_SERVER_USER_NAME: "root"
+    LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE: 1024
+
+# notifier settings
+notifier:
+  envs:
+    NOTIFIER_NF_CONFIG_CHANNEL: "SMTPChannel"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_ACCESS_KEY_ID: "IKSMDBWVIECPIVNDYZAB"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_SECRET_ACCESS_KEY: "JnEco2qZ6EvXt89mJpCVdkBoc5AwPA0unrkFkOxq"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_HOST: "api.alphacloud.com"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_PORT: 7777
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_PROTOCOL: "http"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_URI: "/iaas"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_HOST: "smtp.163.com"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PORT: 25
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_USER_NAME: "xiaobai417sos@163.com"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PASSWORD: "82717785"
+
+# observer settings
+observer:
+  envs: {}
+
+# resourcemanager settings
+resourcemanager:
+  envs: {}
+
+
+# scheduler settings
+scheduler:
+  envs:
+    SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
+    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
+
+# sourcemanager settings
+sourcemanager:
+  envs:
+    SOURCE_MANAGER_TRACER_SERVICE_NAME: "sourcemanager"
+
+# spacemanager settings
+spacemanager:
+  envs:
+    SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
+
+# udfmanager settings
+udfmanager:
+  envs:
+    UDF_MANAGER_TRACER_SERVICE_NAME: "udfmanager"
+
+# zeppelin settings
+zeppelin:
+  enabled: false
+  envs:
+    LIB_URL: "https://dataworkbench.gd2.qingstor.com/zeppelin_lib/"
+    LIB_NAME: "mysql-connector-java-8.0.21.jar,flink-connector-jdbc_2.11-1.11.2.jar,postgresql-42.2.18.jar,flink-sql-connector-kafka_2.11-1.11.2.jar,flink-connector-clickhouse-1.11.0.jar"
+
+# zeppelinscale settings
+zeppelinscale:
+  envs:
+    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: "zeppelinscale"
+
+
+# jaeger settings
+jaeger:
+  envs:
+    COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
 
 # serviceName: port
 ports:
   jaeger: 6831
-  jaegerweb: 16686
+  jaegerWeb: 16686
   mysql: 3306
   etcd: 2379
   zeppelin: 8080
   hdfs: 8020
+  redis: 26379  # keep same as the port of redis cluster
 
-  apiglobal: 8001
-  apiserver: 9001
-  spacemanager: 9101
-  flowmanager: 9102
+  apiGlobal: 8001
+  apiServer: 9001
+  spaceManager: 9101
+  spaceManagerMetrics: 9201
+  flowManager: 9102
+  flowManagerMetrics: 9202
   scheduler: 9103
-  sourcemanager: 9104
-  jobmanager: 9105
-  udfmanager: 9106
-  zeppelinscale: 9107
-  jobwatcher: 9108
-  jobdeveloper: 9109
+  schedulerMetrics: 9203
+  sourceManager: 9104
+  sourceManagerMetrics: 9204
+  jobManager: 9105
+  jobManagerMetrics: 9205
+  udfManager: 9106
+  udfManagerMetrics: 9206
+  zeppelinScale: 9107
+  zeppelinScaleMetrics: 9207
+  jobWatcher: 9108
+  jobWatcherMetrics: 9208
+  jobDeveloper: 9109
+  jobDeveloperMetrics: 9209
   account: 9110
-  resourcemanager: 9111
+  accountMetrics: 9210
+  resourceManager: 9111
+  resourceManagerMetrics: 9211
   observer: 9112
+  observerMetrics: 9212
   notifier: 9113
-  enginemanager: 9114
+  notifierMetrics: 9213
+  engineManager: 9114
+  engineManagerMetrics: 9214
+  logManager: 9115
+  logManagerMetrics: 9215

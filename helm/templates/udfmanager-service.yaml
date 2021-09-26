@@ -13,8 +13,12 @@ spec:
   {{- end }}
   ports:
     - name: service
-      port: {{ .Values.ports.udfmanager }}
+      port: {{ .Values.ports.udfManager }}
       targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.udfManagerMetrics }}
+      targetPort: metrics
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}

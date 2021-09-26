@@ -38,27 +38,30 @@ spec:
       - name: notifier
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/notifier.yaml"]
+        command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
+          - containerPort: {{ .Values.ports.notifierMetrics }}
+            name: metrics
         env:
-          - name: NOTIFICATION_LOG_LEVEL
-            value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
           - name: NOTIFICATION_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifier }}"
-          - name: NOTIFICATION_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.notifier.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: NOTIFICATION_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: NOTIFICATION_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+          - name: NOTIFICATION_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.notifierMetrics }}"
           - name: NOTIFICATION_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
@@ -79,3 +82,11 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+

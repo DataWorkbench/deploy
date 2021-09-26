@@ -38,32 +38,35 @@ spec:
       - name: flowmanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "flowmanager start -c ${DATABENCH_CONF}/flowmanager.yaml"]
+        command: ["sh", "-c", "flowmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.flowmanager }}
+          - containerPort: {{ .Values.ports.flowManager }}
             name: service
+          - containerPort: {{ .Values.ports.flowManagerMetrics }}
+            name: metrics
         env:
-          - name: FLOW_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.flowmanager.logLevel .Values.common.logLevel | quote }}
           - name: FLOW_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.flowmanager }}"
-          - name: FLOW_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.flowmanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: FLOW_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.flowmanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: FLOW_MANAGER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: FLOW_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+            value: "0.0.0.0:{{- .Values.ports.flowManager }}"
+          - name: FLOW_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.flowManagerMetrics }}"
+          - name: FLOW_MANAGER_SCHEDULER_ADDRESS
+            value: {{ include "service.scheduler" . | quote }}
           - name: FLOW_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.flowmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowManager }}"]
           {{- if .Values.flowmanager.readinessProbe }}
           periodSeconds: {{ .Values.flowmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.readinessProbe.initialDelaySeconds }}
@@ -73,7 +76,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowManager }}"]
           {{- if .Values.flowmanager.livenessProbe }}
           periodSeconds: {{ .Values.flowmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.livenessProbe.initialDelaySeconds }}
@@ -81,3 +84,10 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

@@ -38,32 +38,29 @@ spec:
       - name: spacemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "spacemanager start -c ${DATABENCH_CONF}/spacemanager.yaml"]
+        command: ["sh", "-c", "spacemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.spacemanager }}
+          - containerPort: {{ .Values.ports.spaceManager }}
             name: service
+          - containerPort: {{ .Values.ports.spaceManagerMetrics }}
+            name: metrics
         env:
-          - name: SPACE_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.spacemanager.logLevel .Values.common.logLevel | quote }}
           - name: SPACE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
-          - name: SPACE_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.spacemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.spacemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: SPACE_MANAGER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: SPACE_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+            value: "0.0.0.0:{{- .Values.ports.spaceManager }}"
+          - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.spaceManagerMetrics }}"
           - name: SPACE_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spaceManager }}"]
           {{- if .Values.spacemanager.readinessProbe }}
           periodSeconds: {{ .Values.spacemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.spacemanager.readinessProbe.initialDelaySeconds }}
@@ -73,7 +70,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}" ]
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.spaceManager }}" ]
           {{- if .Values.spacemanager.livenessProbe }}
           periodSeconds: {{ .Values.spacemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.spacemanager.livenessProbe.initialDelaySeconds }}
@@ -81,3 +78,14 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

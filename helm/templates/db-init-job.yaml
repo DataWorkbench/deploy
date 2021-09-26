@@ -30,12 +30,14 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/flyway/sql/ddl/ddl_init.sh"
-            - '-h{{ include "mysql.host" . }}'
-            - "-uroot"
             - "--connect-timeout=5"
           env:
-            - name: PASSWORD
-              value: {{ include "mysql.root.password" . | quote }}
+            - name: MYSQL_HOST
+              value: {{ include "mysql.host" . | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.mysql.user }}
+            - name: MYSQL_PASSWORD
+              value: {{ .Values.mysql.password }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       dnsPolicy: ClusterFirst

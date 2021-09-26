@@ -13,8 +13,12 @@ spec:
   {{- end }}
   ports:
     - name: service
-      port: {{ .Values.ports.jobwatcher }}
+      port: {{ .Values.ports.jobWatcher }}
       targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.jobWatcherMetrics }}
+      targetPort: metrics
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}

@@ -38,32 +38,29 @@ spec:
       - name: sourcemanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "sourcemanager start -c ${DATABENCH_CONF}/sourcemanager.yaml"]
+        command: ["sh", "-c", "sourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - name: service
-            containerPort: {{ .Values.ports.sourcemanager }}
+            containerPort: {{ .Values.ports.sourceManager }}
+          - name: metrics
+            containerPort: {{ .Values.ports.sourceManagerMetrics }}
         env:
-          - name: SOURCE_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.sourcemanager.logLevel .Values.common.logLevel | quote }}
           - name: SOURCE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.sourcemanager }}"
-          - name: SOURCE_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.sourcemanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: SOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.sourcemanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: SOURCE_MANAGER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: SOURCE_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+            value: "0.0.0.0:{{- .Values.ports.sourceManager }}"
+          - name: SOURCE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.sourceManagerMetrics }}"
           - name: SOURCE_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.sourcemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourceManager }}"]
           {{- if .Values.sourcemanager.readinessProbe }}
           periodSeconds: {{ .Values.sourcemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.readinessProbe.initialDelaySeconds }}
@@ -73,7 +70,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourceManager }}"]
           {{- if .Values.sourcemanager.livenessProbe }}
           periodSeconds: {{ .Values.sourcemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.livenessProbe.initialDelaySeconds }}
@@ -81,3 +78,15 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+

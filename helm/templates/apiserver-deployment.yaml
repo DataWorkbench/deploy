@@ -35,17 +35,17 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"]
           ports:
-            - containerPort: {{ .Values.ports.apiserver }}
+            - containerPort: {{ .Values.ports.apiServer }}
               name: service
           env:
             - name: API_SERVER_LOG_LEVEL
               value: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel | quote }}
             - name: API_SERVER_GRPC_LOG_LEVEL
-              value: {{ coalesce .Values.apiserver.grpcLogLevel .Values.common.grpcLogLevel | quote }}
+              value: {{ coalesce .Values.apiserver.grpcLogLevel .Values.common.grpcLog.level | quote }}
             - name: API_SERVER_GRPC_LOG_VERBOSITY
-              value: {{ coalesce .Values.apiserver.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+              value: {{ coalesce .Values.apiserver.grpcLogVerbosity .Values.common.grpcLog.verbosity | quote }}
             - name: API_SERVER_HTTP_SERVER_ADDRESS
-              value: "0.0.0.0:{{ .Values.ports.apiserver }}"
+              value: "0.0.0.0:{{ .Values.ports.apiServer }}"
 {{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
             - name: {{ $ename }}

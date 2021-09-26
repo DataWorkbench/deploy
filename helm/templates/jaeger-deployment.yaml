@@ -36,7 +36,7 @@ spec:
         ports:
           - containerPort: {{ .Values.ports.jaeger }}
             name: service
-          - containerPort: {{ .Values.ports.jaegerweb }}
+          - containerPort: {{ .Values.ports.jaegerWeb }}
             name: web
         env:
           {{- range $ename, $evalue := .Values.jaeger.envs }}

@@ -17,7 +17,7 @@ spec:
       targetPort: service
       protocol: TCP
     - name: web
-      port: {{ .Values.ports.jaegerweb }}
+      port: {{ .Values.ports.jaegerWeb }}
       targetPort: web
       protocol: TCP
   selector:

@@ -38,27 +38,30 @@ spec:
       - name: observer
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "observer start -c ${DATABENCH_CONF}/observer.yaml"]
+        command: ["sh", "-c", "observer start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - containerPort: {{ .Values.ports.observer }}
             name: service
+          - containerPort: {{ .Values.ports.observerMetrics }}
+            name: metrics
         env:
-          - name: OBSERVER_LOG_LEVEL
-            value: {{ coalesce .Values.observer.logLevel .Values.common.logLevel | quote }}
           - name: OBSERVER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.observer }}"
-          - name: OBSERVER_GRPC_LOG_LEVEL
-            value: {{ coalesce .Values.observer.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: OBSERVER_GRPC_LOG_VERBOSITY
-            value: {{ coalesce .Values.observer.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: OBSERVER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+          - name: OBSERVER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.observerMetrics }}"
           - name: OBSERVER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.observer.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.observer }}"]
@@ -79,3 +82,11 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+

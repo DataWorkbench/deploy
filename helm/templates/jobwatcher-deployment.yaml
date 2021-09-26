@@ -38,34 +38,35 @@ spec:
       - name: jobwatcher
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/jobwatcher.yaml"]
+        command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.jobwatcher }}
+          - containerPort: {{ .Values.ports.jobWatcher }}
             name: service
+          - containerPort: {{ .Values.ports.jobWatcherMetrics }}
+            name: metrics
         env:
-          - name: JOB_WATCHER_LOG_LEVEL
-            value: {{ coalesce .Values.jobwatcher.logLevel .Values.common.logLevel | quote }}
           - name: JOB_WATCHER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobwatcher }}"
-          - name: JOB_WATCHER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.jobwatcher.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: JOB_WATCHER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.jobwatcher.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
+            value: "0.0.0.0:{{- .Values.ports.jobWatcher }}"
+          - name: JOB_WATCHER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobWatcherMetrics }}"
           - name: JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS
             value: {{ include "service.jobdeveloper" . | quote }}
-          - name: JOB_WATCHER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: JOB_WATCHER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
           - name: JOB_WATCHER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.jobwatcher.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
           {{- if .Values.jobwatcher.readinessProbe }}
           periodSeconds: {{ .Values.jobwatcher.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.readinessProbe.initialDelaySeconds }}
@@ -75,7 +76,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
           {{- if .Values.jobwatcher.livenessProbe }}
           periodSeconds: {{ .Values.jobwatcher.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.livenessProbe.initialDelaySeconds }}
@@ -83,3 +84,10 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

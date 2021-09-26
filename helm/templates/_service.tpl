@@ -5,55 +5,120 @@ Service Addresses For ApiServer
 {{ include "databench.fullname" . }}-jaeger:{{ .Values.ports.jaeger }}
 {{- end -}}
 
+{{- define "service.spacemanager" -}}
+{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spaceManager }}
+{{- end -}}
+
 {{- define "service.udfmanager" -}}
-{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
+{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfManager }}
+{{- end -}}
+
+{{- define "service.scheduler" -}}
+{{ include "databench.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}
 {{- end -}}
 
 {{- define "service.flowmanager" -}}
-{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
+{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowManager }}
 {{- end -}}
 
 {{- define "service.sourcemanager" -}}
-{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
+{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourceManager }}
 {{- end -}}
 
 {{- define "service.jobdeveloper" -}}
-{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
+{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobDeveloper }}
 {{- end -}}
 
 {{- define "service.jobwatcher" -}}
-{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
+{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobWatcher }}
 {{- end -}}
 
 {{- define "service.jobmanager" -}}
-{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
+{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobManager }}
 {{- end -}}
 
 {{- define "service.zeppelinscale" -}}
-{{ include "databench.fullname" . }}-zeppelinscale:{{ .Values.ports.zeppelinscale }}
+{{ include "databench.fullname" . }}-zeppelinscale:{{ .Values.ports.zeppelinScale }}
 {{- end -}}
 
 {{- define "service.zeppelin" -}}
 {{ include "databench.fullname" . }}-zeppelin:{{ .Values.ports.zeppelin }}
 {{- end -}}
 
-{{- define "service.hdfs" -}}
-hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
+{{- define "service.resourcemanager" -}}
+{{ include "databench.fullname" . }}-resourcemanager:{{ .Values.ports.resourceManager }}
 {{- end -}}
+
+{{- define "service.enginemanager" -}}
+{{ include "databench.fullname" . }}-enginemanager:{{ .Values.ports.engineManager }}
+{{- end -}}
+
+{{- define "service.observermanager" -}}
+{{ include "databench.fullname" . }}-observermanager:{{ .Values.ports.observer }}
+{{- end -}}
+
+{{- define "service.account" -}}
+{{ include "databench.fullname" . }}-account:{{ .Values.ports.account }}
+{{- end -}}
+
+{{- define "service.logmanager" -}}
+{{ include "databench.fullname" . }}-logmanager:{{ .Values.ports.logManager }}
+{{- end -}}
+
 
 {{- define "apiserver.link.services" -}}
 - name: API_SERVER_TRACER_LOCAL_AGENT
-  value: '{{ include "service.jaeger" . }}'
+  value: '{{- include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
-  value: "{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}"
+  value: '{{- include "service.spacemanager" . }}'
 - name: API_SERVER_FLOW_MANAGER_ADDRESS
   value: '{{- include "service.flowmanager" . }}'
 - name: API_SERVER_SCHEDULER_ADDRESS
-  value: "{{ include "databench.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}"
+  value: '{{- include "service.scheduler" . }}'
 - name: API_SERVER_SOURCE_MANAGER_ADDRESS
   value: '{{ include "service.sourcemanager" . }}'
 - name: API_SERVER_JOB_MANAGER_ADDRESS
-  value: "{{ .Release.Name }}-jobmanager:{{ .Values.ports.jobmanager }}"
+  value: '{{ include "service.jobmanager" . }}'
+- name: API_SERVER_UDF_MANAGER_ADDRESS
+  value: '{{ include "service.udfmanager" . }}'
+- name: API_SERVER_RESOURCE_MANAGER_ADDRESS
+  value: '{{ include "service.resourcemanager" . }}'
+- name: API_SERVER_OBSERVER_MANAGER_ADDRESS
+  value: '{{ include "service.observermanager" . }}'
+- name: API_SERVER_ACCOUNT_SERVER_ADDRESS
+  value: '{{ include "service.account" . }}'
+- name: API_SERVER_LOG_MANAGER_ADDRESS
+  value: '{{ include "service.logmanager" . }}'
+{{- end -}}
+
+
+{{- define "jobdeveloper.link.services" -}}
+- name: JOB_DEVELOPER_SOURCE_MANAGER_ADDRESS
+  value: '{{ include "service.sourcemanager" . }}'
+- name: JOB_DEVELOPER_UDF_MANAGER_ADDRESS
+  value: '{{ include "service.udfmanager" . }}'
+- name: JOB_DEVELOPER_RESOURCE_MANAGER_ADDRESS
+  value: '{{ include "service.resourcemanager" . }}'
+- name: JOB_DEVELOPER_ENGINE_MANAGER_ADDRESS
+  value: '{{ include "service.enginemanager" . }}'
+{{- end -}}
+
+
+{{- define "jobmanager.link.services" -}}
+- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER
+  value: '{{ include "service.zeppelinscale" . }}'
+- name: JOB_MANAGER_JOBDEVELOPER_SERVER
+  value: '{{ include "service.jobdeveloper" . }}'
+- name: JOB_MANAGER_JOBWATCHER_SERVER
+  value: '{{ include "service.jobwatcher" . }}'
+{{- end -}}
+
+
+{{- define "scheduler.link.services" -}}
+- name: SCHEDULER_JOB_MANAGER_ADDRESS
+  value: '{{ include "service.jobmanager" . }}'
+- name: SCHEDULER_FLOW_MANAGER_ADDRESS
+  value: '{{ include "service.flowmanager" . }}'
 {{- end -}}
 
 
@@ -64,20 +129,12 @@ Mysql Settings
 {{ .Release.Name }}-mysql
 {{- end -}}
 
-{{- define "mysql.port" -}}
-{{ .Values.ports.mysql }}
-{{- end -}}
-
-{{- define "mysql.url" -}}
-{{ .Release.Name }}-mysql:{{- .Values.ports.mysql }}
-{{- end -}}
-
-{{- define "mysql.root.password" -}}
-{{- .Values.mysql.password }}
-{{- end -}}
-
 {{- define "mysql.waiting.cmd" -}}
 until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
+{{- end -}}
+
+{{- define "service.hdfs" -}}
+hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
 {{- end -}}
 
 {{/*
@@ -89,4 +146,8 @@ Etcd Settings
 
 {{- define "etcd.waiting.cmd" -}}
 until nc -z {{ .Release.Name }}-etcd-cluster-client {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
+{{- end -}}
+
+{{- define "service.redis" -}}
+rfs-{{ .Release.Name }}:{{ .Values.ports.redis }}
 {{- end -}}

@@ -35,13 +35,13 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"]
           ports:
-            - containerPort: {{ .Values.ports.apiglobal }}
+            - containerPort: {{ .Values.ports.apiGlobal }}
               name: service
           env:
             - name: API_GLOBAL_LOG_LEVEL
               value: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel | quote }}
             - name: API_GLOBAL_HTTP_SERVER_ADDRESS
-              value: "0.0.0.0:{{ .Values.ports.apiglobal }}"
+              value: "0.0.0.0:{{ .Values.ports.apiGlobal }}"
             - name: API_GLOBAL_TRACER_LOCAL_AGENT
               value: '{{ include "service.jaeger" . }}'
             {{- range $ename, $evalue := .Values.apiglobal.envs }}

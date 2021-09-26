@@ -38,38 +38,34 @@ spec:
       - name: jobmanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"]
+        command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - name: service
-            containerPort: {{ .Values.ports.jobmanager }}
+            containerPort: {{ .Values.ports.jobManager }}
+          - name: metrics
+            containerPort: {{ .Values.ports.jobManagerMetrics }}
         env:
-          - name: JOB_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.jobmanager.logLevel .Values.common.logLevel | quote }}
           - name: JOB_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobmanager }}"
-          - name: JOB_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.jobmanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.jobmanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
-            value: {{ include "service.jobdeveloper" . | quote }}
-          - name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS
-            value: {{ include "service.jobwatcher" . | quote }}
-          - name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
-            value: {{ include "service.zeppelinscale" . | quote }}
-          - name: JOB_MANAGER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: JOB_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.url" . }}'
+            value: "0.0.0.0:{{- .Values.ports.jobManager }}"
+          - name: JOB_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobManagerMetrics }}"
           - name: JOB_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
+{{ include "jobmanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobManager }}"]
           {{- if .Values.jobmanager.readinessProbe }}
           periodSeconds: {{ .Values.jobmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobmanager.readinessProbe.initialDelaySeconds }}
@@ -79,7 +75,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobManager }}"]
           {{- if .Values.jobmanager.livenessProbe }}
           periodSeconds: {{ .Values.jobmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobmanager.livenessProbe.initialDelaySeconds }}
@@ -87,3 +83,10 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

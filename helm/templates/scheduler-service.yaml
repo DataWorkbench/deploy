@@ -16,6 +16,10 @@ spec:
       protocol: TCP
       port: {{ .Values.ports.scheduler }}
       targetPort: service
+    - name: metrics
+      protocol: TCP
+      port: {{ .Values.ports.schedulerMetrics }}
+      targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}

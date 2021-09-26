@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.apiglobal.service.type }}
   ports:
     - name: service
-      port: {{ .Values.ports.apiglobal }}
+      port: {{ .Values.ports.apiGlobal }}
       targetPort: service
       protocol: TCP
   selector:

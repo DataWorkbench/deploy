@@ -33,21 +33,17 @@ spec:
       - name: zeppelinscale
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"]
+        command: ["sh", "-c", "zeppelinscale start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.zeppelinscale }}
+          - containerPort: {{ .Values.ports.zeppelinScale }}
             name: service
+          - containerPort: {{ .Values.ports.zeppelinScaleMetrics }}
+            name: metrics
         env:
-          - name: ZEPPELIN_SCALE_LOG_LEVEL
-            value: {{ coalesce .Values.zeppelinscale.logLevel .Values.common.logLevel | quote }}
           - name: ZEPPELIN_SCALE_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.zeppelinscale }}"
-          - name: ZEPPELIN_SCALE_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.zeppelinscale.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.zeppelinscale.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: ZEPPELIN_SCALE_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
+            value: "0.0.0.0:{{- .Values.ports.zeppelinScale }}"
+          - name: ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.zeppelinScaleMetrics }}"
           - name: ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS
             value: {{ include "service.zeppelin" . | quote }}
           {{- range $ename, $evalue := .Values.zeppelinscale.envs }}
@@ -56,7 +52,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinscale }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinScale }}"]
           {{- if .Values.zeppelinscale.readinessProbe }}
           periodSeconds: {{ .Values.zeppelinscale.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.zeppelinscale.readinessProbe.initialDelaySeconds }}
@@ -66,7 +62,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinscale }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.zeppelinScale }}"]
           {{- if .Values.zeppelinscale.livenessProbe }}
           periodSeconds: {{ .Values.zeppelinscale.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.zeppelinscale.livenessProbe.initialDelaySeconds }}
@@ -74,3 +70,14 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

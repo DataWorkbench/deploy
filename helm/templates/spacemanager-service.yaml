@@ -13,8 +13,12 @@ spec:
   {{- end }}
   ports:
     - name: service
-      port: {{ .Values.ports.spacemanager }}
+      port: {{ .Values.ports.spaceManager }}
       targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.spaceManagerMetrics }}
+      targetPort: metrics
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}

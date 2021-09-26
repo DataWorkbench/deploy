@@ -55,7 +55,7 @@ spec:
           # $ kubectl create secret generic mysql-pass --from-file=password.txt
           # make sure password.txt does not have a trailing newline
         - name: MYSQL_ROOT_PASSWORD
-          value: {{ include "mysql.root.password" . | quote }}
+          value: "passw0rd"
         - name: MYSQL_ROOT_HOST
           value: "%"
         ports:
