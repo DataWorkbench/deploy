@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-account
+  labels:
+{{ include "dataworkbench.labels" . | indent 4 }}
+    component: account
+annotations:
+  {{- range $key, $value := .Values.account.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.account.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.account.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: account
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: account
+      annotations:
+      {{- range $key, $value := .Values.account.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: account
+        image: {{ .Values.image.dataworkbench | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "account start -c ${DATABENCH_CONF}/common-config.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.account }}
+            name: service
+          - containerPort: {{ .Values.ports.accountMetrics }}
+            name: metrics
+        env:
+          - name: ACCOUNT_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.account }}"
+          - name: ACCOUNT_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.accountMetrics }}"
+          - name: ACCOUNT_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
+          {{- range $ename, $evalue := .Values.flowmanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
+          {{- if .Values.account.readinessProbe }}
+          periodSeconds: {{ .Values.account.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.account.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
+          {{- if .Values.account.livenessProbe }}
+          periodSeconds: {{ .Values.account.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.account.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
