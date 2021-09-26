@@ -826,3 +826,31 @@ services:
       dataworkbench-net:
         aliases:
           - account
+
+  logmanager:
+    image: "dataworkbench/dataworkbench:dev"
+    container_name: "dataworkbench-logmanager"
+    command: "logmanager start -c ${DATABENCH_CONF}/logmanager.yaml"
+    ports:
+      - "${LOG_MANAGER_PORT}:${LOG_MANAGER_PORT}"
+    depends_on:
+      - hadoop
+    environment:
+      - LOG_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+      - LOG_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${LOG_MANAGER_PORT}
+      - LOG_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - LOG_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - LOG_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+      - LOG_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${LOG_MANAGER_METRICS_PORT}
+      - LOG_MANAGER_HDFS_SERVER_ADDRESSES=hadoop:9000
+      - LOG_MANAGER_HDFS_SERVER_USER_NAME="root"
+      - LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE=1024
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - logmanager
