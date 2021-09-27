@@ -20,9 +20,9 @@ hdfs:
 common:
   replicas: 1
   strategy: RollingUpdate
-  logLevel: 1
+  logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
   grpcLog:
-    level: 1
+    level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
   metrics:
     enabled: true
@@ -44,7 +44,7 @@ mysql:
   maxIdleConn: 16
   maxOpenConn: 128
   connMaxLifetime: 10m
-  logLevel: 4
+  logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
 
 
@@ -122,7 +122,7 @@ jobdeveloper:
     JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
     JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: "/zeppelin/flink/flink-1.11.2"
     JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar"
-    JOB_DEVELOPER_ZEPPELIN_ZEPPELIN_FLINK_HOME: "/opt/homebrew/Cellar/hadoop/3.3.1/libexec/etc/hadoop"
+    JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF: "/opt/homebrew/Cellar/hadoop/3.3.1/libexec/etc/hadoop"
 
 # jobmanager settings
 jobmanager:
@@ -166,7 +166,6 @@ observer:
 resourcemanager:
   envs: {}
 
-
 # scheduler settings
 scheduler:
   envs:
@@ -199,7 +198,6 @@ zeppelin:
 zeppelinscale:
   envs:
     ZEPPELIN_SCALE_TRACER_SERVICE_NAME: "zeppelinscale"
-
 
 # jaeger settings
 jaeger:

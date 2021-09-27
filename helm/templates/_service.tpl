@@ -91,26 +91,31 @@ Service Addresses For ApiServer
   value: '{{ include "service.logmanager" . }}'
 {{- end -}}
 
+{{/* TODO: delete tmp JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS */}}
 
 {{- define "jobdeveloper.link.services" -}}
-- name: JOB_DEVELOPER_SOURCE_MANAGER_ADDRESS
+- name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.sourcemanager" . }}'
-- name: JOB_DEVELOPER_UDF_MANAGER_ADDRESS
+- name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
   value: '{{ include "service.udfmanager" . }}'
-- name: JOB_DEVELOPER_RESOURCE_MANAGER_ADDRESS
+- name: JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
-- name: JOB_DEVELOPER_ENGINE_MANAGER_ADDRESS
+- name: JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS
+  value: '{{ include "service.resourcemanager" . }}'
+- name: JOB_DEVELOPER_ENGINEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
 {{- end -}}
 
 
 {{- define "jobmanager.link.services" -}}
-- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER
+- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
   value: '{{ include "service.zeppelinscale" . }}'
-- name: JOB_MANAGER_JOBDEVELOPER_SERVER
+- name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
   value: '{{ include "service.jobdeveloper" . }}'
-- name: JOB_MANAGER_JOBWATCHER_SERVER
+- name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS
   value: '{{ include "service.jobwatcher" . }}'
+- name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
+  value: '{{ include "service.enginemanager" . }}'
 {{- end -}}
 
 

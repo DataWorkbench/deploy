@@ -54,7 +54,7 @@ spec:
               secretKeyRef:
                 name: databench-secret
                 key: mysql_password
-          {{- range $ename, $evalue := .Values.flowmanager.envs }}
+          {{- range $ename, $evalue := .Values.account.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}

@@ -45,11 +45,11 @@ spec:
           - containerPort: {{ .Values.ports.notifierMetrics }}
             name: metrics
         env:
-          - name: NOTIFICATION_GRPC_SERVER_ADDRESS
+          - name: NOTIFIER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifier }}"
-          - name: NOTIFICATION_METRICS_SERVER_ADDRESS
+          - name: NOTIFIER_METRICS_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifierMetrics }}"
-          - name: NOTIFICATION_MYSQL_PASSWORD
+          - name: NOTIFIER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: databench-secret
@@ -89,4 +89,3 @@ spec:
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"
-

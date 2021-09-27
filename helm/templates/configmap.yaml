@@ -38,6 +38,5 @@ data:
       mode: "sentinel"
 
     etcd:
-      endpoints:
-        - {{ include "etcd.endpoints" . }}
+      endpoints: {{ include "etcd.endpoints" . | quote }}
       dial_timeout: 5s
