@@ -9,7 +9,7 @@ cd /flyway/sql/ddl || exit
 for F in $(ls *.sql)
 do
     echo "Start process $F"
-    mysql "$@" "$OPT" < "$F"
+    mysql "-h$MYSQL_HOST" "-u$MYSQL_USER" "-p$MYSQL_PASSWORD" "$@" < "$F"
     if [ $? -ne 0 ]; then
         echo "Process $F failed"
                 return 1
