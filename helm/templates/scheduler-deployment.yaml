@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-scheduler
+  name: {{ include "databench.fullname" . }}-scheduler
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: scheduler
@@ -42,41 +42,23 @@ spec:
       - name: scheduler
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "scheduler start -c ${DATAWORKBENCH_CONF}/scheduler.yaml"]
+        command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - containerPort: {{ .Values.ports.scheduler }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+          - containerPort: {{ .Values.ports.schedulerMetrics }}
+            name: metrics
         env:
-          - name: SCHEDULER_LOG_LEVEL
-            value: {{ coalesce .Values.scheduler.logLevel .Values.common.logLevel | quote }}
           - name: SCHEDULER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.scheduler }}"
-          - name: SCHEDULER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.scheduler.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: SCHEDULER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.scheduler.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: SCHEDULER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: SCHEDULER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
-          - name: SCHEDULER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
-          - name: SCHEDULER_FLOW_MANAGER_ADDRESS
-            value: {{ include "service.flowmanager" . | quote }}
-          - name: SCHEDULER_JOB_MANAGER_ADDRESS
-            value: {{ include "service.jobmanager" . | quote }}
-          - name: SCHEDULER_ETCD_ENDPOINTS
-            value: {{ include "etcd.endpoints" . | quote }}
-          - name: SCHEDULER_METRICS_ENABLED
-          {{- if .Values.scheduler.metric.enabled }}
-            value: "true"
           - name: SCHEDULER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.scheduler.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
+            value: "0.0.0.0:{{- .Values.ports.schedulerMetrics }}"
+          - name: SCHEDULER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
+{{ include "scheduler.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.scheduler.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -101,3 +83,14 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

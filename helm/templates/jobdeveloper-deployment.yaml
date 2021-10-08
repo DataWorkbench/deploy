@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-jobdeveloper
+  name: {{ include "databench.fullname" . }}-jobdeveloper
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: jobdeveloper
@@ -33,42 +33,29 @@ spec:
       - name: jobdeveloper
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobdeveloper start -c ${DATAWORKBENCH_CONF}/jobdeveloper.yaml"]
+        command: ["sh", "-c", "jobdeveloper start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.jobdeveloper }}
+          - containerPort: {{ .Values.ports.jobDeveloper }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+          - containerPort: {{ .Values.ports.jobDeveloperMetrics }}
+            name: metrics
         env:
-          - name: JOB_DEVELOPER_LOG_LEVEL
-            value: {{ coalesce .Values.jobdeveloper.logLevel .Values.common.logLevel | quote }}
           - name: JOB_DEVELOPER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobdeveloper }}"
-          - name: JOB_DEVELOPER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.jobdeveloper.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: JOB_DEVELOPER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.jobdeveloper.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: JOB_DEVELOPER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
-            value: {{ include "service.udfmanager" . | quote }}
-          - name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
-            value: {{ include "service.sourcemanager" . | quote }}
-          - name: JOB_DEVELOPER_METRICS_ENABLED
-          {{- if .Values.jobdeveloper.metric.enabled }}
-            value: "true"
+            value: "0.0.0.0:{{- .Values.ports.jobDeveloper }}"
           - name: JOB_DEVELOPER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.jobdeveloper.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
+            value: "0.0.0.0:{{- .Values.ports.jobDeveloperMetrics }}"
+{{ include "jobdeveloper.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobdeveloper.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobDeveloper }}"]
           {{- if .Values.jobdeveloper.readinessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.readinessProbe.initialDelaySeconds }}
@@ -78,7 +65,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobDeveloper }}"]
           {{- if .Values.jobdeveloper.livenessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.livenessProbe.initialDelaySeconds }}
@@ -86,3 +73,10 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

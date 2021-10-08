@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-udfmanager
+  name: {{ include "databench.fullname" . }}-udfmanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: udfmanager
@@ -38,42 +38,29 @@ spec:
       - name: udfmanager
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "udfmanager start -c ${DATAWORKBENCH_CONF}/udfmanager.yaml"]
+        command: ["sh", "-c", "udfmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.udfmanager }}
+          - containerPort: {{ .Values.ports.udfManager }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+          - containerPort: {{ .Values.ports.udfManagerMetrics }}
+            name: metrics
         env:
-          - name: UDF_MANAGER_LOG_LEVEL
-            value: {{ coalesce .Values.udfmanager.logLevel .Values.common.logLevel | quote }}
           - name: UDF_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.udfmanager }}"
-          - name: UDF_MANAGER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.udfmanager.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: UDF_MANAGER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.udfmanager.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: UDF_MANAGER_TRACER_LOCAL_AGENT
-            value: '{{ include "service.jaeger" . }}'
-          - name: UDF_MANAGER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
-          - name: UDF_MANAGER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
-          - name: UDF_MANAGER_METRICS_ENABLED
-          {{- if .Values.udfmanager.metric.enabled }}
-            value: "true"
+            value: "0.0.0.0:{{- .Values.ports.udfManager }}"
           - name: UDF_MANAGER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.udfmanager.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
+            value: "0.0.0.0:{{- .Values.ports.udfManagerMetrics }}"
+          - name: UDF_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.udfmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
           {{- if .Values.udfmanager.readinessProbe }}
           periodSeconds: {{ .Values.udfmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.udfmanager.readinessProbe.initialDelaySeconds }}
@@ -83,7 +70,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfmanager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
           {{- if .Values.udfmanager.livenessProbe }}
           periodSeconds: {{ .Values.udfmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.udfmanager.livenessProbe.initialDelaySeconds }}
@@ -91,3 +78,15 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+

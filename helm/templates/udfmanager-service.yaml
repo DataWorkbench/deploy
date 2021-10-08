@@ -1,18 +1,24 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-udfmanager
+  name: {{ include "databench.fullname" . }}-udfmanager
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: udfmanager
-  annotations:
-    {{ toYaml .Values.udfmanager.service.annotations | indent 4 }}
+    component: udfmanager-service
 spec:
-  type: {{ .Values.udfmanager.service.type }}
+  {{- if .Values.udfmanager.service }}
+  type: {{ coalesce .Values.udfmanager.service.type .Values.common.service.type }}
+  {{- else }}
+  type: {{ .Values.common.service.type }}
+  {{- end }}
   ports:
     - name: service
-      port: {{ .Values.ports.udfmanager }}
+      port: {{ .Values.ports.udfManager }}
       targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.udfManagerMetrics }}
+      targetPort: metrics
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}

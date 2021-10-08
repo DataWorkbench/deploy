@@ -1,9 +1,16 @@
-apiVersion: v1ss
+apiVersion: v2
 appVersion: 0.0.1
-description: Helm Charts For DataWorkbench Service
-name: dataworkbench
+description: Helm Charts For Databench Service
+name: databench
 version: 0.0.1
 maintainers:
-  - name: QingCloud Appcenter
-    email: appcenter@yunify.com
+  - name: QingCloud Databench
+    email: databench@yunify.com
 home: https://github.com/DataWorkbench
+dependencies:
+  - name: etcd-cluster
+    version: "0.11.2"
+    repository: "file://../charts/etcd-cluster"
+  - name: redis-cluster
+    version: "1.0.0"
+    repository: "file://../charts/redis-cluster"

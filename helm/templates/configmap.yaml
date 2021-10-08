@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: databench-config
+data:
+  config.yaml: |
+    log_level: {{ .Values.common.logLevel }}
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    grpc_server:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metrics_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+
+    mysql:
+      hosts: {{ include "mysql.host" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    tracer:
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    redis:
+      sentinel_addrs: {{ include "service.redis" . | quote }}
+      database: {{ .Values.redis.database }}
+      master_name: {{ .Values.redis.masterName }}
+      mode: "sentinel"
+
+    etcd:
+      endpoints: {{ include "etcd.endpoints" . | quote }}
+      dial_timeout: 5s

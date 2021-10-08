@@ -1,8 +1,7 @@
-{{- if .Values.notifier.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-notifier
+  name: {{ include "databench.fullname" . }}-notifier
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
     component: notifier
@@ -39,37 +38,30 @@ spec:
       - name: notifier
         image: {{ .Values.image.dataworkbench | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "notifier start -c ${DATAWORKBENCH_CONF}/notifier.yaml"]
+        command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - containerPort: {{ .Values.ports.notifier }}
             name: service
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: jaeger
+          - containerPort: {{ .Values.ports.notifierMetrics }}
+            name: metrics
         env:
-          - name: NOTIFIER_LOG_LEVEL
-            value: {{ coalesce .Values.notifier.logLevel .Values.common.logLevel | quote }}
           - name: NOTIFIER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifier }}"
-          - name: NOTIFIER_GRPC_SERVER_LOG_LEVEL
-            value: {{ coalesce .Values.notifier.grpcLogLevel .Values.common.grpcLogLevel | quote }}
-          - name: NOTIFIER_GRPC_SERVER_LOG_VERBOSITY
-            value: {{ coalesce .Values.notifier.grpcLogVerbosity .Values.common.grpcLogVerbosity | quote }}
-          - name: NOTIFIER_MYSQL_HOSTS
-            value: '{{- include "mysql.hostPort" . }}'
-          - name: NOTIFIER_MYSQL_PASSWORD
-            value: {{ include "mysql.root.password" . | quote }}
-          - name: NOTIFIER_METRICS_ENABLED
-          {{- if .Values.notifier.metric.enabled }}
-            value: "true"
           - name: NOTIFIER_METRICS_SERVER_ADDRESS
-            value: {{ .Values.notifier.metric.address }}
-          {{- else }}
-            value: "false"
-          {{- end }}
+            value: "0.0.0.0:{{- .Values.ports.notifierMetrics }}"
+          - name: NOTIFIER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: mysql_password
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
@@ -90,4 +82,10 @@ spec:
           periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
-{{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

@@ -1,18 +1,24 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-jobdeveloper
+  name: {{ include "databench.fullname" . }}-jobdeveloper
   labels:
 {{ include "dataworkbench.labels" . | indent 4 }}
-    component: jobdeveloper
-  annotations:
-    {{ toYaml .Values.jobdeveloper.service.annotations | indent 4 }}
+    component: jobdeveloper-service
 spec:
-  type: {{ .Values.jobdeveloper.service.type }}
+  {{- if .Values.jobdeveloper.service }}
+  type: {{ coalesce .Values.jobdeveloper.service.type .Values.common.service.type }}
+  {{- else }}
+  type: {{ .Values.common.service.type }}
+  {{- end }}
   ports:
     - name: service
-      port: {{ .Values.ports.jobdeveloper }}
+      port: {{ .Values.ports.jobDeveloper }}
       targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.jobDeveloperMetrics }}
+      targetPort: metrics
       protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
