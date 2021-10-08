@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "databench.fullname" . }}-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.databench.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "databench.fullname" . }}-apiglobal
+                port:
+                  number: {{ .Values.ports.apiGlobal }}
