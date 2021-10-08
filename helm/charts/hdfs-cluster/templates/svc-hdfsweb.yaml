@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-hdfs-http
+  labels:
+    app: hdfs-namenode
+spec:
+  ports:
+    - port: 50070
+      protocol: TCP
+      targetPort: 50070
+      nodePort: {{ .Values.namenodeNodePort }}
+  type: NodePort
+  selector:
+    app: hdfs-namenode
