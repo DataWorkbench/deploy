@@ -102,7 +102,7 @@ spec:
 {{- end }}
 
 
-{{- if .Values.zookeeper }}
+{{- if .Values.zookeeper.nodes }}
 ---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
@@ -110,7 +110,6 @@ metadata:
   name: {{ $fullname }}-zookeeper-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- if .Values.zookeeper.nodes }}
 {{- range $node := .Values.zookeeper.nodes }}
 ---
 apiVersion: v1
@@ -134,6 +133,5 @@ spec:
               operator: In
               values:
                 - {{ $node }}
-{{- end }}
 {{- end }}
 {{- end }}
