@@ -18,7 +18,7 @@ spec:
   datanode:
     name: datanode
     storageClass: {{ include "hdfs.fullname" . }}-datanode-sc
-    replicas: {{ len .Values.datanode }}
+    replicas: {{ len .Values.datanode.nodes }}
   zkQuorum: {{ include "zookeeper.quorum" . }}
   clusterConfig:
     - property: "dfs.namenode.handler.count"

@@ -1,4 +1,4 @@
-## FirstAtAll: create namenode / datanode / journalnode dir with: {{ .Values.hdfsHome }}/{{ .Release.Name }}/xxxxnode
+## FirstAtAll: create namenode / datanode / journalnode / zookeeper dir with: {{ .Values.hdfsHome }}/{{ .Release.Name }}/xxxxnode
 
 fullnameOverride: ""
 
@@ -7,7 +7,7 @@ storageClass: ""
 hdfsHome: /mnt
 
 namenode:
-  nodePort: 30094
+  nodePort: 30091
   nodes:
     - "worker-s001"
     - "worker-s002"
