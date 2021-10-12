@@ -15,4 +15,3 @@ data:
 kind: ConfigMap
 metadata:
   name: hdfs-operator-manager-config
-  namespace: hdfs-operator-system

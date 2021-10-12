@@ -4,7 +4,6 @@ metadata:
   labels:
     control-plane: controller-manager
   name: hdfs-operator-controller-manager-metrics-service
-  namespace: hdfs-operator-system
 spec:
   clusterIP: None
   ports:

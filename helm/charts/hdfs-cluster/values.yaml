@@ -1,31 +1,31 @@
 
 storageClass: ""
 
-namenodeCapacity: 100Gi
+namenodeCapacity: 20Gi
 
-dnStorageClass: dn-disks02
+dnStorageClass: dn-disks
 dn01Node: "worker-s001"
 dn02Node: "worker-s002"
 dn03Node: "worker-s003"
-dnLocalPvPath: "/mnt/hdfs02/dn1"
+dnLocalPvPath: "/mnt/hdfs/dn"
 
-zkStorageClass: zk-disks02
+zkStorageClass: zk-disks
 zk01Node: "worker-s001"
 zk02Node: "worker-s002"
 zk03Node: "worker-s003"
-zkLocalPvPath: "/mnt/hdfs02/zk"
+zkLocalPvPath: "/mnt/hdfs/zk"
 
-nnStorageClass: nn-disks02
+nnStorageClass: nn-disks
 nn01Node: "worker-s004"
 nn02Node: "worker-s005"
-nnLocalPvPath: "/mnt/hdfs02/nn"
+nnLocalPvPath: "/mnt/hdfs/nn"
 
-jnStorageClass: jn-disks02
+jnStorageClass: jn-disks
 jn01Node: "worker-s001"
 jn02Node: "worker-s002"
 jn03Node: "worker-s003"
-jnLocalPvPath: "/mnt/hdfs02/jn"
+jnLocalPvPath: "/mnt/hdfs/jn"
 
-namenodeNodePort: 30094
+namenodeNodePort: 30091
 
 

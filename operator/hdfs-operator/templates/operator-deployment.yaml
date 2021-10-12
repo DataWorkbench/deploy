@@ -1,12 +1,9 @@
-# kubectl get deployment hdfs-operator-controller-manager  -n hdfs-operator-system -o yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  # generation: 1
   labels:
     control-plane: controller-manager
   name: hdfs-operator-controller-manager
-  namespace: hdfs-operator-system
 spec:
   progressDeadlineSeconds: 600
   replicas: 1
