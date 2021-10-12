@@ -46,7 +46,7 @@ spec:
     matchLabels:
       app: zk
   serviceName: zk-hs
-  replicas: 3
+  replicas: {{ len .Values.zookeeper.nodes }}
   updateStrategy:
     type: RollingUpdate
   podManagementPolicy: Parallel
@@ -130,7 +130,7 @@ spec:
       {{- if .Values.storageClass }}
       storageClassName: {{ .Values.storageClass }}
         {{- else }}
-      storageClassName: {{ .Values.zkStorageClass }}
+      storageClassName: {{ include "hdfs.fullname" . }}-zookeeper-sc
         {{- end }}
       resources:
         requests:

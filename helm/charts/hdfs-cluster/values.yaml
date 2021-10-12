@@ -1,31 +1,44 @@
+## FirstAtAll: create namenode / datanode / journalnode dir with: {{ .Values.hdfsHome }}/{{ .Release.Name }}/xxxxnode
+
+fullnameOverride: ""
 
 storageClass: ""
 
-namenodeCapacity: 100Gi
+hdfsHome: /mnt
 
-dnStorageClass: dn-disks02
-dn01Node: "worker-s001"
-dn02Node: "worker-s002"
-dn03Node: "worker-s003"
-dnLocalPvPath: "/mnt/hdfs02/dn1"
+namenode:
+  nodePort: 30094
+  nodes:
+    - "worker-s001"
+    - "worker-s002"
+  storage:
+    capacity: 10Gi
+    reclaimPolicy: Retain
 
-zkStorageClass: zk-disks02
-zk01Node: "worker-s001"
-zk02Node: "worker-s002"
-zk03Node: "worker-s003"
-zkLocalPvPath: "/mnt/hdfs02/zk"
+datanode:
+  nodes:
+    - "worker-s001"
+    - "worker-s002"
+    - "worker-s003"
+  storage:
+    capacity: 50Gi
+    reclaimPolicy: Retain
 
-nnStorageClass: nn-disks02
-nn01Node: "worker-s004"
-nn02Node: "worker-s005"
-nnLocalPvPath: "/mnt/hdfs02/nn"
-
-jnStorageClass: jn-disks02
-jn01Node: "worker-s001"
-jn02Node: "worker-s002"
-jn03Node: "worker-s003"
-jnLocalPvPath: "/mnt/hdfs02/jn"
-
-namenodeNodePort: 30094
+journalnode:
+  nodes:
+    - "worker-s001"
+    - "worker-s002"
+    - "worker-s003"
+  storage:
+    capacity: 10Gi
+    reclaimPolicy: Retain
 
 
+zookeeper:
+  nodes:
+    - "worker-s001"
+    - "worker-s002"
+    - "worker-s003"
+  storage:
+    capacity: 1Gi
+    reclaimPolicy: Retain

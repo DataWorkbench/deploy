@@ -1,2 +1,2 @@
 
-operatorImage: "dwd/hdfs-operator:v1"
+operatorImage: "dataworkbench/hdfs-operator:0.1.1"
