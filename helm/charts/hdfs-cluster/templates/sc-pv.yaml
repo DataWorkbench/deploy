@@ -1,24 +1,27 @@
-{{- if .Values.jn01Node }}
+{{ $fullname := include "hdfs.fullname" . }}
+
+{{- if .Values.namenode.nodes }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.jnStorageClass }}
+  name: {{ $fullname }}-namenode-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
+{{- range $node := .Values.namenode.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Release.Name }}-jnpv-01
+  name: {{ $fullname }}-{{ $node }}-namenode-pv
 spec:
   capacity:
-    storage: 20Gi
+    storage: {{ $.Values.namenode.storage.capacity }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.jnStorageClass }}
+  persistentVolumeReclaimPolicy: {{ $.Values.namenode.storage.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-namenode-sc
   local:
-    path: {{ .Values.jnLocalPvPath }}
+    path: {{ $.Values.hdfsHome }}/{{ $fullname }}/namenode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -26,78 +29,33 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - {{ .Values.jn01Node }}
-  {{- end }}
+                - {{ $node }}
+{{- end }}
+{{- end }}
+
+{{- if .Values.datanode.nodes }}
 ---
-  {{- if .Values.jn02Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-jnpv-02
-spec:
-  capacity:
-    storage: 20Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.jnStorageClass }}
-  local:
-    path: {{ .Values.jnLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.jn02Node }}
-  {{- end }}
----
-  {{- if .Values.jn03Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-jnpv-03
-spec:
-  capacity:
-    storage: 20Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.jnStorageClass }}
-  local:
-    path: {{ .Values.jnLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.jn03Node }}
-  {{- end }}
----
-  {{- if .Values.nn01Node }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.nnStorageClass }}
+  name: {{ $fullname }}-datanode-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
+{{- range $node := .Values.datanode.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Release.Name }}-nnpv-01
+  name: {{ $fullname }}-{{ $node }}-datanode-pv
 spec:
   capacity:
-    storage: {{ .Values.namenodeCapacity }}
+    storage: {{ $.Values.datanode.storage.capacity }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.nnStorageClass }}
+  persistentVolumeReclaimPolicy: {{ $.Values.datanode.storage.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-datanode-sc
   local:
-    path: {{ .Values.nnLocalPvPath }}
+    path: {{ $.Values.hdfsHome }}/{{ $fullname }}/datanode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -105,56 +63,33 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - {{ .Values.nn01Node }}
-  {{- end }}
----
-  {{- if .Values.nn02Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-nnpv-02
-spec:
-  capacity:
-    storage: {{ .Values.namenodeCapacity }}
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.nnStorageClass }}
-  local:
-    path: {{ .Values.nnLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.nn02Node }}
-  {{- end }}
----
+                - {{ $node }}
+{{- end }}
+{{- end }}
 
-
-  {{- if .Values.dn01Node }}
+{{- if .Values.journalnode.nodes }}
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.dnStorageClass }}
+  name: {{ $fullname }}-journalnode-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
+{{- range $node := .Values.journalnode.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Release.Name }}-dnpv-01
+  name: {{ $fullname }}-{{ $node }}-journalnode-pv
 spec:
   capacity:
-    storage: 20Gi
+    storage: {{ $.Values.journalnode.storage.capacity }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.dnStorageClass }}
+  persistentVolumeReclaimPolicy: {{ $.Values.journalnode.storage.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-journalnode-sc
   local:
-    path: {{ .Values.dnLocalPvPath }}
+    path: {{ $.Values.hdfsHome }}/{{ $fullname }}/journalnode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -162,81 +97,35 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - {{ .Values.dn01Node }}
-  {{- end }}
----
-  {{- if .Values.dn02Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-dnpv-02
-spec:
-  capacity:
-    storage: 20Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.dnStorageClass }}
-  local:
-    path: {{ .Values.dnLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.dn02Node }}
-  {{- end }}
----
-  {{- if .Values.dn03Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-dnpv-03
-spec:
-  capacity:
-    storage: 20Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.dnStorageClass }}
-  local:
-    path: {{ .Values.dnLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.dn03Node }}
-  {{- end }}
----
+                - {{ $node }}
+{{- end }}
+{{- end }}
 
 
-
-  {{- if .Values.zk01Node }}
+{{- if .Values.zookeeper }}
+---
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.zkStorageClass }}
+  name: {{ $fullname }}-zookeeper-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
+{{- if .Values.zookeeper.nodes }}
+{{- range $node := .Values.zookeeper.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: {{ .Release.Name }}-zk01-pv
+  name: {{ $fullname }}-{{ $node }}-zookeeper-pv
 spec:
   capacity:
-    storage: 1Gi
+    storage: {{ $.Values.zookeeper.storage.capacity }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.zkStorageClass }}
+  persistentVolumeReclaimPolicy: {{ $.Values.zookeeper.storage.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-zookeeper-sc
   local:
-    path: {{ .Values.zkLocalPvPath }}
+    path: {{ $.Values.hdfsHome }}/{{ $fullname }}/zookeeper
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -244,53 +133,7 @@ spec:
             - key: kubernetes.io/hostname
               operator: In
               values:
-                - {{ .Values.zk01Node }}
-  {{- end }}
----
-  {{- if .Values.zk02Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-zk02-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.zkStorageClass }}
-  local:
-    path: {{ .Values.zkLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.zk02Node }}
-  {{- end }}
----
-  {{- if .Values.zk03Node }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: {{ .Release.Name }}-zk03-pv
-spec:
-  capacity:
-    storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Delete
-  storageClassName: {{ .Values.zkStorageClass }}
-  local:
-    path: {{ .Values.zkLocalPvPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.zk03Node }}
-  {{- end }}
+                - {{ $node }}
+{{- end }}
+{{- end }}
+{{- end }}

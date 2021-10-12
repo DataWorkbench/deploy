@@ -1,24 +1,24 @@
 apiVersion: qy.dataworkbench.com/v1
 kind: HDFS
 metadata:
-  name: hdfs
+  name: {{ .Release.Name }}
 spec:
   version: 2.7.2
   #storageClass: csi-ssd-enterprise
   namenode:
     name: namenode
-    storageClass: {{ .Values.nnStorageClass }}
+    storageClass: {{ include "hdfs.fullname" . }}-namenode-sc
     #Capacity: 10Gi
-    replicas: 2
+    replicas: {{ len .Values.namenode.nodes }}
   journalnode:
     name: journalnode
-    storageClass: {{ .Values.jnStorageClass }}
+    storageClass: {{ include "hdfs.fullname" . }}-journalnode-sc
     #Capacity: 10Gi
-    replicas: 3
+    replicas: {{ len .Values.journalnode.nodes }}
   datanode:
     name: datanode
-    storageClass: {{ .Values.dnStorageClass }}
-    replicas: 3
+    storageClass: {{ include "hdfs.fullname" . }}-datanode-sc
+    replicas: {{ len .Values.datanode }}
   zkQuorum: zk-0.zk-hs.{{ .Release.Namespace }}.svc.cluster.local:2181,zk-1.zk-hs.{{ .Release.Namespace }}.svc.cluster.local:2181,zk-2.zk-hs.{{ .Release.Namespace }}.svc.cluster.local:2181
   clusterConfig:
     - property: "dfs.namenode.handler.count"

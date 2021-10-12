@@ -9,7 +9,7 @@ spec:
     - port: 50070
       protocol: TCP
       targetPort: 50070
-      nodePort: {{ .Values.namenodeNodePort }}
+      nodePort: {{ .Values.namenode.nodePort }}
   type: NodePort
   selector:
     github.dataworkbench.com/statefulset-name: hdfs-namenode
