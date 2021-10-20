@@ -34,7 +34,10 @@ services:
     entrypoint: "sh"
     command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
     environment:
-      - PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=root
+      - MYSQL_HOST=dataworkbench-db
     links:
       - dataworkbench-db:dataworkbench-db
     depends_on:
@@ -48,6 +51,11 @@ services:
     image: "dataworkbench/flyway:dev"
     container_name: "dataworkbench-db-ctrl"
     command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=root
+      - MYSQL_HOST=dataworkbench-db
     links:
       - dataworkbench-db:dataworkbench-db
     depends_on:
@@ -568,7 +576,7 @@ services:
           - resourcemanager
 
   zeppelin:
-    image: "dataworkbench/zeppelin"
+    image: "dataworkbench/zeppelin:dev"
     container_name: "dataworkbench-zeppelin"
     links:
       - flinkjobmanager:flinkjobmanager
