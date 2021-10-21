@@ -52,7 +52,7 @@ def main(arg):
         log(err)
         sys.exit(1)
 
-// TODO: compile to cmd
+# TODO: compile to cmd
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         arg = zeppelinCmd
