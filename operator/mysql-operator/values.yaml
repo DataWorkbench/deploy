@@ -1,4 +1,4 @@
-# Default values for pxc-cluster.
+# Default values for mysql-cluster.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -7,6 +7,7 @@ replicaCount: 1
 image:
   repository: nginx
   pullPolicy: IfNotPresent
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
