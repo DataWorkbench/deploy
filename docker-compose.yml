@@ -157,6 +157,7 @@ services:
       - udfmanager
       - resourcemanager
       - account
+      - enginemanager
     depends_on:
       - spacemanager
       - flowmanager
@@ -166,6 +167,7 @@ services:
       - udfmanager
       - dataworkbench-jaeger
       - account
+      - enginemanager
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -202,6 +204,9 @@ services:
       - API_SERVER_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_PORT}
       - API_SERVER_ACCOUNT_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_ACCOUNT_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_ENGINE_MANAGER_ADDRESS=enginemanager:${ENGINE_MANAGER_PORT}
+      - API_SERVER_ENGINE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_ENGINE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -862,3 +867,38 @@ services:
       dataworkbench-net:
         aliases:
           - logmanager
+
+  enginemanager:
+      image: "dataworkbench/dataworkbench:dev"
+      container_name: "dataworkbench-enginemanager"
+      command: "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"
+      ports:
+        - "${ENGINE_MANAGER_PORT}:${ENGINE_MANAGER_PORT}"
+      links:
+        - dataworkbench-db:dataworkbench-db
+      depends_on:
+        - dataworkbench-db-ctrl
+        - dataworkbench-etcd
+        - dataworkbench-jaeger
+      environment:
+        - ENGINE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+        - ENGINE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_PORT}
+        - ENGIN_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+        - ENGIN_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+        - ENGIN_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+        - ENGINE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_METRICS_PORT}
+        - ENGINE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+        - ENGINE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+        - ENGINE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - ENGINE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+        - ENGINE_MANAGER_TRACER_SERVICE_NAME=flowmanager
+        - ENGINE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      logging:
+        driver: "json-file"
+        options:
+          max-size: ${LOG_MAX_SIZE}
+          max-file: ${LOG_MAX_FILE}
+      networks:
+        dataworkbench-net:
+          aliases:
+            - enginemanager
