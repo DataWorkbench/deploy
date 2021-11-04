@@ -590,9 +590,6 @@ services:
     depends_on:
       - flinkjobmanager
       - flinktaskmanager
-    environment:
-      - LIB_URL=${LIB_URL}
-      - LIB_NAMES=${LIB_NAMES}
     logging:
       driver: "json-file"
       options:
