@@ -190,6 +190,7 @@ udfmanager:
 # zeppelin settings
 zeppelin:
   envs:
+    ZEPPELIN_RUN_MODE: local
 
 # zeppelinscale settings
 zeppelinscale:

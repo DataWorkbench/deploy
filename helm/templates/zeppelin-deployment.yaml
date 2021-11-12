@@ -37,6 +37,8 @@ spec:
           - containerPort: {{ .Values.ports.zeppelin }}
             name: service
         env:
+          - name: ZEPPELIN_PORT
+            value: {{ .Values.ports.zeppelin | quote }}
           {{- range $ename, $evalue := .Values.zeppelin.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
