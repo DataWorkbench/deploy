@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: percona-xtradb-cluster-operator
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       name: percona-xtradb-cluster-operator
@@ -15,13 +15,13 @@ spec:
       serviceAccountName: percona-xtradb-cluster-operator
       containers:
         - name: percona-xtradb-cluster-operator
-          image: percona/percona-xtradb-cluster-operator:1.5.0
+          image: {{ .Values.image }}
           ports:
-          - containerPort: 60000
+          - containerPort: {{ .Values.containerPort }}
             name: metrics
           command:
           - percona-xtradb-cluster-operator
-          imagePullPolicy: Always
+          imagePullPolicy: {{ .Values.pullPolicy }}
           env:
             - name: WATCH_NAMESPACE
               valueFrom:

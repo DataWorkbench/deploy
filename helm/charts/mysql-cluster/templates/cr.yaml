@@ -17,10 +17,10 @@ spec:
   upgradeOptions:
     versionServiceEndpoint: https://check.percona.com/versions
     apply: recommended
-    schedule: "0 4 * * *"
+    schedule: {{ .Values.schedule }}
   pxc:
-    size: 3
-    image: percona/percona-xtradb-cluster:8.0.19-10.1
+    size: {{ .Values.pxc.size }}
+    image: {{ .Values.pxc.image }}
 #    schedulerName: mycustom-scheduler
 #    readinessDelaySec: 15
 #    livenessDelaySec: 300
@@ -49,8 +49,7 @@ spec:
 #    serviceAccountName: percona-xtradb-cluster-operator-workload
     resources:
       requests:
-        memory: 1G
-        cpu: 600m
+        {{ .Values.pxc.resources.requests }}
 #        ephemeral-storage: 1Gi
 #      limits:
 #        memory: 1G
@@ -60,21 +59,6 @@ spec:
 #      disktype: ssd
     affinity:
       antiAffinityTopologyKey: "kubernetes.io/hostname"
-#      advanced:
-#        nodeAffinity:
-#          requiredDuringSchedulingIgnoredDuringExecution:
-#            nodeSelectorTerms:
-#            - matchExpressions:
-#              - key: kubernetes.io/e2e-az-name
-#                operator: In
-#                values:
-#                - e2e-az1
-#                - e2e-az2
-#    tolerations:
-#    - key: "node.alpha.kubernetes.io/unreachable"
-#      operator: "Exists"
-#      effect: "NoExecute"
-#      tolerationSeconds: 6000
     podDisruptionBudget:
       maxUnavailable: 1
 #      minAvailable: 0
@@ -91,36 +75,13 @@ spec:
             storage: 2Gi
     gracePeriod: 600
   haproxy:
-    enabled: true
-    size: 3
-    image: percona/percona-xtradb-cluster-operator:1.5.0-haproxy
-#    schedulerName: mycustom-scheduler
-#    imagePullSecrets:
-#      - name: private-registry-credentials
-#    annotations:
-#      iam.amazonaws.com/role: role-arn
-#    labels:
-#      rack: rack-22
-#    serviceType: ClusterIP
-#    schedulerName: "default"
+    enabled: {{ .Values.haproxy.enabled }}
+    size: {{ .Values.haproxy.size }}
+    image: {{ .Values.haproxy.image }}
     resources:
       requests:
-        memory: 1G
-        cpu: 600m
-#      limits:
-#        memory: 1G
-#        cpu: 700m
-#    priorityClassName: high-priority
-#    nodeSelector:
-#      disktype: ssd
-#    sidecarResources:
-#      requests:
-#        memory: 1G
-#        cpu: 500m
-#      limits:
-#        memory: 2G
-#        cpu: 600m
-#    serviceAccountName: percona-xtradb-cluster-operator-workload
+        memory: {{ .Values.haproxy.resources.requests.memory }}
+        cpu: {{ .Values.haproxy.resources.requests.cpu }}
     affinity:
       antiAffinityTopologyKey: "kubernetes.io/hostname"
 #      advanced:
@@ -147,22 +108,13 @@ spec:
 #   serviceAnnotations:
 #     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
   proxysql:
-    enabled: false
-    size: 3
-    image: percona/percona-xtradb-cluster-operator:1.5.0-proxysql
-#    schedulerName: mycustom-scheduler
-#    imagePullSecrets:
-#      - name: private-registry-credentials
-#    annotations:
-#      iam.amazonaws.com/role: role-arn
-#    labels:
-#      rack: rack-22
-#    serviceType: ClusterIP
-#    schedulerName: "default"
+    enabled: {{ .Values.proxysql.enabled }}
+    size: {{ .Values.proxysql.size }}
+    image: {{ .Values.proxysql.image }}
     resources:
       requests:
-        memory: 1G
-        cpu: 600m
+        memory: {{ .Values.proxysql.resources.requests.memory }}
+        cpu: {{ .Values.proxysql.resources.requests.cpu }}
 #      limits:
 #        memory: 1G
 #        cpu: 700m
@@ -223,7 +175,7 @@ spec:
 #        memory: 200M
 #        cpu: 500m
   backup:
-    image: percona/percona-xtradb-cluster-operator:1.5.0-pxc8.0-backup
+    image: {{ .Values.backup.image }}
     serviceAccountName: percona-xtradb-cluster-operator
 #    imagePullSecrets:
 #      - name: private-registry-credentials
@@ -232,17 +184,13 @@ spec:
         type: filesystem
         volume:
           persistentVolumeClaim:
-            storageClassName: "managed-nfs-storage"
-            accessModes: [ "ReadWriteOnce" ]
+            storageClassName: {{ .Values.backup.storageClassName }}
+            accessModes: {{ .Values.backup.accessModes }}
             resources:
               requests:
-                storage: 2Gi
+                storage: {{ .Values.backup.storage }}
     schedule:
-      #- name: "sat-night-backup"
-      #  schedule: "0 0 * * 6"
-      #  keep: 3
-      #  storageName: s3-us-west
       - name: "daily-backup"
-        schedule: "20 * * * *"
-        keep: 5
-        storageName: fs-pvc
+          schedule: "20 * * * *"
+          keep: 5
+          storageName: fs-pvc
