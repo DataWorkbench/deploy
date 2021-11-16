@@ -43,7 +43,7 @@ spec:
 #        path: /data
 #        type: Directory
       persistentVolumeClaim:
-        storageClassName: managed-nfs-storage
+        storageClassName: {{ .Values.storageClassName }}
         accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
@@ -159,7 +159,7 @@ spec:
         type: filesystem
         volume:
           persistentVolumeClaim:
-            storageClassName: {{ .Values.backup.storageClassName }}
+            storageClassName: {{ .Values.storageClassName }}
             accessModes: [ "ReadWriteOnce" ]
             resources:
               requests:
