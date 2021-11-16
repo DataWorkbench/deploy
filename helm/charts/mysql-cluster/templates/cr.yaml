@@ -164,6 +164,7 @@ spec:
             resources:
               requests:
                 storage: {{ .Values.backup.storage }}
+
     schedule:
       - name: {{ .Values.backup.schedule.name }}
         schedule: {{ .Values.backup.schedule.schedule }}
