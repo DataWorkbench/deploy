@@ -32,5 +32,7 @@ proxysql:
 backup:
   image: percona/percona-xtradb-cluster-operator:1.5.0-pxc8.0-backup
   storageClassName: "managed-nfs-storage"
-  accessModes: [ "ReadWriteOnce" ]
   storage: 2Gi
+  schedule:
+    name: "daily-backup"
+    schedule: "20 * * * *"
