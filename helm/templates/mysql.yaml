@@ -1,12 +1,13 @@
+{{- if Values.mysql.singleMysql  }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "databench.fullname" . }}-mysql
   labels:
     component: mysql
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
@@ -16,6 +17,7 @@ spec:
     protocol: TCP
     port: 3306
     targetPort: mysql
+    nodePort: 30306
 ---
 
 apiVersion: apps/v1
@@ -24,7 +26,7 @@ metadata:
   name: {{ include "databench.fullname" . }}-mysql
   labels:
     component: mysql
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -37,7 +39,7 @@ spec:
     metadata:
       labels:
         component: mysql
-{{ include "dataworkbench.labels" . | indent 8 }}
+{{ include "databench.labels" . | indent 8 }}
     spec:
       containers:
       - name: {{ include "databench.fullname" . }}-mysql
@@ -61,3 +63,4 @@ spec:
         ports:
         - containerPort: 3306
           name: mysql
+{{- end -}}
