@@ -1,2 +1,2 @@
 
-operatorImage: "dataworkbench/hdfs-operator:0.1.1"
+operatorImage: "dataworkbench/hadoop-operator:0.0.1"

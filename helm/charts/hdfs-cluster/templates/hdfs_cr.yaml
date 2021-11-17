@@ -3,27 +3,35 @@ kind: HDFS
 metadata:
   name: {{ .Release.Name }}
 spec:
-  version: 2.7.2
-  #storageClass: csi-ssd-enterprise
+  version: {{ .Values.version }}  # hadoop version
+  image: dataworkbench/hdfs-metrics:3.1.0
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc
-    #Capacity: 10Gi
+    capacity: 10Gi
     replicas: {{ len .Values.namenode.nodes }}
   journalnode:
     name: journalnode
     storageClass: {{ include "hdfs.fullname" . }}-journalnode-sc
-    #Capacity: 10Gi
+    capacity: 10Gi
     replicas: {{ len .Values.journalnode.nodes }}
   datanode:
     name: datanode
     storageClass: {{ include "hdfs.fullname" . }}-datanode-sc
+    capacity: 10Gi
+    datadirs:
+      - dn1    #  k8s节点多目录
+      - dn2
     replicas: {{ len .Values.datanode.nodes }}
   zkQuorum: {{ include "zookeeper.quorum" . }}
-  clusterConfig:
+  hdfsSite:
     - property: "dfs.namenode.handler.count"
-      value: "10"
-    - property: "dfs.datanode.handler.count"
       value: "10"
     - property: "dfs.replication"
       value: "2"
+{{- if .Values.yarn.nmReplicas }}
+  yarn:
+    name: yarn
+    rmReplicas: 1
+    nmReplicas: {{ .Values.yarn.nmReplicas }}
+{{- end }}

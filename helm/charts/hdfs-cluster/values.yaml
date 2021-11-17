@@ -6,8 +6,11 @@ storageClass: ""
 
 hdfsHome: /mnt
 
+version: 3.1.0
+
 namenode:
   nodePort: 30091
+  webPort: 9870  # 3.x 9870 ; 2.x 50070
   nodes:
     - "worker-s001"
     - "worker-s002"
@@ -42,3 +45,6 @@ zookeeper:
   storage:
     capacity: 1Gi
     reclaimPolicy: Retain
+
+yarn:
+  nmReplicas: "3"  #  fill if you need to deploy yarn
