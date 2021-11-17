@@ -34,7 +34,10 @@ services:
     entrypoint: "sh"
     command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
     environment:
-      - PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=root
+      - MYSQL_HOST=dataworkbench-db
     links:
       - dataworkbench-db:dataworkbench-db
     depends_on:
@@ -48,6 +51,11 @@ services:
     image: "dataworkbench/flyway:dev"
     container_name: "dataworkbench-db-ctrl"
     command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=root
+      - MYSQL_HOST=dataworkbench-db
     links:
       - dataworkbench-db:dataworkbench-db
     depends_on:
@@ -149,6 +157,7 @@ services:
       - udfmanager
       - resourcemanager
       - account
+      - enginemanager
     depends_on:
       - spacemanager
       - flowmanager
@@ -158,6 +167,7 @@ services:
       - udfmanager
       - dataworkbench-jaeger
       - account
+      - enginemanager
     environment:
       - API_SERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - API_SERVER_READ_TIMEOUT=${API_SERVER_READ_TIMEOUT}
@@ -194,6 +204,9 @@ services:
       - API_SERVER_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_PORT}
       - API_SERVER_ACCOUNT_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_ACCOUNT_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+      - API_SERVER_ENGINE_MANAGER_ADDRESS=enginemanager:${ENGINE_MANAGER_PORT}
+      - API_SERVER_ENGINE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+      - API_SERVER_ENGINE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
     logging:
       driver: "json-file"
       options:
@@ -469,7 +482,7 @@ services:
     environment:
       - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
       - JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF=/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
-      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.12.0.jar;Hbase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar
+      - JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS=MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.0.0.jar;HBase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar
       - JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS=udfmanager:${UDF_MANAGER_PORT}
       - JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS=sourcemanager:${SOURCE_MANAGER_PORT}
       - JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS=resourcemanager:${RESOURCE_MANAGER_PORT}
@@ -568,7 +581,7 @@ services:
           - resourcemanager
 
   zeppelin:
-    image: "dataworkbench/zeppelin"
+    image: "dataworkbench/zeppelin:dev"
     container_name: "dataworkbench-zeppelin"
     links:
       - flinkjobmanager:flinkjobmanager
@@ -577,9 +590,6 @@ services:
     depends_on:
       - flinkjobmanager
       - flinktaskmanager
-    environment:
-      - LIB_URL=${LIB_URL}
-      - LIB_NAMES=${LIB_NAMES}
     logging:
       driver: "json-file"
       options:
@@ -592,7 +602,7 @@ services:
 
   flinkjobmanager:
     #image: "flink:1.12.3-scala_2.11"
-    image: "dataworkbench/flinkutile"
+    image: "dataworkbench/flinkutile:dev"
     container_name: "dataworkbench-flink-jobmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -610,7 +620,7 @@ services:
 
   flinktaskmanager:
     #image: "flink:1.12.3-scala_2.11"
-    image: "dataworkbench/flinkutile"
+    image: "dataworkbench/flinkutile:dev"
     container_name: "dataworkbench-flink-taskmanager"
     links:
       - dataworkbench-db:dataworkbench-db
@@ -696,6 +706,38 @@ services:
         aliases:
           - notifier
 
+  clickhouse:
+    image: "yandex/clickhouse-server:latest"
+    container_name: "dataworkbench-clickhouse-for-test"
+    ports:
+      - "8123:8123"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - clickhouse
+
+  postgres:
+    image: "postgres:12.1"
+    container_name: "dataworkbench-postgres-for-test"
+    environment:
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: ${LOG_MAX_SIZE}
+        max-file: ${LOG_MAX_FILE}
+    networks:
+      dataworkbench-net:
+        aliases:
+          - postgres
+
   hbase:
     image: "harisekhon/hbase:2.1"
     container_name: "dataworkbench-hbase-for-test"
@@ -729,6 +771,7 @@ services:
       - "9000:9000"
       - "8088:8088"
       - "8040:8040"
+      - "8020:8020"
       - "8042:8042"
       - "49707:49707"
       - "50010:50010"
@@ -854,3 +897,38 @@ services:
       dataworkbench-net:
         aliases:
           - logmanager
+
+  enginemanager:
+      image: "dataworkbench/dataworkbench:dev"
+      container_name: "dataworkbench-enginemanager"
+      command: "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"
+      ports:
+        - "${ENGINE_MANAGER_PORT}:${ENGINE_MANAGER_PORT}"
+      links:
+        - dataworkbench-db:dataworkbench-db
+      depends_on:
+        - dataworkbench-db-ctrl
+        - dataworkbench-etcd
+        - dataworkbench-jaeger
+      environment:
+        - ENGINE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
+        - ENGINE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_PORT}
+        - ENGIN_MANAGER_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
+        - ENGIN_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
+        - ENGIN_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
+        - ENGINE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_METRICS_PORT}
+        - ENGINE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+        - ENGINE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
+        - ENGINE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - ENGINE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
+        - ENGINE_MANAGER_TRACER_SERVICE_NAME=flowmanager
+        - ENGINE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      logging:
+        driver: "json-file"
+        options:
+          max-size: ${LOG_MAX_SIZE}
+          max-file: ${LOG_MAX_FILE}
+      networks:
+        dataworkbench-net:
+          aliases:
+            - enginemanager
