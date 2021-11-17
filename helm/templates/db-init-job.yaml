@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: {{ include "databench.fullname" . }}-db-init-job
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: db-init-job
 spec:
   backoffLimit: 6
@@ -26,7 +26,7 @@ spec:
             - '{{ include "mysql.waiting.cmd" . }}'
       containers:
         - name: db-init-job
-          image: {{ .Values.image.flyway }}
+          image: {{ include "flyway.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/flyway/sql/ddl/ddl_init.sh"

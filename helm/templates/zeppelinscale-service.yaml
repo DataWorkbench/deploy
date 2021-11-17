@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "databench.fullname" . }}-zeppelinscale
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: zeppelinscale-service
 spec:
   {{- if .Values.zeppelinscale.service }}

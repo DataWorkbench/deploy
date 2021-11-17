@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-resourcemanager
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: resourcemanager
 spec:
   replicas: {{ coalesce .Values.common.replicas .Values.resourcemanager.replicas }}
@@ -32,7 +32,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: resourcemanager
-        image: {{ .Values.image.dataworkbench | quote }}
+        image: {{ include "databench.image" . | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

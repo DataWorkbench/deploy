@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-zeppelinscale
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: zeppelinscale
 annotations:
   {{- range $key, $value := .Values.zeppelinscale.annotations }}
@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: zeppelinscale
-        image: {{ .Values.image.dataworkbench | quote }}
+        image: {{ include "databench.image" . | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "zeppelinscale start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

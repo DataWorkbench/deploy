@@ -1,13 +1,16 @@
-# Default values for dataworkbench.
+# Default values for databench.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 image:
-  pullPolicy: IfNotPresent
-#  pullPolicy: Always
-  dataworkbench: dataworkbench/dataworkbench:dev
-  flyway: dataworkbench/flyway:dev
-  zeppelin: dataworkbench/zeppelin:dev
+#  pullPolicy: IfNotPresent
+  pullPolicy: Always
+  registry: dockerhub.databench.io/databench
+  databench: databench
+  flyway: flyway
+  tag: dev
+  zeppelin: zeppelin
+  zeppelinTag: 0.9.0-dev
   jaeger: jaegertracing/all-in-one:1.22
 
 

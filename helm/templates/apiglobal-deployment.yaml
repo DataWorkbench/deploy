@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-apiglobal
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: apiglobal
 annotations:
   {{- range $key, $value := .Values.apiglobal.annotations }}
@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: apiglobal
-          image: {{ .Values.image.dataworkbench | quote }}
+          image: {{ include "databench.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"]
           ports:
