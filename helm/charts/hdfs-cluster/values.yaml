@@ -47,4 +47,4 @@ zookeeper:
     reclaimPolicy: Retain
 
 yarn:
-  nmReplicas: "3"  #  fill if you need to deploy yarn
+  nmReplicas: ""  #  fill if you need to deploy yarn
