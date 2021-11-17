@@ -12,8 +12,8 @@ image:
 
 
 ## hdfs settings
-hdfs:
-  service: "my-hdfs-namenode"
+hdfs-cluster:
+  hdfsHome: /data
 
 
 # common settings for all service

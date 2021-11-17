@@ -131,9 +131,9 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       {{- if .Values.storageClass }}
       storageClassName: {{ .Values.storageClass }}
-        {{- else }}
+      {{- else }}
       storageClassName: {{ include "hdfs.fullname" . }}-zookeeper-sc
-        {{- end }}
+      {{- end }}
       resources:
         requests:
           storage: 500Mi
