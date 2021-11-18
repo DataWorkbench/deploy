@@ -1,21 +1,23 @@
-# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Copyright 2020 The Databench Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
 version: '3'
 
 networks:
-  dataworkbench-net:
+  databench-net:
 
 services:
-  dataworkbench-db:
+  databench-db:
+    container_name: "databench-db"
     image: "mysql:8.0.11"
-    container_name: "dataworkbench-db"
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - ${DATA_PATH}/mysql:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+#      - MYSQL_USER=${MYSQL_USER} # there is no need to set root that created by default with the password specified by MYSQL_PASSWORD
+#      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - ${LOCAL_VOLUME_PATH}/mysql:/var/lib/mysql
     ports:
       - "3306:${MYSQL_PORT}" # for test & debug
     logging:
@@ -24,53 +26,48 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-db
+          - databench-db
 
-  dataworkbench-db-init:
-    image: "dataworkbench/flyway:dev"
-    container_name: "dataworkbench-db-init"
+  databench-db-init:
+    container_name: "databench-db-init"
+    image: ${IMAGE_REPO}/flyway:${IMAGE_TAG}
     entrypoint: "sh"
-    command: -c "/flyway/sql/ddl/ddl_init.sh -hdataworkbench-db -uroot --connect-timeout=5"
+    command: -c "/flyway/sql/ddl/ddl_init.sh --connect-timeout=5"
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=root
-      - MYSQL_HOST=dataworkbench-db
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db
+      - databench-db
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-db-init
+          - databench-db-init
 
-  dataworkbench-db-ctrl:
-    image: "dataworkbench/flyway:dev"
-    container_name: "dataworkbench-db-ctrl"
-    command: -url=jdbc:mysql://dataworkbench-db/data_workbench -user=root -password=${MYSQL_ROOT_PASSWORD} -validateOnMigrate=false migrate
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_USER=root
-      - MYSQL_HOST=dataworkbench-db
+  databench-db-ctrl:
+    image: ${IMAGE_REPO}/flyway:${IMAGE_TAG}
+    container_name: "databench-db-ctrl"
+    command: -url=jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE} -user=${MYSQL_USER} -password=${MYSQL_PASSWORD} -validateOnMigrate=false migrate
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-init
+      - databench-db-init
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-ctrl
+          - databench-ctrl
 
-  dataworkbench-etcd:
+  databench-etcd:
     image: "quay.io/coreos/etcd:latest"
-    container_name: "dataworkbench-etcd"
+    container_name: "databench-etcd"
     volumes:
-      - ${DATA_PATH}/etcd:/etcd-data
-    command: "/usr/local/bin/etcd --data-dir=/etcd-data --name dataworkbench-etcd --initial-advertise-peer-urls http://0.0.0.0:2380 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --initial-cluster dataworkbench-etcd=http://0.0.0.0:2380"
+      - ${LOCAL_VOLUME_PATH}/etcd:/etcd-data
+    command: "/usr/local/bin/etcd --data-dir=/etcd-data --name databench-etcd --initial-advertise-peer-urls http://0.0.0.0:2380 --listen-peer-urls http://0.0.0.0:2380 --advertise-client-urls http://0.0.0.0:2379 --listen-client-urls http://0.0.0.0:2379 --initial-cluster databench-etcd=http://0.0.0.0:2380"
     ports:
       - "2379:${ETCD_SERVER_PORT}" # for test & debug
       - "2380:${ETCD_PEER_PORT}" # for test & debug
@@ -80,13 +77,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-etcd
+          - databench-etcd
 
-  dataworkbench-jaeger:
+  databench-jaeger:
     image: "jaegertracing/all-in-one:1.22"
-    container_name: "dataworkbench-jaeger"
+    container_name: "databench-jaeger"
     ports:
       - "5775:5775/udp" # for test & debug
       - "6831:6831/udp" # for test & debug
@@ -104,13 +101,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-jaeger
+          - databench-jaeger
 
   apiglobal:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-apiglobal"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-apiglobal"
     command: "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"
     ports:
       - "${API_GLOBAL_PORT}:${API_GLOBAL_PORT}"
@@ -119,7 +116,7 @@ services:
       - account
     depends_on:
       - apiserver
-      - dataworkbench-jaeger
+      - databench-jaeger
       - account
     environment:
       - API_GLOBAL_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
@@ -129,7 +126,7 @@ services:
       - API_GLOBAL_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
       - API_GLOBAL_HTTP_SERVER_ADDRESS=0.0.0.0:${API_GLOBAL_PORT}
       - API_GLOBAL_TRACER_SERVICE_NAME=apiglobal
-      - API_GLOBAL_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - API_GLOBAL_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
       - API_GLOBAL_REGIONS=staging:http://apiserver:9001|zh_cn:开发测试区,en_us:staging mock:http://apiserver:9001|zh_cn:模拟测试用,en_us:mock
       - API_GLOBAL_ACCOUNT_SERVER_ADDRESS=account:${ACCOUNT_PORT}
     logging:
@@ -138,13 +135,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - apiglobal
 
   apiserver:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-apiserver"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-apiserver"
     command: "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"
     ports:
       - "${API_SERVER_PORT}:${API_SERVER_PORT}"
@@ -165,7 +162,7 @@ services:
       - sourcemanager
       - jobmanager
       - udfmanager
-      - dataworkbench-jaeger
+      - databench-jaeger
       - account
       - enginemanager
     environment:
@@ -176,7 +173,7 @@ services:
       - API_SERVER_EXIT_TIMEOUT=${API_SERVER_EXIT_TIMEOUT}
       - API_SERVER_HTTP_SERVER_ADDRESS=0.0.0.0:${API_SERVER_PORT}
       - API_SERVER_TRACER_SERVICE_NAME=apiserver
-      - API_SERVER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - API_SERVER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
       - API_SERVER_SPACE_MANAGER_ADDRESS=spacemanager:${SPACE_MANAGER_PORT}
       - API_SERVER_SPACE_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - API_SERVER_SPACE_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
@@ -213,21 +210,21 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - apiserver
 
   spacemanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-spacemanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-spacemanager"
     command: "spacemanager start -c ${DATABENCH_CONF}/spacemanager.yaml"
     ports:
       - "${SPACE_MANAGER_PORT}:${SPACE_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
-      - dataworkbench-jaeger
+      - databench-db-ctrl
+      - databench-jaeger
     environment:
       - SPACE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SPACE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_PORT}
@@ -235,34 +232,34 @@ services:
       - SPACE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - SPACE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - SPACE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SPACE_MANAGER_METRICS_PORT}
-      - SPACE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SPACE_MANAGER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - SPACE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - SPACE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SPACE_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - SPACE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - SPACE_MANAGER_TRACER_SERVICE_NAME=spacemanager
-      - SPACE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - SPACE_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - spacemanager
 
   flowmanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-flowmanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-flowmanager"
     command: "flowmanager start -c ${DATABENCH_CONF}/flowmanager.yaml"
     ports:
       - "${FLOW_MANAGER_PORT}:${FLOW_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
-      - dataworkbench-etcd
-      - dataworkbench-jaeger
+      - databench-db-ctrl
+      - databench-etcd
+      - databench-jaeger
     environment:
       - FLOW_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - FLOW_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_PORT}
@@ -270,38 +267,38 @@ services:
       - FLOW_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - FLOW_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - FLOW_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${FLOW_MANAGER_METRICS_PORT}
-      - FLOW_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - FLOW_MANAGER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - FLOW_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - FLOW_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - FLOW_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - FLOW_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - FLOW_MANAGER_SCHEDULER_ADDRESS=scheduler:${SCHEDULER_PORT}
       - FLOW_MANAGER_SCHEDULER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - FLOW_MANAGER_SCHEDULER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - FLOW_MANAGER_TRACER_SERVICE_NAME=flowmanager
-      - FLOW_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - FLOW_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - flowmanager
 
   scheduler:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-scheduler"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-scheduler"
     command: "scheduler start -c ${DATABENCH_CONF}/scheduler.yaml"
     ports:
       - "${SCHEDULER_PORT}:${SCHEDULER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
-      - dataworkbench-etcd:dataworkbench-etcd
+      - databench-db:databench-db
+      - databench-etcd:databench-etcd
     depends_on:
-      - dataworkbench-db-ctrl
-      - dataworkbench-etcd
-      - dataworkbench-jaeger
+      - databench-db-ctrl
+      - databench-etcd
+      - databench-jaeger
     environment:
       - SCHEDULER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SCHEDULER_GRPC_SERVER_ADDRESS=0.0.0.0:${SCHEDULER_PORT}
@@ -309,14 +306,14 @@ services:
       - SCHEDULER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - SCHEDULER_METRICS_ENABLED=${METRICS_ENABLED}
       - SCHEDULER_METRICS_SERVER_ADDRESS=0.0.0.0:${SCHEDULER_METRICS_PORT}
-      - SCHEDULER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SCHEDULER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - SCHEDULER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - SCHEDULER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SCHEDULER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - SCHEDULER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
-      - SCHEDULER_ETCD_ENDPOINTS=dataworkbench-etcd:${ETCD_SERVER_PORT}
+      - SCHEDULER_ETCD_ENDPOINTS=databench-etcd:${ETCD_SERVER_PORT}
       - SCHEDULER_ETCD_DIAL_TIMEOUT=5s
       - SCHEDULER_TRACER_SERVICE_NAME=scheduler
-      - SCHEDULER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - SCHEDULER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
       - SCHEDULER_FLOW_MANAGER_ADDRESS=flowmanager:${FLOW_MANAGER_PORT}
       - SCHEDULER_FLOW_MANAGER_LOG_LEVEL=${GRPC_LOG_LEVEL}
       - SCHEDULER_FLOW_MANAGER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
@@ -329,21 +326,21 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - scheduler
 
   sourcemanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-sourcemanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-sourcemanager"
     command: "sourcemanager start -c ${DATABENCH_CONF}/sourcemanager.yaml"
     ports:
       - "${SOURCE_MANAGER_PORT}:${SOURCE_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
-      - dataworkbench-jaeger
+      - databench-db-ctrl
+      - databench-jaeger
     environment:
       - SOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - SOURCE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_PORT}
@@ -351,33 +348,33 @@ services:
       - SOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - SOURCE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - SOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${SOURCE_MANAGER_METRICS_PORT}
-      - SOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - SOURCE_MANAGER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - SOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - SOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - SOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - SOURCE_MANAGER_MYSQL_USERS=${MYSQL_USER}
+      - SOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - SOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - SOURCE_MANAGER_TRACER_SERVICE_NAME=sourcemanager
-      - SOURCE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - SOURCE_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - sourcemanager
 
   udfmanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-udfmanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-udfmanager"
     command: "udfmanager start -c ${DATABENCH_CONF}/udfmanager.yaml"
     ports:
       - "${UDF_MANAGER_PORT}:${UDF_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - UDF_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - UDF_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${UDF_MANAGER_PORT}
@@ -385,33 +382,33 @@ services:
       - UDF_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - UDF_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - UDF_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${UDF_MANAGER_METRICS_PORT}
-      - UDF_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - UDF_MANAGER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - UDF_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - UDF_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - UDF_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - UDF_MANAGER_MYSQL_USERS=${MYSQL_USER}
+      - UDF_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - UDF_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - UDF_MANAGER_TRACER_SERVICE_NAME=udfmanager
-      - UDF_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - UDF_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - udfmanager
 
   zeppelinscale:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-zeppelinscale"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-zeppelinscale"
     command: "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"
     ports:
       - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS=zeppelin:8080
       - ZEPPELIN_SCALE_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
@@ -421,27 +418,27 @@ services:
       - ZEPPELIN_SCALE_METRICS_ENABLED=${METRICS_ENABLED}
       - ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_METRICS_PORT}
       - ZEPPELIN_SCALE_TRACER_SERVICE_NAME=zeppelinscale
-      - ZEPPELIN_SCALE_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - ZEPPELIN_SCALE_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - zeppelinscale
 
   jobwatcher:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-jobwatcher"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-jobwatcher"
     command: "jobwatcher start -c ${DATABENCH_CONF}/jobwatcher.yaml"
     ports:
       - "${JOB_WATCHER_PORT}:${JOB_WATCHER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - JOB_WATCHER_JOB_WORKS=16
       - JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
@@ -452,33 +449,33 @@ services:
       - JOB_WATCHER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - JOB_WATCHER_METRICS_ENABLED=${METRICS_ENABLED}
       - JOB_WATCHER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_METRICS_PORT}
-      - JOB_WATCHER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - JOB_WATCHER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - JOB_WATCHER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - JOB_WATCHER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - JOB_WATCHER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - JOB_WATCHER_MYSQL_USERS=${MYSQL_USER}
+      - JOB_WATCHER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - JOB_WATCHER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - JOB_WATCHER_TRACER_SERVICE_NAME=jobwatcher
-      - JOB_WATCHER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - JOB_WATCHER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - jobwatcher
 
   jobdeveloper:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-jobdeveloper"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-jobdeveloper"
     command: "jobdeveloper start -c ${DATABENCH_CONF}/jobdeveloper.yaml"
     ports:
       - "${JOB_DEVELOPER_PORT}:${JOB_DEVELOPER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - JOB_DEVELOPER_ZEPPELIN_FLINK_HOME=/zeppelin/flink/flink-1.12.3
       - JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF=/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
@@ -493,31 +490,31 @@ services:
       - JOB_DEVELOPER_METRICS_ENABLED=${METRICS_ENABLED}
       - JOB_DEVELOPER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_WATCHER_METRICS_PORT}
       - JOB_DEVELOPER_TRACER_SERVICE_NAME=jobdeveloper
-      - JOB_DEVELOPER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - JOB_DEVELOPER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - jobdeveloper
 
   jobmanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-jobmanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-jobmanager"
     command: "jobmanager start -c ${DATABENCH_CONF}/jobmanager.yaml"
     ports:
       - "${JOB_MANAGER_PORT}:${JOB_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
       - jobwatcher:jobwatcher
       - jobdeveloper:jobdeveloper
       - zeppelinscale:zeppelinscale
     depends_on:
-      - dataworkbench-db-ctrl
-      - dataworkbench-jaeger
+      - databench-db-ctrl
+      - databench-jaeger
     environment:
       - JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS=zeppelinscale:${ZEPPELIN_SCALE_PORT}
       - JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
@@ -528,33 +525,33 @@ services:
       - JOB_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - JOB_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - JOB_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${JOB_MANAGER_METRICS_PORT}
-      - JOB_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - JOB_MANAGER_MYSQL_HOSTS=${MYSQL_HOST}:${MYSQL_PORT}
       - JOB_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - JOB_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - JOB_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - JOB_MANAGER_MYSQL_USERS=${MYSQL_USER}
+      - JOB_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - JOB_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - JOB_MANAGER_TRACER_SERVICE_NAME=jobmanager
-      - JOB_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - JOB_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - jobmanager
 
   resourcemanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-resourcemanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-resourcemanager"
     command: "resourcemanager start -c ${DATABENCH_CONF}/resourcemanager.yaml"
     ports:
       - "${RESOURCE_MANAGER_PORT}:${RESOURCE_MANAGER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - RESOURCE_MANAGER_HDFS_SERVER=hadoop:9000
       - RESOURCE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
@@ -563,26 +560,26 @@ services:
       - RESOURCE_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - RESOURCE_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
       - RESOURCE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${RESOURCE_MANAGER_METRICS_PORT}
-      - RESOURCE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - RESOURCE_MANAGER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - RESOURCE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - RESOURCE_MANAGER_MYSQL_USERS=${MYSQL_ROOT_USERS}
-      - RESOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - RESOURCE_MANAGER_MYSQL_USERS=${MYSQL_USER}
+      - RESOURCE_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - RESOURCE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
       - RESOURCE_MANAGER_TRACER_SERVICE_NAME=resourcemanager
-      - RESOURCE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+      - RESOURCE_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - resourcemanager
 
   zeppelin:
-    image: "dataworkbench/zeppelin:dev"
-    container_name: "dataworkbench-zeppelin"
+    image: ${IMAGE_REPO}/zeppelin:${ZEPPELIN_IMAGE_TAG}
+    container_name: "databench-zeppelin"
     links:
       - flinkjobmanager:flinkjobmanager
     ports:
@@ -596,16 +593,16 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - zeppelin
 
   flinkjobmanager:
+    container_name: "databench-flink-jobmanager"
     #image: "flink:1.12.3-scala_2.11"
-    image: "dataworkbench/flinkutile:dev"
-    container_name: "dataworkbench-flink-jobmanager"
+    image: ${IMAGE_REPO}/flinkutile:${FLINK_IMAGE_TAG}
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     ports:
       - "${FLINK_PORT}:${FLINK_PORT}"
     command: jobmanager
@@ -614,16 +611,16 @@ services:
         FLINK_PROPERTIES=
         jobmanager.rpc.address: flinkjobmanager
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - flinkjobmanager
 
   flinktaskmanager:
+    container_name: "databench-flink-taskmanager"
     #image: "flink:1.12.3-scala_2.11"
-    image: "dataworkbench/flinkutile:dev"
-    container_name: "dataworkbench-flink-taskmanager"
+    image: ${IMAGE_REPO}/flinkutile:${FLINK_IMAGE_TAG}
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
       - flinkjobmanager
     command: taskmanager
@@ -634,13 +631,13 @@ services:
         jobmanager.rpc.address: flinkjobmanager
         taskmanager.numberOfTaskSlots: 10
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - flinktaskmanager
 
   zookeeper:
     image: wurstmeister/zookeeper
-    container_name: "dataworkbench-zookeeper"
+    container_name: "databench-zookeeper"
     ports:
       - "2181:2181"
     logging:
@@ -649,19 +646,19 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - zookeeper
 
-  dataworkbench-kafka-for-test:
+  databench-kafka-for-test:
     image: wurstmeister/kafka:2.12-2.5.0
-    container_name: "dataworkbench-kafka-for-test"
+    container_name: "databench-kafka-for-test"
     ports:
       - "9092:9092"
     links:
       - zookeeper:zookeeper
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: "dataworkbench-kafka-for-test"
+      KAFKA_ADVERTISED_HOST_NAME: "databench-kafka-for-test"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -671,20 +668,20 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-kafka-for-test
+          - databench-kafka-for-test
 
   notifier:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-notifier"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-notifier"
     command: "notifier start -c ${DATABENCH_CONF}/notifier.yaml"
     ports:
       - "${NOTIFIER_PORT}:${NOTIFIER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - NOTIFIER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - NOTIFIER_GRPC_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_PORT}
@@ -692,9 +689,9 @@ services:
       - NOTIFIER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - NOTIFIER_METRICS_ENABLED=${METRICS_ENABLED}
       - NOTIFIER_METRICS_SERVER_ADDRESS=0.0.0.0:${NOTIFIER_METRICS_PORT}
-      - NOTIFIER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - NOTIFIER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - NOTIFIER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - NOTIFIER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - NOTIFIER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - NOTIFIER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
     logging:
       driver: "json-file"
@@ -702,7 +699,7 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - notifier
 
@@ -740,7 +737,7 @@ services:
 
   hbase:
     image: "harisekhon/hbase:2.1"
-    container_name: "dataworkbench-hbase-for-test"
+    container_name: "databench-hbase-for-test"
     ports:
       - "2182:2181"
       # - "8080:8080"
@@ -759,13 +756,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - hbase
 
   hadoop:
     image: "sequenceiq/hadoop-docker:2.7.0"
-    container_name: "dataworkbench-hadoop-for-test"
+    container_name: "databench-hadoop-for-test"
     ports:
       - "50070:50070"
       - "9000:9000"
@@ -783,21 +780,21 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - hadoop
 
 
   observer:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-observer"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-observer"
     command: "observer start -c ${DATABENCH_CONF}/observer.yaml"
     ports:
       - "${OBSERVER_PORT}:${OBSERVER_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
+      - databench-db:databench-db
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - OBSERVER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - OBSERVER_GRPC_SERVER_ADDRESS=0.0.0.0:${OBSERVER_PORT}
@@ -805,9 +802,9 @@ services:
       - OBSERVER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - OBSERVER_METRICS_ENABLED=${METRICS_ENABLED}
       - OBSERVER_METRICS_SERVER_ADDRESS=0.0.0.0:${OBSERVER_METRICS_PORT}
-      - OBSERVER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - OBSERVER_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - OBSERVER_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - OBSERVER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - OBSERVER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - OBSERVER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
     logging:
       driver: "json-file"
@@ -815,15 +812,15 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - observer
 
-  dataworkbench-redis:
+  databench-redis:
     image: "redis:5.0.0"
-    container_name: "dataworkbench-redis"
+    container_name: "databench-redis"
     volumes:
-      - ${DATA_PATH}/redis:/var/lib/redis
+      - ${LOCAL_VOLUME_PATH}/redis:/var/lib/redis
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
       - "6379:${REDIS_PORT}" # for test & debug
@@ -833,21 +830,21 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
-          - dataworkbench-redis
+          - databench-redis
 
   account:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-account"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-account"
     command: "account start -c ${DATABENCH_CONF}/account.yaml"
     ports:
       - "${ACCOUNT_PORT}:${ACCOUNT_PORT}"
     links:
-      - dataworkbench-db:dataworkbench-db
-      - dataworkbench-redis:dataworkbench-redis
+      - databench-db:databench-db
+      - databench-redis:databench-redis
     depends_on:
-      - dataworkbench-db-ctrl
+      - databench-db-ctrl
     environment:
       - ACCOUNT_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
       - ACCOUNT_GRPC_SERVER_ADDRESS=0.0.0.0:${ACCOUNT_PORT}
@@ -855,24 +852,24 @@ services:
       - ACCOUNT_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
       - ACCOUNT_METRICS_ENABLED=${METRICS_ENABLED}
       - ACCOUNT_METRICS_SERVER_ADDRESS=0.0.0.0:${ACCOUNT_METRICS_PORT}
-      - ACCOUNT_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+      - ACCOUNT_MYSQL_HOSTS=databench-db:${MYSQL_PORT}
       - ACCOUNT_MYSQL_DATABASE=${MYSQL_DATABASE}
-      - ACCOUNT_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - ACCOUNT_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - ACCOUNT_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
-      - ACCOUNT_REDIS_ADDR=dataworkbench-redis:${REDIS_PORT}
+      - ACCOUNT_REDIS_ADDR=databench-redis:${REDIS_PORT}
     logging:
       driver: "json-file"
       options:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - account
 
   logmanager:
-    image: "dataworkbench/dataworkbench:dev"
-    container_name: "dataworkbench-logmanager"
+    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+    container_name: "databench-logmanager"
     command: "logmanager start -c ${DATABENCH_CONF}/logmanager.yaml"
     ports:
       - "${LOG_MANAGER_PORT}:${LOG_MANAGER_PORT}"
@@ -894,22 +891,22 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - logmanager
 
   enginemanager:
-      image: "dataworkbench/dataworkbench:dev"
-      container_name: "dataworkbench-enginemanager"
+      image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
+      container_name: "databench-enginemanager"
       command: "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"
       ports:
         - "${ENGINE_MANAGER_PORT}:${ENGINE_MANAGER_PORT}"
       links:
-        - dataworkbench-db:dataworkbench-db
+        - databench-db:databench-db
       depends_on:
-        - dataworkbench-db-ctrl
-        - dataworkbench-etcd
-        - dataworkbench-jaeger
+        - databench-db-ctrl
+        - databench-etcd
+        - databench-jaeger
       environment:
         - ENGINE_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
         - ENGINE_MANAGER_GRPC_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_PORT}
@@ -917,18 +914,18 @@ services:
         - ENGIN_MANAGER_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
         - ENGIN_MANAGER_METRICS_ENABLED=${METRICS_ENABLED}
         - ENGINE_MANAGER_METRICS_SERVER_ADDRESS=0.0.0.0:${ENGINE_MANAGER_METRICS_PORT}
-        - ENGINE_MANAGER_MYSQL_HOSTS=dataworkbench-db:${MYSQL_PORT}
+        - ENGINE_MANAGER_MYSQL_HOSTS=${MYSQL_HOST}:${MYSQL_PORT}
         - ENGINE_MANAGER_MYSQL_DATABASE=${MYSQL_DATABASE}
-        - ENGINE_MANAGER_MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+        - ENGINE_MANAGER_MYSQL_PASSWORD=${MYSQL_PASSWORD}
         - ENGINE_MANAGER_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
         - ENGINE_MANAGER_TRACER_SERVICE_NAME=flowmanager
-        - ENGINE_MANAGER_TRACER_LOCAL_AGENT=dataworkbench-jaeger:${TRACER_PORT}
+        - ENGINE_MANAGER_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
       logging:
         driver: "json-file"
         options:
           max-size: ${LOG_MAX_SIZE}
           max-file: ${LOG_MAX_FILE}
       networks:
-        dataworkbench-net:
+        databench-net:
           aliases:
             - enginemanager

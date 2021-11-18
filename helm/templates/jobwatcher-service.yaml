@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "databench.fullname" . }}-jobwatcher
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: jobwatcher-service
 spec:
   {{- if .Values.jobwatcher.service }}

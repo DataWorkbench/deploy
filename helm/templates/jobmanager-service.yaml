@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "databench.fullname" . }}-jobmanager
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: jobmanager-service
 spec:
   {{- if .Values.jobmanager.service }}

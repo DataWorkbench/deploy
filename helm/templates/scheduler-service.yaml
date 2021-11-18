@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: {{ include "databench.fullname" . }}-scheduler
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: scheduler-service
 spec:
   {{- if .Values.scheduler.service }}

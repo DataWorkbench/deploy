@@ -1,6 +1,6 @@
 apiVersion: v2
 appVersion: 2.7.5
-description: A Helm chart for hdfs
-name: hdfs
+description: A Helm chart for hdfs-cluster
+name: hdfs-cluster
 type: application
 version: 0.1.1

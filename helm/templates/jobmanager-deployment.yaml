@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-jobmanager
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: jobmanager
 annotations:
   {{- range $key, $value := .Values.jobmanager.annotations }}
@@ -36,7 +36,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: jobmanager
-        image: {{ .Values.image.dataworkbench | quote }}
+        image: {{ include "databench.image" . | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
