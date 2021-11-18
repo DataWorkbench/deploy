@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}
 spec:
   version: {{ .Values.version }}  # hadoop version
-  image: dataworkbench/hdfs-metrics:3.1.0
+  image: {{ .Values.image }}
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc

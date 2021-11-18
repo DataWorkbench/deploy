@@ -6,11 +6,13 @@ storageClass: ""
 
 hdfsHome: /mnt
 
-version: 3.1.0
+version: 2.9.2
+
+image: dataworkbench/hadoop:2.9.2   #  dataworkbench/hdfs-metrics:3.1.0
 
 namenode:
   nodePort: 30091
-  webPort: 9870  # 3.x 9870 ; 2.x 50070
+  webPort: 50070  # 3.x 9870 ; 2.x 50070
   nodes:
     - "worker-s001"
     - "worker-s002"
