@@ -19,7 +19,7 @@ data:
       url_path: {{ .Values.common.metrics.urlPath }}
 
     mysql:
-      hosts: {{ include "mysql.host" . | quote }}
+      hosts: {{ include "mysql.hostPort" . | quote }}
       users: {{ .Values.mysql.user }}
       database: {{ .Values.mysql.database }}
       max_idle_conn: {{ .Values.mysql.maxIdleConn }}

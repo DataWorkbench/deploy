@@ -133,6 +133,9 @@ Mysql Settings
 {{- define "mysql.host" -}}
 {{ .Release.Name }}-mysql
 {{- end -}}
+{{- define "mysql.hostPort" -}}
+{{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
+{{- end -}}
 
 {{- define "mysql.waiting.cmd" -}}
 until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
