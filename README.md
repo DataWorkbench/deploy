@@ -68,3 +68,10 @@ run `make update [service=apiserver]` to update the service;
 ## regress test
 - add test scripy to tests directory
 - make test
+
+
+# helm deploy
+
+## deploy etcd/redis/mysql/hdfs operator
+## create dir datanode / namenode / journalnode / zookeeper under {{ .Values.hdfs-cluster.hdfsHome }}/hdfs-cluster/{{ .Release.Name }} on all k8s workers for hdfs
+## create dir /root/.cache/helm/repository on all k8s workers for flink-cluster in enginemanager

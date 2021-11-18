@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-scheduler
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: scheduler
 annotations:
   {{- range $key, $value := .Values.scheduler.annotations }}
@@ -40,7 +40,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
       - name: scheduler
-        image: {{ .Values.image.dataworkbench | quote }}
+        image: {{ include "databench.image" . | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

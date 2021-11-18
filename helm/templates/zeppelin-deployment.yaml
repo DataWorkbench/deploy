@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "databench.fullname" . }}-zeppelin
   labels:
-{{ include "dataworkbench.labels" . | indent 4 }}
+{{ include "databench.labels" . | indent 4 }}
     component: zeppelin
 annotations:
   {{- range $key, $value := .Values.zeppelin.annotations }}
@@ -31,12 +31,14 @@ spec:
     spec:
       containers:
       - name: zeppelin
-        image: {{ .Values.image.zeppelin | quote }}
+        image: {{ include "zeppelin.image" . | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - containerPort: {{ .Values.ports.zeppelin }}
             name: service
         env:
+          - name: ZEPPELIN_PORT
+            value: {{ .Values.ports.zeppelin | quote }}
           {{- range $ename, $evalue := .Values.zeppelin.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

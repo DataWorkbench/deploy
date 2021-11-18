@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "databench.fullname" . }}-db-init-job
+  name: {{ include "databench.fullname" . }}-db-ctrl-job
   labels:
 {{ include "databench.labels" . | indent 4 }}
-    component: db-init-job
+    component: db-ctrl-job
 spec:
   backoffLimit: 6
   completions: 1
@@ -14,7 +14,7 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
-        component: db-init-job
+        component: db-ctrl-job
     spec:
       initContainers:
         - name: wait-mysql
@@ -25,18 +25,22 @@ spec:
             - '-c'
             - '{{ include "mysql.waiting.cmd" . }}'
       containers:
-        - name: db-init-job
+        - name: db-ctrl-job
           image: {{ include "flyway.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - "/flyway/sql/ddl/ddl_init.sh"
-            - "--connect-timeout=5"
+            - "flyway"
+            - "-X"
+            - '-url=jdbc:mysql://{{- include "mysql.host" . -}}:{{- .Values.mysql.port -}}/{{- .Values.mysql.database -}}'
+            - '-user={{- .Values.mysql.user -}}'
+            - "-validateOnMigrate=false"
+            - "migrate"
           env:
             - name: MYSQL_HOST
               value: {{ include "mysql.host" . | quote }}
             - name: MYSQL_USER
               value: {{ .Values.mysql.user }}
-            - name: MYSQL_PASSWORD
+            - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: databench-secret

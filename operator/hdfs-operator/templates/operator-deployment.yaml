@@ -46,7 +46,7 @@ spec:
           command:
             - /manager
           image: {{ .Values.operatorImage }}
-          #imagePullPolicy: Always
+          imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
             httpGet:

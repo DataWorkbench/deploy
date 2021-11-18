@@ -1,15 +1,32 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: my-hdfs-http
+  name: {{ .Release.Name }}-hdfs-http
   labels:
     app: hdfs-namenode
 spec:
   ports:
-    - port: 50070
+    - port: {{ .Values.namenode.webPort }}
       protocol: TCP
-      targetPort: 50070
+      targetPort: {{ .Values.namenode.webPort }}
       nodePort: {{ .Values.namenode.nodePort }}
   type: NodePort
   selector:
     github.dataworkbench.com/statefulset-name: {{ .Release.Name }}-namenode
+{{- if .Values.yarn.nmReplicas }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-yarn-ui
+  labels:
+    component: yarn-ui
+spec:
+  ports:
+    - port: 8088
+      name: web
+      nodePort: 30088
+  type: NodePort
+  selector:
+    github.dataworkbench.com/statefulset-name: {{ .Release.Name }}-yarn-rm
+{{- end }}

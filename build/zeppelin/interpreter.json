@@ -1892,13 +1892,13 @@
       "properties": {
         "FLINK_HOME": {
           "name": "FLINK_HOME",
-          "value": "zzzzzzzzzz",
+          "value": "/zeppelin/flink/flink-1.12.3",
           "type": "string",
           "description": "Location of flink distribution"
         },
         "HADOOP_CONF_DIR": {
           "name": "HADOOP_CONF_DIR",
-          "value": "",
+          "value": "/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop",
           "type": "string",
           "description": "Location of hadoop conf (core-site.xml, hdfs-site.xml and etc.)"
         },

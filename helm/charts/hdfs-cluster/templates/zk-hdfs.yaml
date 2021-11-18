@@ -8,6 +8,8 @@ spec:
   ports:
   - port: 2888
     name: server
+  - port: 2181
+    name: client
   - port: 3888
     name: leader-election
   clusterIP: None
@@ -129,9 +131,9 @@ spec:
       accessModes: [ "ReadWriteOnce" ]
       {{- if .Values.storageClass }}
       storageClassName: {{ .Values.storageClass }}
-        {{- else }}
+      {{- else }}
       storageClassName: {{ include "hdfs.fullname" . }}-zookeeper-sc
-        {{- end }}
+      {{- end }}
       resources:
         requests:
           storage: 500Mi

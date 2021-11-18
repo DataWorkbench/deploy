@@ -139,7 +139,7 @@ until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waitin
 {{- end -}}
 
 {{- define "service.hdfs" -}}
-hdfs://{{- .Values.hdfs.service }}:{{ .Values.ports.hdfs }}
+hdfs://{{ .Release.Name }}-hdfs-http:{{ .Values.ports.hdfs }}
 {{- end -}}
 
 {{/*

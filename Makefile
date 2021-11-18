@@ -1,14 +1,18 @@
-# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Copyright 2020 The Databench Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Name:=dataworkbench
+TARG.Repo:=dockerhub.databench.io/databench
+TARG.Name:=databench
 TRAG.Gopkg:=DataWorkbench
 #TRAG.Version:=$(TRAG.Gopkg)/pkg/version
 
-DOCKER_TAGS=dev
-BUILDER_IMAGE=dataworkbench/builder:latest
-BUILDER_IMAGE_ZEPPELIN=dataworkbench/builder:zeppelin
+TAG:=dev
+FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
+ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0-dev
+FLINK_IMAGE:=$(TARG.Repo)/flinkutile:1.12.3-scala_2.11
+BUILDER_IMAGE:=$(TARG.Repo)/builder:latest
+BUILDER_IMAGE_ZEPPELIN:=$(TARG.Repo)/builder:zeppelin
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
@@ -21,14 +25,14 @@ space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
 service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,observer,account,logmanager,enginemanager
 COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
-COMPOSE_DB_CTRL=dataworkbench-db-ctrl
+COMPOSE_DB_CTRL=databench-db-ctrl
 
 .PHONY: help
 help: ## This help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_%-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: update-builder
-update-builder: ## Pull dataworkbench-builder image
+update-builder: ## Pull databench-builder image
 	docker pull $(BUILDER_IMAGE)
 	docker pull $(BUILDER_IMAGE_ZEPPELIN)
 	@echo "update-builder done"
@@ -39,19 +43,19 @@ compile:
 
 .PHONY: build-flyway
 build-flyway: ## Build flyway image for database migration
-	cd .. && docker build -t $(TARG.Name)/flyway:${DOCKER_TAGS} -f ./deploy/build/db/Dockerfile .
+	cd .. && docker build -t $(FLYWAY_IMAGE) -f ./deploy/build/db/Dockerfile .
 
 .PHONY: build-zeppelin
 build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
-	cd ./build/zeppelin && docker build -t $(TARG.Name)/zeppelin:${DOCKER_TAGS} . && cd ../..
+	cd ./build/zeppelin && docker build -t $(ZEPPELIN_IMAGE) . && cd ../..
 
 .PHONY: build-flink-utile
 build-flink-utile:
-	cd ./build/flink_utile/ && docker build -t $(TARG.Name)/flinkutile:${DOCKER_TAGS} . && cd ../..
+	cd ./build/flink_utile/ && docker build -t $(FLINK_IMAGE) . && cd ../..
 
 .PHONY: build-dev
-build-dev: compile  ## Build dataworkbench image
-	@cd .. && docker build -t $(TARG.Name)/$(TARG.Name):$(DOCKER_TAGS) -f ./deploy/Dockerfile.dev .
+build-dev: compile  ## Build databench image
+	@cd .. && docker build -t $(TARG.Repo)/$(TARG.Name):$(TAG) -f ./deploy/Dockerfile.dev .
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build done"
 
@@ -65,12 +69,12 @@ pull-images: ## Pull images for docker-compose
 
 .PHONY: compose-migrate-db
 compose-migrate-db: ## Migrate db in docker compose
-	until docker-compose exec dataworkbench-db bash -c "echo 'SELECT VERSION();' | mysql -uroot -ppassword"; do echo "waiting for mysql"; sleep 2; done;
+	until docker-compose exec databench-db bash -c "echo 'SELECT VERSION();' | mysql -uroot -ppassword"; do echo "waiting for mysql"; sleep 2; done;
 	docker-compose up $(COMPOSE_DB_CTRL)
 
 .PHONY: compose-up
-compose-up: ## Launch dataworkbench in docker compose
-	docker-compose up -d dataworkbench-db
+compose-up: ## Launch databench in docker compose
+	docker-compose up -d databench-db
 	make compose-migrate-db
 	docker-compose up --remove-orphans -d
 	@echo "compose-up done"
@@ -85,6 +89,7 @@ compose-logs-f: ## Follow service log in docker compose
 	docker-compose logs --tail 10 -f $(COMPOSE_SERVICE)
 
 update: build-dev ## Update some service
+	docker-compose stop $(COMPOSE_SERVICE)
 	docker-compose up --no-deps -d $(COMPOSE_SERVICE)
 	@echo "update service $(service) done"
 
@@ -93,5 +98,5 @@ clean:
 	rm -r ./tmp
 
 .PHONY: test
-test: ## Launch dataworkbench in docker compose
+test: ## Launch databench in docker compose
 	@bash ./tests/run.sh
