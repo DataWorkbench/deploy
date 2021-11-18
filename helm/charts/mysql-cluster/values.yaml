@@ -35,4 +35,4 @@ backup:
   storage: 2Gi
   schedule:
     name: "daily-backup"
-    schedule: "20 * * * *"
+    schedule: "0 4 * * *"
