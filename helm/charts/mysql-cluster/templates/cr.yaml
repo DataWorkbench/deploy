@@ -12,7 +12,6 @@ spec:
   sslSecretName: my-cluster-ssl
   sslInternalSecretName: my-cluster-ssl-internal
   allowUnsafeConfigurations: false
-#  pause: false
   updateStrategy: OnDelete
   upgradeOptions:
     versionServiceEndpoint: https://check.percona.com/versions
