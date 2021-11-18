@@ -51,9 +51,11 @@ spec:
 #      minAvailable: 0
     volumeSpec:
       persistentVolumeClaim:
+        storageClassName: {{ .Values.storageClassName }}
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
-            storage: {{ .Values.haproxy.resources.requests.cpu }}
+            storage: {{ .Values.haproxy.storage }}
     gracePeriod: 30
   proxysql:
     enabled: {{ .Values.proxysql.enabled }}
@@ -71,8 +73,8 @@ spec:
 #        path: /data
 #        type: Directory
       persistentVolumeClaim:
-#        storageClassName: standard
-#        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.storageClassName }}
+        accessModes: [ "ReadWriteOnce" ]
         resources:
           requests:
             storage: {{ .Values.proxysql.storage }}
