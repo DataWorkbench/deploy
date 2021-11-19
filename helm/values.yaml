@@ -41,6 +41,8 @@ common:
 
 
 ## mysql settings
+mysql-cluster:
+  storageClassName: "local"
 mysql:
   user: "root"
   database: "data_workbench"
