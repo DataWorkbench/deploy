@@ -1,25 +1,26 @@
-apiVersion: pxc.percona.com/v1-5-0
+apiVersion: pxc.percona.com/v1-8-0
 kind: PerconaXtraDBCluster
 metadata:
-  name: cluster1
+  name: {{ .Release.Name }}-mysql
   finalizers:
     - delete-pxc-pods-in-order
-#    - delete-proxysql-pvc
-#    - delete-pxc-pvc
 spec:
+  crVersion: 1.8.0
   secretsName: my-cluster-secrets
   vaultSecretName: keyring-secret-vault
   sslSecretName: my-cluster-ssl
   sslInternalSecretName: my-cluster-ssl-internal
+  logCollectorSecretName: my-log-collector-secrets
   allowUnsafeConfigurations: false
-  updateStrategy: OnDelete
+  updateStrategy: Never
   upgradeOptions:
-    versionServiceEndpoint: https://check.percona.com/versions
-    apply: recommended
+    versionServiceEndpoint: https://check.percona.com
+    apply: 8.0-recommended
     schedule: "0 4 * * *"
   pxc:
     size: {{ .Values.pxc.size }}
     image: {{ .Values.pxc.image }}
+    autoRecovery: true
     resources:
       requests:
         memory: {{ .Values.pxc.resources.requests.memory }}
@@ -46,16 +47,9 @@ spec:
         cpu: {{ .Values.haproxy.resources.requests.cpu }}
     affinity:
       antiAffinityTopologyKey: "kubernetes.io/hostname"
+
     podDisruptionBudget:
       maxUnavailable: 1
-#      minAvailable: 0
-    volumeSpec:
-      persistentVolumeClaim:
-        storageClassName: {{ .Values.storageClassName }}
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: {{ .Values.haproxy.storage }}
     gracePeriod: 30
   proxysql:
     enabled: {{ .Values.proxysql.enabled }}
@@ -64,14 +58,10 @@ spec:
     resources:
       requests:
         memory: {{ .Values.proxysql.resources.requests.memory }}
-        cpu: {{ .Values.proxysql.storage }}
+        cpu: {{ .Values.proxysql.resources.requests.cpu }}
     affinity:
       antiAffinityTopologyKey: "kubernetes.io/hostname"
     volumeSpec:
-#      emptyDir: {}
-#      hostPath:
-#        path: /data
-#        type: Directory
       persistentVolumeClaim:
         storageClassName: {{ .Values.storageClassName }}
         accessModes: [ "ReadWriteOnce" ]
@@ -80,26 +70,25 @@ spec:
             storage: {{ .Values.proxysql.storage }}
     podDisruptionBudget:
       maxUnavailable: 1
-#      minAvailable: 0
     gracePeriod: 30
 #   loadBalancerSourceRanges:
 #     - 10.0.0.0/8
 #   serviceAnnotations:
 #     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+  logcollector:
+    enabled: true
+    image: percona/percona-xtradb-cluster-operator:1.8.0-logcollector
   pmm:
     enabled: false
-    image: percona/percona-xtradb-cluster-operator:1.5.0-pmm
+    image: percona/pmm-client:2.12.0
     serverHost: monitoring-service
-    serverUser: pmm
-#    resources:
-#      requests:
-#        memory: 200M
-#        cpu: 500m
+    serverUser: admin
   backup:
     image: {{ .Values.backup.image }}
-    serviceAccountName: percona-xtradb-cluster-operator
-#    imagePullSecrets:
-#      - name: private-registry-credentials
+    pitr:
+      enabled: false
+      storageName: STORAGE-NAME-HERE
+      timeBetweenUploads: 60
     storages:
       fs-pvc:
         type: filesystem

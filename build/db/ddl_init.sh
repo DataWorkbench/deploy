@@ -2,7 +2,7 @@
 
 cd /flyway/sql/ddl || exit
 
-[ -n "$PASSWORD" ] && OPT="-p$(echo "$PASSWORD" | tr -d '\n')"
+[ -n "$MYSQL_PASSWORD" ] && OPT="-p$(echo "$MYSQL_PASSWORD" | tr -d '\n')"
 
 for F in $(ls *.sql)
 do

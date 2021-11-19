@@ -1,4 +1,4 @@
-{{- if Values.mysql.singleMysql  }}
+{{- if .Values.mysql.singleMysql  }}
 apiVersion: v1
 kind: Service
 metadata:

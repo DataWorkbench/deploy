@@ -1,4 +1,4 @@
-kind: Role
+kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: percona-xtradb-cluster-operator
@@ -21,10 +21,23 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
   - ""
   resources:
   - pods
   - pods/exec
+  - pods/log
   - configmaps
   - services
   - persistentvolumeclaims
@@ -78,6 +91,7 @@ rules:
   - delete
 - apiGroups:
   - certmanager.k8s.io
+  - cert-manager.io
   resources:
   - issuers
   - certificates
@@ -96,19 +110,15 @@ kind: ServiceAccount
 metadata:
   name: percona-xtradb-cluster-operator
 ---
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: percona-xtradb-cluster-operator-workload
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: service-account-percona-xtradb-cluster-operator
 subjects:
 - kind: ServiceAccount
   name: percona-xtradb-cluster-operator
+  namespace: {{ .Values.namespace }}
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: percona-xtradb-cluster-operator
   apiGroup: rbac.authorization.k8s.io

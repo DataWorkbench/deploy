@@ -24,22 +24,36 @@ spec:
             - 'sh'
             - '-c'
             - '{{ include "mysql.waiting.cmd" . }}'
-      containers:
-        - name: db-ctrl-job
+        - name: database-init
           image: {{ include "flyway.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
+            - "/flyway/sql/ddl/ddl_init.sh"
+            - "--connect-timeout=5"
+          env:
+            - name: MYSQL_HOST
+              value: {{ include "mysql.host" . | quote }}
+            - name: MYSQL_PORT
+              value: {{ .Values.ports.mysql | quote }}
+            - name: MYSQL_USER
+              value: {{ .Values.mysql.user }}
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: databench-secret
+                  key: mysql_password
+      containers:
+        - name: db-ctrl-job
+          image: {{ include "flyway.image" . | quote }}
+          imagePullPolicy: IfNotPresent
+          command:
             - "flyway"
             - "-X"
-            - '-url=jdbc:mysql://{{- include "mysql.host" . -}}:{{- .Values.mysql.port -}}/{{- .Values.mysql.database -}}'
+            - '-url=jdbc:mysql://{{- include "mysql.hostPort" . -}}/{{- .Values.mysql.database -}}'
             - '-user={{- .Values.mysql.user -}}'
             - "-validateOnMigrate=false"
             - "migrate"
           env:
-            - name: MYSQL_HOST
-              value: {{ include "mysql.host" . | quote }}
-            - name: MYSQL_USER
-              value: {{ .Values.mysql.user }}
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -50,5 +64,4 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: OnFailure
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
