@@ -1,11 +1,11 @@
-apiVersion: pxc.percona.com/v1-9-0
+apiVersion: pxc.percona.com/v1-8-0
 kind: PerconaXtraDBCluster
 metadata:
   name: cluster1
   finalizers:
     - delete-pxc-pods-in-order
 spec:
-  crVersion: 1.9.0
+  crVersion: 1.8.0
   secretsName: my-cluster-secrets
   vaultSecretName: keyring-secret-vault
   sslSecretName: my-cluster-ssl
@@ -51,13 +51,6 @@ spec:
     podDisruptionBudget:
       maxUnavailable: 1
     gracePeriod: 30
-    volumeSpec:
-      persistentVolumeClaim:
-        storageClassName: {{ .Values.storageClassName }}
-        accessModes: [ "ReadWriteOnce" ]
-        resources:
-          requests:
-            storage: {{ .Values.haproxy.storage }}
   proxysql:
     enabled: {{ .Values.proxysql.enabled }}
     size: {{ .Values.proxysql.size }}
@@ -77,11 +70,20 @@ spec:
             storage: {{ .Values.proxysql.storage }}
     podDisruptionBudget:
       maxUnavailable: 1
+#      minAvailable: 0
     gracePeriod: 30
+#   loadBalancerSourceRanges:
+#     - 10.0.0.0/8
+#   serviceAnnotations:
+#     service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
   logcollector:
     enabled: true
-    image: percona/percona-xtradb-cluster-operator:1.9.0-logcollector
-
+    image: percona/percona-xtradb-cluster-operator:1.8.0-logcollector
+  pmm:
+    enabled: false
+    image: percona/pmm-client:2.12.0
+    serverHost: monitoring-service
+    serverUser: admin
   backup:
     image: {{ .Values.backup.image }}
     pitr:
@@ -101,5 +103,5 @@ spec:
     schedule:
       - name: {{ .Values.backup.schedule.name }}
         schedule: {{ .Values.backup.schedule.schedule }}
-        keep: 3
+        keep: 5
         storageName: fs-pvc
