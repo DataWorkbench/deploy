@@ -3,5 +3,6 @@ kind: PerconaXtraDBClusterBackup
 metadata:
   name: backup1
 spec:
+  # update this for your mysql-cluster to backup
   pxcCluster: cluster1
   storageName: fs-pvc
