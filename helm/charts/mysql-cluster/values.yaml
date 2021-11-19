@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-schedule: "0 4 * * *"
 storageClassName: "managed-nfs-storage"
 pxc:
   size: 3
@@ -31,7 +30,7 @@ proxysql:
       cpu: 600m
   storage: 2Gi
 backup:
-  image: percona/percona-xtradb-cluster-operator:1.5.0-pxc8.0-backup
+  image: percona/percona-xtradb-cluster-operator:1.9.0-pxc8.0-backup
   storage: 2Gi
   schedule:
     name: "daily-backup"
