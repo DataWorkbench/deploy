@@ -6,7 +6,7 @@ metadata:
     - delete-pxc-pods-in-order
 spec:
   crVersion: 1.8.0
-  secretsName: my-cluster-secrets
+  secretsName: {{ .Release.Name }}-mysql-secrets
   vaultSecretName: keyring-secret-vault
   sslSecretName: my-cluster-ssl
   sslInternalSecretName: my-cluster-ssl-internal
