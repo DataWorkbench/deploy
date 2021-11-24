@@ -56,6 +56,8 @@ spec:
                 key: root
           - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
             value: '{{- include "service.hdfs" . }}'
+          - name: ENGINE_MANAGER_FLINK_DOMAIN_FMT
+            value: "%s.flink.{{- .Values.domain }}"
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

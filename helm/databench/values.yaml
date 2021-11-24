@@ -2,6 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+domain: databench.io
+
 image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
@@ -36,8 +38,6 @@ common:
   readinessProbe:
     periodSeconds: 10
     initialDelaySeconds: 20
-  service:
-    type: ClusterIP
 
 
 ## mysql settings
@@ -70,9 +70,6 @@ redis:
 
 # apiserver settings
 apiglobal:
-  service:
-    type: ClusterIP
-    annotations: {}
   envs:
     API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
     API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
@@ -120,7 +117,9 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
-    ENGINE_MANAGER_FLINK_ENGINE_CHART_NAME: "flink-0.1.0.tgz"
+    ENGINE_MANAGER_FLINK_JOB_MANAGER_PORT: "6123"
+    ENGINE_MANAGER_FLINK_WEBUI_PORT: "8081"
+    ENGINE_MANAGER_FLINK_SERVICE_NAME_FMT: "%s-jobmanager"
 
 # flowmanager settings
 flowmanager:
