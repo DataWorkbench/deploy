@@ -62,6 +62,12 @@ build-dev: compile  ## Build databench image
 .PHONY: build-all  ## Build all images
 build-all: build-flyway build-dev build-zeppelin build-flink-utile
 
+.PHONY: push-images  ## push all images
+push-images:
+	docker push $(TARG.Repo)/$(TARG.Name):$(TAG)
+	docker push $(ZEPPELIN_IMAGE)
+	docker push $(FLYWAY_IMAGE)
+
 .PHONY: pull-images
 pull-images: ## Pull images for docker-compose
 	docker-compose pull --ignore-pull-failures
