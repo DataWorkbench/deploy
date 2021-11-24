@@ -56,8 +56,8 @@ spec:
           - name: SCHEDULER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: databench-secret
-                key: mysql_password
+                name: {{ .Release.Name }}-mysql-secret
+                key: root
 {{ include "scheduler.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.scheduler.envs }}
           - name: {{ $ename }}

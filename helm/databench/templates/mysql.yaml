@@ -1,25 +1,12 @@
 {{- if .Values.mysql.singleMysql  }}
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: {{ include "databench.fullname" . }}-mysql
-  labels:
-    component: mysql
-{{ include "databench.labels" . | indent 4 }}
-spec:
-  type: NodePort
-  selector:
-    app.kubernetes.io/name: {{ .Chart.Name }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    component: mysql
-  ports:
-  - name: mysql
-    protocol: TCP
-    port: 3306
-    targetPort: mysql
-    nodePort: 30306
----
+  name: {{ .Release.Name }}-mysql-secret
+data:
+  root: {{ print "passw0rd" | b64enc }}
 
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -57,10 +44,34 @@ spec:
           # $ kubectl create secret generic mysql-pass --from-file=password.txt
           # make sure password.txt does not have a trailing newline
         - name: MYSQL_ROOT_PASSWORD
-          value: "passw0rd"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-mysql-secret
+              key: root
         - name: MYSQL_ROOT_HOST
           value: "%"
         ports:
         - containerPort: 3306
           name: mysql
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "databench.fullname" . }}-mysql
+  labels:
+    component: mysql
+  {{ include "databench.labels" . | indent 4 }}
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: mysql
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: 3306
+      targetPort: mysql
+      nodePort: 30306
 {{- end -}}

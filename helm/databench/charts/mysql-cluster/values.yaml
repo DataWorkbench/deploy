@@ -35,3 +35,14 @@ backup:
   schedule:
     name: "daily-backup"
     schedule: "0 4 * * *"
+
+secrets:
+  passwords:
+    root: rootDatabench
+    xtrabackup: backupDatabench
+    monitor: monitoryDatabench
+    clustercheck: clusterCheckDatabench
+    proxyadmin: proxyAdminDatabench
+    pmmserver: pmmAdminDatabench
+    operator: operatorAdminDatabench
+    replication: replicationAdminDatabench

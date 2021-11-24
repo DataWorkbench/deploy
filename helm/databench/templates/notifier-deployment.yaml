@@ -52,8 +52,8 @@ spec:
           - name: NOTIFIER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: databench-secret
-                key: mysql_password
+                name: {{ .Release.Name }}-mysql-secret
+                key: root
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

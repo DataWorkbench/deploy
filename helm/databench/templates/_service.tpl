@@ -91,7 +91,6 @@ Service Addresses For ApiServer
   value: '{{ include "service.logmanager" . }}'
 {{- end -}}
 
-{{/* TODO: delete tmp JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS */}}
 
 {{- define "jobdeveloper.link.services" -}}
 - name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
@@ -99,8 +98,6 @@ Service Addresses For ApiServer
 - name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
   value: '{{ include "service.udfmanager" . }}'
 - name: JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.resourcemanager" . }}'
-- name: JOB_DEVELOPER_FILEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
 - name: JOB_DEVELOPER_ENGINEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
@@ -131,10 +128,19 @@ Service Addresses For ApiServer
 Mysql Settings
 */}}
 {{- define "mysql.host" -}}
+{{- if .Values.mysql.singleMysql  }}
 {{ .Release.Name }}-mysql
+{{- else }}
+{{ .Release.Name }}-mysql-haproxy
 {{- end -}}
+{{- end -}}
+
 {{- define "mysql.hostPort" -}}
+{{- if .Values.mysql.singleMysql  }}
 {{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
+{{- else }}
+{{ .Release.Name }}-mysql-haproxy:{{ .Values.ports.mysql }}
+{{- end -}}
 {{- end -}}
 
 {{- define "mysql.waiting.cmd" -}}

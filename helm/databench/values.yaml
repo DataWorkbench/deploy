@@ -41,9 +41,15 @@ common:
 
 
 ## mysql settings
+# mysql pxc-cluster settings
 mysql-cluster:
   storageClassName: "local"
+
+# mysql config for databench-service
 mysql:
+  # if deploy single mysql for testing
+  singleMysql: false
+
   user: "root"
   database: "data_workbench"
   maxIdleConn: 16
@@ -51,8 +57,6 @@ mysql:
   connMaxLifetime: 10m
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
-  # if deploy single mysql for testing
-  singleMysql: true
 
 
 # redis settings

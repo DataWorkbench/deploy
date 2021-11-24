@@ -52,8 +52,8 @@ spec:
           - name: ENGINE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: databench-secret
-                key: mysql_password
+                name: {{ .Release.Name }}-mysql-secret
+                key: root
           - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
             value: '{{- include "service.hdfs" . }}'
           {{- range $ename, $evalue := .Values.enginemanager.envs }}

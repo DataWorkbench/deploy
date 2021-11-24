@@ -54,8 +54,8 @@ spec:
           - name: FLOW_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: databench-secret
-                key: mysql_password
+                name: {{ .Release.Name }}-mysql-secret
+                key: root
           {{- range $ename, $evalue := .Values.flowmanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
