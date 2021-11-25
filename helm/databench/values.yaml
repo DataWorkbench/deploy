@@ -69,22 +69,6 @@ redis:
   masterName: "mymaster"
 
 # apiserver settings
-apiglobal:
-  envs:
-    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
-    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
-    API_GLOBAL_REGIONS: "staging:http://127.0.0.1:9001|zh_cn:开发测试区,en_us:staging mock:http://127.0.0.1:9002|zh_cn:模拟测试用,en_us:mock"
-  livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 60
-  readinessProbe:
-    initialDelaySeconds: 20
-    periodSeconds: 60
-
-# apiserver settings
 apiserver:
   envs:
     API_SERVER_READ_TIMEOUT: 30s
@@ -223,7 +207,6 @@ ports:
   hdfs: 8020
   redis: 26379  # keep same as the port of redis cluster
 
-  apiGlobal: 8001
   apiServer: 9001
   spaceManager: 9101
   spaceManagerMetrics: 9201
