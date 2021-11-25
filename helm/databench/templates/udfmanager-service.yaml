@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: udfmanager-service
 spec:
-  {{- if .Values.udfmanager.service }}
-  type: {{ coalesce .Values.udfmanager.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.udfManager }}

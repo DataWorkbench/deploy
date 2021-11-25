@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: logmanager-service
 spec:
-  {{- if .Values.logmanager.service }}
-  type: {{ coalesce .Values.logmanager.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.logManager }}

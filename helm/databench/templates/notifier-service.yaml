@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: notifier-service
 spec:
-  {{- if .Values.notifier.service }}
-  type: {{ coalesce .Values.notifier.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.notifier }}

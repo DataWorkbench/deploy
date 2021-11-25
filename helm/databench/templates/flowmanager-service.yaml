@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: flowmanager-service
 spec:
-  {{- if .Values.flowmanager.service }}
-  type: {{ coalesce .Values.flowmanager.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.flowManager }}

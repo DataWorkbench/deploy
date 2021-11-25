@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: jobdeveloper-service
 spec:
-  {{- if .Values.jobdeveloper.service }}
-  type: {{ coalesce .Values.jobdeveloper.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.jobDeveloper }}

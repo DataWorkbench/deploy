@@ -7,11 +7,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: zeppelin-service
 spec:
-  {{- if .Values.zeppelin.service }}
-  type: {{ coalesce .Values.zeppelin.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.zeppelin }}

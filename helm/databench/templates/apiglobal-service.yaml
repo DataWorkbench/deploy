@@ -5,10 +5,8 @@ metadata:
   labels:
 {{ include "databench.labels" . | indent 4 }}
     component: apiglobal-service
-  annotations:
-    {{ toYaml .Values.apiglobal.service.annotations | indent 4 }}
 spec:
-  type: {{ .Values.apiglobal.service.type }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.apiGlobal }}

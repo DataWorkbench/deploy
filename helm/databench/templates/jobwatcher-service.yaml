@@ -6,11 +6,7 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: jobwatcher-service
 spec:
-  {{- if .Values.jobwatcher.service }}
-  type: {{ coalesce .Values.jobwatcher.service.type .Values.common.service.type }}
-  {{- else }}
-  type: {{ .Values.common.service.type }}
-  {{- end }}
+  type: ClusterIP
   ports:
     - name: service
       port: {{ .Values.ports.jobWatcher }}
