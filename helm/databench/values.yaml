@@ -20,6 +20,8 @@ image:
 hdfs-cluster:
   hdfsHome: /data
 
+hdfsConfigDir: "/etc/hdfs"
+
 
 # common settings for all service
 common:
@@ -48,7 +50,7 @@ mysql-cluster:
 # mysql config for databench-service
 mysql:
   # if deploy single mysql for testing
-  singleMysql: false
+  singleMysql: true
 
   user: "root"
   database: "data_workbench"
@@ -81,11 +83,11 @@ apiserver:
 account:
   envs:
     ACCOUNT_SOURCE: "qingcloud"
-    ACCOUNT_QINGCLOUD_CONFIG_ACCESS_KEY_ID: "NHYIAFWQGTUOYJAPQZTK"
-    ACCOUNT_QINGCLOUD_CONFIG_SECRET_ACCESS_KEY: "xl7G25CjeEZ5gQIjC6GbHZsXDmqUfl9iOVAUcQIx"
-    ACCOUNT_QINGCLOUD_CONFIG_HOST: "api.qingcloud.com"
-    ACCOUNT_QINGCLOUD_CONFIG_PORT: "443"
-    ACCOUNT_QINGCLOUD_CONFIG_PROTOCOL: "https"
+    ACCOUNT_QINGCLOUD_CONFIG_ACCESS_KEY_ID: "LTMJGBXPHSEZRNVKKPHU"
+    ACCOUNT_QINGCLOUD_CONFIG_SECRET_ACCESS_KEY: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+    ACCOUNT_QINGCLOUD_CONFIG_HOST: "api.testing.com"
+    ACCOUNT_QINGCLOUD_CONFIG_PORT: "7777"
+    ACCOUNT_QINGCLOUD_CONFIG_PROTOCOL: "http"
     ACCOUNT_QINGCLOUD_CONFIG_URI: "/iaas"
 
 # enginemanager settings
