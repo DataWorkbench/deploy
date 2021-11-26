@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd /flyway/sql/ddl || exit
+cd /flyway/ddl || exit
 
 [ -n "$MYSQL_PASSWORD" ] && OPT="-p$(echo "$MYSQL_PASSWORD" | tr -d '\n')"
 

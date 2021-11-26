@@ -28,7 +28,7 @@ spec:
           image: {{ include "flyway.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - "/flyway/sql/ddl/ddl_init.sh"
+            - "/flyway/ddl/ddl_init.sh"
             - "--connect-timeout=5"
           env:
             - name: MYSQL_HOST
