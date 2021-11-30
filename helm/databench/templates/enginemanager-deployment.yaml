@@ -30,6 +30,12 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ .Release.Name }}-engine-manager
+      {{- if .Values.dns.ksLBIP }}
+      hostAliases:
+        - ip: {{ .Values.dns.ksLBIP | quote }}
+          hostnames:
+            - "lb.kubesphere.local"
+      {{- end }}
       initContainers:
       - name: wait-mysql
         image: busybox:1.28.4

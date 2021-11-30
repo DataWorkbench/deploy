@@ -4,6 +4,7 @@
 
 domain: databench.io
 dns:
+  ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
 
 image:
