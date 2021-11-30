@@ -109,6 +109,7 @@ enginemanager:
     ENGINE_MANAGER_FLINK_JOB_MANAGER_PORT: "6123"
     ENGINE_MANAGER_FLINK_WEBUI_PORT: "8081"
     ENGINE_MANAGER_FLINK_SERVICE_NAME_FMT: "%s-jobmanager"
+    ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
 
 # flowmanager settings
 flowmanager:

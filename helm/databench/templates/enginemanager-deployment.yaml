@@ -29,7 +29,7 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
-      serviceAccountName: sa-engine-manager
+      serviceAccountName: {{ .Release.Name }}-engine-manager
       initContainers:
       - name: wait-mysql
         image: busybox:1.28.4
