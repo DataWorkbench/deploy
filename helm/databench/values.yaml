@@ -3,6 +3,8 @@
 # Declare variables to be passed into your templates.
 
 domain: databench.io
+dns:
+  qingcloudApiIP: 172.31.60.141
 
 image:
 #  pullPolicy: IfNotPresent
