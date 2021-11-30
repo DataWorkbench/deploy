@@ -54,7 +54,7 @@ spec:
           - name: JOB_WATCHER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secret
+                name: {{ .Release.Name }}-mysql-secrets
                 key: root
           {{- range $ename, $evalue := .Values.jobwatcher.envs }}
           - name: {{ $ename }}

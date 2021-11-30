@@ -41,8 +41,8 @@ spec:
           - containerPort: {{ .Values.ports.resourceManagerMetrics }}
             name: metrics
         env:
-          - name: RESOURCE_MANAGER_HDFS_SERVER
-            value: '{{- include "service.hdfs" . }}'
+          - name: RESOURCE_MANAGER_HADOOP_CONF_DIR
+            value: {{ .Values.hdfsConfigDir }}
           - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.resourceManager }}"
           - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
@@ -50,7 +50,7 @@ spec:
           - name: RESOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secret
+                name: {{ .Release.Name }}-mysql-secrets
                 key: root
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
           - name: {{ $ename }}
@@ -80,6 +80,9 @@ spec:
           - name: config
             mountPath: "/etc/dataworkbench"
             readOnly: true
+          - name: hdfs-config
+            mountPath: {{ .Values.hdfsConfigDir }}
+            readOnly: true
       volumes:
         - name: config
           configMap:
@@ -87,3 +90,11 @@ spec:
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"
+        - name: hdfs-config
+          configMap:
+            name: databench-common-config
+            items:
+              - key: "core-site.xml"
+                path: "core-site.xml"
+              - key: "hdfs-site.xml"
+                path: "hdfs-site.xml"

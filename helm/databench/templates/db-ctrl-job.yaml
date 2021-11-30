@@ -28,7 +28,7 @@ spec:
           image: {{ include "flyway.image" . | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - "/flyway/sql/ddl/ddl_init.sh"
+            - "/flyway/ddl/ddl_init.sh"
             - "--connect-timeout=5"
           env:
             - name: MYSQL_HOST
@@ -40,7 +40,7 @@ spec:
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: {{ .Release.Name }}-mysql-secrets
                   key: root
       containers:
         - name: db-ctrl-job
@@ -49,7 +49,7 @@ spec:
           command:
             - "flyway"
             - "-X"
-            - '-url=jdbc:mysql://{{- include "mysql.hostPort" . -}}/{{- .Values.mysql.database -}}'
+            - '-url=jdbc:mysql://{{ include "mysql.hostPort" . }}/{{- .Values.mysql.database -}}'
             - '-user={{- .Values.mysql.user -}}'
             - "-validateOnMigrate=false"
             - "migrate"
@@ -57,7 +57,7 @@ spec:
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql-secret
+                  name: {{ .Release.Name }}-mysql-secrets
                   key: root
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File

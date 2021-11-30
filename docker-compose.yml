@@ -34,7 +34,7 @@ services:
     container_name: "databench-db-init"
     image: ${IMAGE_REPO}/flyway:${IMAGE_TAG}
     entrypoint: "sh"
-    command: -c "/flyway/sql/ddl/ddl_init.sh --connect-timeout=5"
+    command: -c "/flyway/ddl/ddl_init.sh --connect-timeout=5"
     environment:
       - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_PORT=${MYSQL_PORT}
@@ -856,7 +856,17 @@ services:
       - ACCOUNT_MYSQL_DATABASE=${MYSQL_DATABASE}
       - ACCOUNT_MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - ACCOUNT_MYSQL_LOG_LEVEL=${MYSQL_LOG_LEVEL}
-      - ACCOUNT_REDIS_ADDR=databench-redis:${REDIS_PORT}
+      - ACCOUNT_SOURCE=${ACCOUNT_SOURCE}
+      - ACCOUNT_REDIS_MODE=${ACCOUNT_REDIS_MODE}
+      - ACCOUNT_REDIS_MASTER_NAME=${ACCOUNT_REDIS_MASTER_NAME}
+      - ACCOUNT_REDIS_STANDALONE_ADDR=databench-redis:${REDIS_PORT}
+      - ACCOUNT_REDIS_DATABASE=${ACCOUNT_REDIS_DATABASE}
+      - ACCOUNT_QINGCLOUD_ACCESS_KEY_ID=${ACCOUNT_QINGCLOUD_ACCESS_KEY_ID}
+      - ACCOUNT_QINGCLOUD_SECRET_ACCESS_KEY=${ACCOUNT_QINGCLOUD_SECRET_ACCESS_KEY}
+      - ACCOUNT_QINGCLOUD_HOST=${ACCOUNT_QINGCLOUD_HOST}
+      - ACCOUNT_QINGCLOUD_PORT=${ACCOUNT_QINGCLOUD_PORT}
+      - ACCOUNT_QINGCLOUD_PROTOCOL=${ACCOUNT_QINGCLOUD_PROTOCOL}
+      - ACCOUNT_QINGCLOUD_URI=${ACCOUNT_QINGCLOUD_URI}
     logging:
       driver: "json-file"
       options:

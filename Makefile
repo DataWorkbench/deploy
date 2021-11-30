@@ -23,7 +23,7 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,observer,account,logmanager,enginemanager
+service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,account,enginemanager
 COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=databench-db-ctrl
 

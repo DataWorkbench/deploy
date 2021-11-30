@@ -53,16 +53,8 @@ Service Addresses For ApiServer
 {{ include "databench.fullname" . }}-enginemanager:{{ .Values.ports.engineManager }}
 {{- end -}}
 
-{{- define "service.observermanager" -}}
-{{ include "databench.fullname" . }}-observermanager:{{ .Values.ports.observer }}
-{{- end -}}
-
 {{- define "service.account" -}}
 {{ include "databench.fullname" . }}-account:{{ .Values.ports.account }}
-{{- end -}}
-
-{{- define "service.logmanager" -}}
-{{ include "databench.fullname" . }}-logmanager:{{ .Values.ports.logManager }}
 {{- end -}}
 
 
@@ -83,12 +75,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.udfmanager" . }}'
 - name: API_SERVER_RESOURCE_MANAGER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
-- name: API_SERVER_OBSERVER_MANAGER_ADDRESS
-  value: '{{ include "service.observermanager" . }}'
 - name: API_SERVER_ACCOUNT_SERVER_ADDRESS
   value: '{{ include "service.account" . }}'
-- name: API_SERVER_LOG_MANAGER_ADDRESS
-  value: '{{ include "service.logmanager" . }}'
 {{- end -}}
 
 
@@ -128,23 +116,23 @@ Service Addresses For ApiServer
 Mysql Settings
 */}}
 {{- define "mysql.host" -}}
-{{- if .Values.mysql.singleMysql  }}
+{{- if .Values.mysql.singleMysql -}}
 {{ .Release.Name }}-mysql
-{{- else }}
+{{- else -}}
 {{ .Release.Name }}-mysql-haproxy
 {{- end -}}
 {{- end -}}
 
 {{- define "mysql.hostPort" -}}
-{{- if .Values.mysql.singleMysql  }}
+{{- if .Values.mysql.singleMysql -}}
 {{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
-{{- else }}
+{{- else -}}
 {{ .Release.Name }}-mysql-haproxy:{{ .Values.ports.mysql }}
 {{- end -}}
 {{- end -}}
 
 {{- define "mysql.waiting.cmd" -}}
-until nc -z {{ .Release.Name }}-mysql {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
+until nc -z {{ include "mysql.host" . }} {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
 {{- end -}}
 
 {{- define "service.hdfs" -}}

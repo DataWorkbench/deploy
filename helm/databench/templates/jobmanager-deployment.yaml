@@ -52,7 +52,7 @@ spec:
           - name: JOB_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secret
+                name: {{ .Release.Name }}-mysql-secrets
                 key: root
 {{ include "jobmanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobmanager.envs }}
