@@ -19,14 +19,14 @@ image:
   jaeger: jaegertracing/all-in-one:1.22
 
 
-## hdfs settings
+## hdfs configuration
 hdfs-cluster:
   hdfsHome: /data
 
 hdfsConfigDir: "/etc/hdfs"
 
 
-# common settings for all service
+# common configuration for all service
 common:
   replicas: 1
   strategy: RollingUpdate
@@ -45,8 +45,7 @@ common:
     initialDelaySeconds: 20
 
 
-## mysql settings
-# mysql pxc-cluster settings
+# mysql pxc-cluster configuration
 mysql-cluster:
   storageClassName: "local"
 
@@ -54,6 +53,7 @@ mysql-cluster:
 mysql:
   # if deploy single mysql for testing
   singleMysql: true
+  password: "pa88w0rd"
 
   user: "root"
   database: "data_workbench"
@@ -64,16 +64,17 @@ mysql:
   slowTshreshold: 2s
 
 
-# redis settings
+# redis-operator configuration
 redisoperator:
   rbac:
     install: true
 
+# redis-cluster configuration
 redis:
   database: 0
   masterName: "mymaster"
 
-# apiserver settings
+# apiserver configuration
 apiserver:
   envs:
     API_SERVER_READ_TIMEOUT: 30s
@@ -82,7 +83,7 @@ apiserver:
     API_SERVER_EXIT_TIMEOUT: 5m
     API_SERVER_TRACER_SERVICE_NAME: "apiserver"
 
-# account settings
+# account configuration
 account:
   envs:
     ACCOUNT_TRACER_SERVICE_NAME: "account"
@@ -94,7 +95,7 @@ account:
     ACCOUNT_QINGCLOUD_PROTOCOL: "http"
     ACCOUNT_QINGCLOUD_URI: "/iaas"
 
-# enginemanager settings
+# enginemanager configuration
 enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
@@ -112,12 +113,12 @@ enginemanager:
     ENGINE_MANAGER_FLINK_SERVICE_NAME_FMT: "%s-jobmanager"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
 
-# flowmanager settings
+# flowmanager configuration
 flowmanager:
   envs:
     FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
 
-# jobdeveloper settings
+# jobdeveloper configuration
 jobdeveloper:
   envs:
     JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
@@ -125,26 +126,26 @@ jobdeveloper:
     JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar"
     JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF: "/opt/homebrew/Cellar/hadoop/3.3.1/libexec/etc/hadoop"
 
-# jobmanager settings
+# jobmanager configuration
 jobmanager:
   envs:
     JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
 
-# jobwatcher settings
+# jobwatcher configuration
 jobwatcher:
   envs:
     JOB_WATCHER_JOB_WORKS: 16
     JOB_WATCHER_PICKUP_ALONE_JOBS: 1
     JOB_WATCHER_TRACER_SERVICE_NAME: "jobwatcher"
 
-# logmanager settings
+# logmanager configuration
 logmanager:
   envs:
     LOG_MANAGER_TRACER_SERVICE_NAME: "logmanager"
     LOG_MANAGER_HDFS_SERVER_USER_NAME: "root"
     LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE: 1024
 
-# notifier settings
+# notifier configuration
 notifier:
   envs:
     NOTIFIER_NF_CONFIG_CHANNEL: "SMTPChannel"
@@ -159,46 +160,46 @@ notifier:
     NOTIFIER_NF_CONFIG_SMTP_CONFIG_USER_NAME: "xiaobai417sos@163.com"
     NOTIFIER_NF_CONFIG_SMTP_CONFIG_PASSWORD: "82717785"
 
-# observer settings
+# observer configuration
 observer:
   envs: {}
 
-# resourcemanager settings
+# resourcemanager configuration
 resourcemanager:
   envs: {}
 
-# scheduler settings
+# scheduler configuration
 scheduler:
   envs:
     SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
     SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
 
-# sourcemanager settings
+# sourcemanager configuration
 sourcemanager:
   envs:
     SOURCE_MANAGER_TRACER_SERVICE_NAME: "sourcemanager"
 
-# spacemanager settings
+# spacemanager configuration
 spacemanager:
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
 
-# udfmanager settings
+# udfmanager configuration
 udfmanager:
   envs:
     UDF_MANAGER_TRACER_SERVICE_NAME: "udfmanager"
 
-# zeppelin settings
+# zeppelin configuration
 zeppelin:
   envs:
     ZEPPELIN_RUN_MODE: local
 
-# zeppelinscale settings
+# zeppelinscale configuration
 zeppelinscale:
   envs:
     ZEPPELIN_SCALE_TRACER_SERVICE_NAME: "zeppelinscale"
 
-# jaeger settings
+# jaeger configuration
 jaeger:
   envs:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
@@ -212,7 +213,7 @@ ports:
   etcd: 2379
   zeppelin: 8080
   hdfs: 8020
-  redis: 26379  # keep same as the port of redis cluster
+  redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
   apiServer: 9001
   spaceManager: 9101
