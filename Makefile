@@ -23,8 +23,8 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,account,enginemanager
-COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
+service=apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,account,enginemanager
+SERVICE_ARRAY=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=databench-db-ctrl
 
 .PHONY: help
@@ -92,11 +92,17 @@ compose-down: ## Shutdown service in docker compose
 
 .PHONY: compose-logs-f
 compose-logs-f: ## Follow service log in docker compose
-	docker-compose logs --tail 10 -f $(COMPOSE_SERVICE)
+	docker-compose logs --tail 10 -f $(SERVICE_ARRAY)
 
 update: build-dev ## Update some service
-	docker-compose stop $(COMPOSE_SERVICE)
-	docker-compose up --no-deps -d $(COMPOSE_SERVICE)
+	docker-compose stop $(SERVICE_ARRAY)
+	docker-compose up --no-deps -d $(SERVICE_ARRAY)
+	@echo "update service $(service) done"
+
+update-service: build-dev ## Update databench service in k8s, eg: make update-k8s service=s1,s2
+	docker push $(TARG.Repo)/$(TARG.Name):$(TAG)
+	@echo "push image done"
+	@$(foreach s,$(SERVICE_ARRAY),kubectl -n databench rollout restart deployment databench-$(s);)
 	@echo "update service $(service) done"
 
 .PHONY: clean
@@ -105,4 +111,10 @@ clean:
 
 .PHONY: test
 test: ## Launch databench in docker compose
-	@bash ./tests/run.sh
+	@bash ./tests/run.
+
+.DEFAULT_GOAL = help
+# Target name % means that it is a rule that matches anything, @: is a recipe;
+# the : means do nothing
+%:
+	@:
