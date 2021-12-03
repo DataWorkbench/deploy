@@ -10,13 +10,14 @@ dns:
 image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
-  registry: dockerhub.databench.io/databench
-  databench: databench
-  flyway: flyway
-  tag: dev
-  zeppelin: zeppelin
-  zeppelinTag: 0.9.0-dev
+
+  databench: dockerhub.databench.io/databench/databench:dev
+  flyway: dockerhub.databench.io/databench/flyway:dev
+  zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0-dev
+
   jaeger: jaegertracing/all-in-one:1.22
+
+  flink: dockerhub.databench.io/databench/flink
 
 
 ## hdfs configuration

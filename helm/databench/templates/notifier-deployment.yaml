@@ -36,7 +36,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: notifier
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

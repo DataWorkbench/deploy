@@ -25,7 +25,7 @@ spec:
             - '-c'
             - '{{ include "mysql.waiting.cmd" . }}'
         - name: database-init
-          image: {{ include "flyway.image" . | quote }}
+          image: "{{ .Values.image.flyway }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/flyway/ddl/ddl_init.sh"
@@ -34,7 +34,7 @@ spec:
             - name: MYSQL_HOST
               value: {{ include "mysql.host" . | quote }}
             - name: MYSQL_PORT
-              value: {{ .Values.ports.mysql | quote }}
+              value: "{{ .Values.ports.mysql }}"
             - name: MYSQL_USER
               value: {{ .Values.mysql.user }}
             - name: MYSQL_PASSWORD
@@ -44,7 +44,7 @@ spec:
                   key: root
       containers:
         - name: db-ctrl-job
-          image: {{ include "flyway.image" . | quote }}
+          image: "{{ .Values.image.flyway }}"
           imagePullPolicy: IfNotPresent
           command:
             - "flyway"

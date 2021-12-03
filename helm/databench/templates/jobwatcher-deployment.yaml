@@ -36,7 +36,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: jobwatcher
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

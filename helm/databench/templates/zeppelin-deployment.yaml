@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: zeppelin
-        image: {{ include "zeppelin.image" . | quote }}
+        image: "{{ .Values.image.zeppelin }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - containerPort: {{ .Values.ports.zeppelin }}

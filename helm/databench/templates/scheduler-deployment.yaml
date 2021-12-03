@@ -40,7 +40,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
       - name: scheduler
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

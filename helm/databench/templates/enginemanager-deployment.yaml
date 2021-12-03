@@ -43,7 +43,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: enginemanager
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
@@ -65,6 +65,8 @@ spec:
             value: '{{- include "service.hdfs" . }}'
           - name: ENGINE_MANAGER_FLINK_DOMAIN
             value: {{ .Values.domain | quote }}
+          - name: ENGINE_MANAGER_FLINK_IMAGE_REPO
+            value: {{ .Values.image.flink | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
