@@ -118,18 +118,18 @@ Service Addresses For ApiServer
 Mysql Settings
 */}}
 {{- define "mysql.host" -}}
-{{- if .Values.mysql.singleMysql -}}
-{{ .Release.Name }}-mysql
-{{- else -}}
+{{- if .Values.mysql.usePxcDb -}}
 {{ .Release.Name }}-mysql-haproxy
+{{- else -}}
+{{ .Release.Name }}-mysql
 {{- end -}}
 {{- end -}}
 
 {{- define "mysql.hostPort" -}}
-{{- if .Values.mysql.singleMysql -}}
-{{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
-{{- else -}}
+{{- if .Values.mysql.usePxcDb -}}
 {{ .Release.Name }}-mysql-haproxy:{{ .Values.ports.mysql }}
+{{- else -}}
+{{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
 {{- end -}}
 {{- end -}}
 

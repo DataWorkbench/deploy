@@ -1,10 +1,10 @@
-{{- if .Values.mysql.singleMysql  }}
+{{- if not .Values.mysql.usePxcDb  }}
 apiVersion: v1
 kind: Secret
 metadata:
   name: {{ .Release.Name }}-mysql-secrets
 data:
-  root: {{ .Values.mysql.password | b64enc }}
+  root: {{ print "pa88w0rd" | b64enc }}
 
 ---
 apiVersion: apps/v1
