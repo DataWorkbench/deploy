@@ -37,10 +37,6 @@ Service Addresses For ApiServer
 {{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobManager }}
 {{- end -}}
 
-{{- define "service.zeppelinscale" -}}
-{{ include "databench.fullname" . }}-zeppelinscale:{{ .Values.ports.zeppelinScale }}
-{{- end -}}
-
 {{- define "service.zeppelin" -}}
 {{ include "databench.fullname" . }}-zeppelin:{{ .Values.ports.zeppelin }}
 {{- end -}}
@@ -95,8 +91,6 @@ Service Addresses For ApiServer
 
 
 {{- define "jobmanager.link.services" -}}
-- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
-  value: '{{ include "service.zeppelinscale" . }}'
 - name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
   value: '{{ include "service.jobdeveloper" . }}'
 - name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS

@@ -190,11 +190,6 @@ zeppelin:
   envs:
     ZEPPELIN_RUN_MODE: local
 
-# zeppelinscale configuration
-zeppelinscale:
-  envs:
-    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: "zeppelinscale"
-
 # jaeger configuration
 jaeger:
   envs:
@@ -224,8 +219,6 @@ ports:
   jobManagerMetrics: 9205
   udfManager: 9106
   udfManagerMetrics: 9206
-  zeppelinScale: 9107
-  zeppelinScaleMetrics: 9207
   jobWatcher: 9108
   jobWatcherMetrics: 9208
   jobDeveloper: 9109
