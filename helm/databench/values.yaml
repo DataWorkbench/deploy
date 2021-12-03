@@ -51,6 +51,7 @@ mysql-cluster:
 
 # mysql config for databench-service
 mysql:
+  usePxcDb: false
   # if deploy single mysql for testing
   singleMysql: true
   password: "pa88w0rd"
@@ -108,9 +109,8 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
-    ENGINE_MANAGER_FLINK_JOB_MANAGER_PORT: "6123"
-    ENGINE_MANAGER_FLINK_WEBUI_PORT: "8081"
-    ENGINE_MANAGER_FLINK_SERVICE_NAME_FMT: "%s-jobmanager"
+    ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
+    ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
 
 # flowmanager configuration
