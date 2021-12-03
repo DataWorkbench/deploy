@@ -166,7 +166,7 @@ controller:
     enable: true
 
     ## Set the port where the NGINX stub_status or the NGINX Plus API is exposed.
-    port: 8080
+    port: 8088
 
     ## Add IPv4 IP/CIDR blocks to the allow list for NGINX stub_status or the NGINX Plus API. Separate multiple IP/CIDR by commas.
     allowCidrs: "192.168.27.133"
