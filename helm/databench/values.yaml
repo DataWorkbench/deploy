@@ -25,7 +25,9 @@ image:
 hdfs-cluster:
   hdfsHome: /data
 
-hdfsConfigDir: "/etc/hdfs"
+hdfs:
+  configDir: /etc/hdfs
+  configmapName: databench-common-config
 
 
 # common configuration for all service
