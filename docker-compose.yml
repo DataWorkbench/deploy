@@ -399,36 +399,6 @@ services:
         aliases:
           - udfmanager
 
-  zeppelinscale:
-    image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
-    container_name: "databench-zeppelinscale"
-    command: "zeppelinscale start -c ${DATABENCH_CONF}/zeppelinscale.yaml"
-    ports:
-      - "${ZEPPELIN_SCALE_PORT}:${ZEPPELIN_SCALE_PORT}"
-    links:
-      - databench-db:databench-db
-    depends_on:
-      - databench-db-ctrl
-    environment:
-      - ZEPPELIN_SCALE_ZEPPELIN_SERVER_ADDRESS=zeppelin:8080
-      - ZEPPELIN_SCALE_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
-      - ZEPPELIN_SCALE_GRPC_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_PORT}
-      - ZEPPELIN_SCALE_GRPC_SERVER_LOG_LEVEL=${GRPC_LOG_LEVEL}
-      - ZEPPELIN_SCALE_GRPC_SERVER_LOG_VERBOSITY=${GRPC_LOG_VERBOSITY}
-      - ZEPPELIN_SCALE_METRICS_ENABLED=${METRICS_ENABLED}
-      - ZEPPELIN_SCALE_METRICS_SERVER_ADDRESS=0.0.0.0:${ZEPPELIN_SCALE_METRICS_PORT}
-      - ZEPPELIN_SCALE_TRACER_SERVICE_NAME=zeppelinscale
-      - ZEPPELIN_SCALE_TRACER_LOCAL_AGENT=databench-jaeger:${TRACER_PORT}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: ${LOG_MAX_SIZE}
-        max-file: ${LOG_MAX_FILE}
-    networks:
-      databench-net:
-        aliases:
-          - zeppelinscale
-
   jobwatcher:
     image: ${IMAGE_REPO}/databench:${IMAGE_TAG}
     container_name: "databench-jobwatcher"
@@ -511,12 +481,11 @@ services:
       - databench-db:databench-db
       - jobwatcher:jobwatcher
       - jobdeveloper:jobdeveloper
-      - zeppelinscale:zeppelinscale
     depends_on:
       - databench-db-ctrl
       - databench-jaeger
     environment:
-      - JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS=zeppelinscale:${ZEPPELIN_SCALE_PORT}
+      - JOB_MANAGER_ZEPPELIN_ADDRESS=zeppelin:${ZEPPELIN_NODEPORT}
       - JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS=jobdeveloper:${JOB_DEVELOPER_PORT}
       - JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS=jobwatcher:${JOB_WATCHER_PORT}
       - JOB_MANAGER_LOG_LEVEL=${DEFAULT_LOG_LEVEL}
