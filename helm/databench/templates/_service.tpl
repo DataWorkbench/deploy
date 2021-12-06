@@ -77,6 +77,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.resourcemanager" . }}'
 - name: API_SERVER_ACCOUNT_SERVER_ADDRESS
   value: '{{ include "service.account" . }}'
+- name: API_SERVER_ENGINE_MANAGER_ADDRESS
+  value: '{{ include "service.enginemanager" . }}'
 {{- end -}}
 
 
@@ -151,5 +153,5 @@ until nc -z {{ .Release.Name }}-etcd-cluster-client {{ .Values.ports.etcd }}; do
 {{- end -}}
 
 {{- define "service.redis" -}}
-rfs-{{ .Release.Name }}:{{ .Values.ports.redis }}
+rfs-{{ .Release.Name }}-redis-cluster:{{ .Values.ports.redis }}
 {{- end -}}

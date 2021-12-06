@@ -29,7 +29,13 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
-      serviceAccountName: sa-engine-manager
+      serviceAccountName: {{ .Release.Name }}-engine-manager
+      {{- if .Values.dns.ksLBIP }}
+      hostAliases:
+        - ip: {{ .Values.dns.ksLBIP | quote }}
+          hostnames:
+            - "lb.kubesphere.local"
+      {{- end }}
       initContainers:
       - name: wait-mysql
         image: busybox:1.28.4
@@ -57,8 +63,8 @@ spec:
                 key: root
           - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
             value: '{{- include "service.hdfs" . }}'
-          - name: ENGINE_MANAGER_FLINK_DOMAIN_FMT
-            value: "%s.flink.{{- .Values.domain }}"
+          - name: ENGINE_MANAGER_FLINK_DOMAIN
+            value: {{ .Values.domain | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

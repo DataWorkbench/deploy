@@ -19,6 +19,5 @@ COPY ./jobmanager/scripts/sql/schema/V0.0.0__jobmanager.sql /flyway/sql/V0.0.0.4
 COPY ./udfmanager/scripts/sql/schema/V0.0.0__udfmanager.sql /flyway/sql/V0.0.0.5__udfmanager.sql
 COPY ./resourcemanager/scripts/sql/schema/V0.0.0__resource.sql  /flyway/sql/V0.0.0.6__resource.sql
 COPY ./notifier/scripts/sql/schema/V0.0.0__notifier.sql  /flyway/sql/V0.0.0.7__notifier.sql
-COPY ./observer/scripts/sql/schema/V0.0.0__observer.sql  /flyway/sql/V0.0.0.8__observer.sql
 COPY ./account/scripts/sql/schema/V0.0.0__account.sql  /flyway/sql/V0.0.0.9__account.sql
 COPY ./enginemanager/scripts/sql/schema/V0.0.0__engine_manager_init.sql  /flyway/sql/V0.0.0.10__engine_manager_init.sql

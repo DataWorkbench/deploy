@@ -32,7 +32,7 @@ data:
       local_agent: {{ include "service.jaeger" . | quote }}
 
     redis:
-      sentinel_addrs: {{ include "service.redis" . | quote }}
+      sentinel_addr: {{ include "service.redis" . | quote }}
       database: {{ .Values.redis.database }}
       master_name: {{ .Values.redis.masterName }}
       mode: "sentinel"
