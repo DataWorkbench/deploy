@@ -1,10 +1,10 @@
-{{- if .Values.mysql.singleMysql  }}
+{{- if not .Values.mysql.usePxcDb  }}
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Release.Name }}-mysql-secrets
+  name: {{ .Release.Name }}-mysql
 data:
-  root: {{ .Values.mysql.password | b64enc }}
+  root: {{ print "pa88w0rd" | b64enc }}
 
 ---
 apiVersion: apps/v1
@@ -46,7 +46,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-mysql-secrets
+              name: {{ .Release.Name }}-mysql
               key: root
         - name: MYSQL_ROOT_HOST
           value: "%"

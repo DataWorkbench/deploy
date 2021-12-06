@@ -32,7 +32,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: resourcemanager
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
@@ -50,7 +50,7 @@ spec:
           - name: RESOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
           - name: {{ $ename }}

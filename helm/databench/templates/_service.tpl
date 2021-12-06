@@ -37,12 +37,8 @@ Service Addresses For ApiServer
 {{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobManager }}
 {{- end -}}
 
-{{- define "service.zeppelinscale" -}}
-{{ include "databench.fullname" . }}-zeppelinscale:{{ .Values.ports.zeppelinScale }}
-{{- end -}}
-
 {{- define "service.zeppelin" -}}
-{{ include "databench.fullname" . }}-zeppelin:{{ .Values.ports.zeppelin }}
+{{ include "databench.fullname" . }}-zeppelin-server:{{ .Values.ports.zeppelin }}
 {{- end -}}
 
 {{- define "service.resourcemanager" -}}
@@ -95,14 +91,14 @@ Service Addresses For ApiServer
 
 
 {{- define "jobmanager.link.services" -}}
-- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
-  value: '{{ include "service.zeppelinscale" . }}'
 - name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
   value: '{{ include "service.jobdeveloper" . }}'
 - name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS
   value: '{{ include "service.jobwatcher" . }}'
 - name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
+- name: JOB_MANAGER_ZEPPELIN_SCALE_SERVER_ADDRESS
+  value: '{{ include "service.zeppelin" . }}'
 {{- end -}}
 
 
@@ -118,18 +114,18 @@ Service Addresses For ApiServer
 Mysql Settings
 */}}
 {{- define "mysql.host" -}}
-{{- if .Values.mysql.singleMysql -}}
-{{ .Release.Name }}-mysql
-{{- else -}}
+{{- if .Values.mysql.usePxcDb -}}
 {{ .Release.Name }}-mysql-haproxy
+{{- else -}}
+{{ .Release.Name }}-mysql
 {{- end -}}
 {{- end -}}
 
 {{- define "mysql.hostPort" -}}
-{{- if .Values.mysql.singleMysql -}}
-{{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
-{{- else -}}
+{{- if .Values.mysql.usePxcDb -}}
 {{ .Release.Name }}-mysql-haproxy:{{ .Values.ports.mysql }}
+{{- else -}}
+{{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
 {{- end -}}
 {{- end -}}
 

@@ -2,10 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "databench.fullname" . }}-ingress
+  annotations:
+    nginx.org/websocket-services: {{ include "databench.fullname" . }}-zeppelin-server
 spec:
   ingressClassName: nginx
   rules:
-    - host: api.{{- .Values.domain }}
+    - host: api.{{ .Values.domain }}
       http:
         paths:
         - path: /
@@ -15,7 +17,7 @@ spec:
               name: {{ include "databench.fullname" . }}-apiserver
               port:
                 number: {{ .Values.ports.apiServer }}
-    - host: jaeger.{{- .Values.domain }}
+    - host: jaeger.{{ .Values.domain }}
       http:
         paths:
         - path: /
@@ -25,3 +27,13 @@ spec:
               name: {{ include "databench.fullname" . }}-jaeger
               port:
                 number: {{ .Values.ports.jaeger }}
+    - host: zeppelin.{{ .Values.domain }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "databench.fullname" . }}-zeppelin-server
+              port:
+                number: {{ .Values.ports.zeppelin }}

@@ -9,7 +9,7 @@ TRAG.Gopkg:=DataWorkbench
 
 TAG:=dev
 FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
-ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0-dev
+ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0
 FLINK_IMAGE:=$(TARG.Repo)/flinkutile:1.12.3-scala_2.11
 BUILDER_IMAGE:=$(TARG.Repo)/builder:latest
 BUILDER_IMAGE_ZEPPELIN:=$(TARG.Repo)/builder:zeppelin
@@ -60,7 +60,7 @@ build-dev: compile  ## Build databench image
 	@echo "build done"
 
 .PHONY: build-all  ## Build all images
-build-all: build-flyway build-dev build-zeppelin build-flink-utile
+build-all: build-flyway build-dev build-zeppelin
 
 .PHONY: push-images  ## push all images
 push-images:

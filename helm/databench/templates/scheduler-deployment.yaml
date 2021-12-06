@@ -40,7 +40,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
       - name: scheduler
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
@@ -56,7 +56,7 @@ spec:
           - name: SCHEDULER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
 {{ include "scheduler.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.scheduler.envs }}

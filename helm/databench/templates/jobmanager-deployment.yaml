@@ -36,7 +36,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: jobmanager
-        image: {{ include "databench.image" . | quote }}
+        image: "{{ .Values.image.databench }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
@@ -52,7 +52,7 @@ spec:
           - name: JOB_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
 {{ include "jobmanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobmanager.envs }}

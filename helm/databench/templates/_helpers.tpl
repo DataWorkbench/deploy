@@ -13,16 +13,6 @@
 {{- end }}
 {{- end }}
 
-{{- define "databench.image" -}}
-{{- .Values.image.registry }}/{{ .Values.image.databench }}:{{ .Values.image.tag }}
-{{- end -}}
-{{- define "flyway.image" -}}
-{{- .Values.image.registry }}/{{ .Values.image.flyway }}:{{ .Values.image.tag }}
-{{- end -}}
-{{- define "zeppelin.image" -}}
-{{- .Values.image.registry }}/{{ .Values.image.zeppelin }}:{{ .Values.image.zeppelinTag }}
-{{- end -}}
-
 
 {{/*
 Create chart name and version as used by the chart label.
