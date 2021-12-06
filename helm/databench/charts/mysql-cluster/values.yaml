@@ -38,7 +38,7 @@ pxc:
   resources:
     requests:
       memory: 1G
-      cpu: 600m
+      cpu: 100m
     limits: {}
       # memory: 1G
       # cpu: 600m
@@ -99,7 +99,7 @@ haproxy:
   resources:
     requests:
       memory: 1G
-      cpu: 600m
+      cpu: 100m
     limits: {}
       # memory: 1G
       # cpu: 600m
@@ -142,7 +142,7 @@ proxysql:
   resources:
     requests:
       memory: 1G
-      cpu: 600m
+      cpu: 100m
     limits: {}
       # memory: 1G
       # cpu: 600m

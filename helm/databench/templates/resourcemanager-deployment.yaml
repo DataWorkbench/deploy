@@ -50,7 +50,7 @@ spec:
           - name: RESOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
           - name: {{ $ename }}

@@ -52,7 +52,7 @@ spec:
           - name: SOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
           {{- range $ename, $evalue := .Values.sourcemanager.envs }}
           - name: {{ $ename }}

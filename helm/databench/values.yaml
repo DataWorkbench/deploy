@@ -48,10 +48,7 @@ common:
 
 # mysql configuration
 mysql:
-  # mysql pxc-cluster configuration
-  usePxcDb: false  # use pxc mysql cluster, false: use single mysql for testing
-  storageClassName: "local"
-
+  usePxcDb: true  # use pxc mysql cluster, false: use single mysql for testing
   # common mysql configuration for databench services
   user: "root"
   database: "data_workbench"
@@ -60,6 +57,13 @@ mysql:
   connMaxLifetime: 10m
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
+
+# pxc mysql-cluster configuration
+mysql-cluster:
+  pxc.persistence.storageClass: "local"
+  pxc.persistence.size: 2Gi
+  backup.storages.fs-pvc.volume.persistentVolumeClaim.storageClassName: "local"
+  backup.storages.qingstor.s3.bucket: "pxc-mysql-backup-newtesting"
 
 
 # redis-operator configuration

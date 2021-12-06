@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: {{ .Release.Name }}-mysql-secrets
+  name: {{ .Release.Name }}-mysql
 data:
   root: {{ print "pa88w0rd" | b64enc }}
 
@@ -46,7 +46,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: {{ .Release.Name }}-mysql-secrets
+              name: {{ .Release.Name }}-mysql
               key: root
         - name: MYSQL_ROOT_HOST
           value: "%"

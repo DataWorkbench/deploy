@@ -59,7 +59,7 @@ spec:
           - name: ENGINE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql-secrets
+                name: {{ .Release.Name }}-mysql
                 key: root
           - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
             value: '{{- include "service.hdfs" . }}'
