@@ -23,7 +23,7 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,observer,account,logmanager,enginemanager
+service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,zeppelinscale,resourcemanager,notifier,account,enginemanager
 COMPOSE_SERVICE=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=databench-db-ctrl
 
@@ -61,6 +61,12 @@ build-dev: compile  ## Build databench image
 
 .PHONY: build-all  ## Build all images
 build-all: build-flyway build-dev build-zeppelin build-flink-utile
+
+.PHONY: push-images  ## push all images
+push-images:
+	docker push $(TARG.Repo)/$(TARG.Name):$(TAG)
+	docker push $(ZEPPELIN_IMAGE)
+	docker push $(FLYWAY_IMAGE)
 
 .PHONY: pull-images
 pull-images: ## Pull images for docker-compose

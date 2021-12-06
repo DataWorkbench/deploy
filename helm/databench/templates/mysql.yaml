@@ -1,0 +1,77 @@
+{{- if .Values.mysql.singleMysql  }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ .Release.Name }}-mysql-secrets
+data:
+  root: "pa88w0rd"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-mysql
+  labels:
+    component: mysql
+{{ include "databench.labels" . | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        component: mysql
+{{ include "databench.labels" . | indent 8 }}
+    spec:
+      containers:
+      - name: {{ include "databench.fullname" . }}-mysql
+        image: mysql:8.0
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          postStart:
+            exec:
+              command: ["sh", "-c", "rm -rf /var/lib/mysql/lost+found"]
+        args:
+          - --default-authentication-plugin=mysql_native_password
+          - --binlog-expire-logs-seconds=604800
+          - --max-binlog-size=1073741824
+        env:
+          # $ kubectl create secret generic mysql-pass --from-file=password.txt
+          # make sure password.txt does not have a trailing newline
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-mysql-secrets
+              key: root
+        - name: MYSQL_ROOT_HOST
+          value: "%"
+        ports:
+        - containerPort: 3306
+          name: mysql
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "databench.fullname" . }}-mysql
+  labels:
+    component: mysql
+{{ include "databench.labels" . | indent 4 }}
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: mysql
+  ports:
+    - name: mysql
+      protocol: TCP
+      port: 3306
+      targetPort: mysql
+      nodePort: 30306
+{{- end -}}

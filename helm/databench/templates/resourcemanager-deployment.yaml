@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-resourcemanager
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: resourcemanager
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.resourcemanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.resourcemanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: resourcemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: resourcemanager
+      annotations:
+      {{- range $key, $value := .Values.resourcemanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: resourcemanager
+        image: {{ include "databench.image" . | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.resourceManager }}
+            name: service
+          - containerPort: {{ .Values.ports.resourceManagerMetrics }}
+            name: metrics
+        env:
+          - name: RESOURCE_MANAGER_HADOOP_CONF_DIR
+            value: {{ .Values.hdfsConfigDir }}
+          - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.resourceManager }}"
+          - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.resourceManagerMetrics }}"
+          - name: RESOURCE_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mysql-secrets
+                key: root
+          {{- range $ename, $evalue := .Values.resourcemanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourceManager }}"]
+          {{- if .Values.resourcemanager.readinessProbe }}
+          periodSeconds: {{ .Values.resourcemanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.resourcemanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourceManager }}"]
+          {{- if .Values.resourcemanager.livenessProbe }}
+          periodSeconds: {{ .Values.resourcemanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.resourcemanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+          - name: hdfs-config
+            mountPath: {{ .Values.hdfsConfigDir }}
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+        - name: hdfs-config
+          configMap:
+            name: databench-common-config
+            items:
+              - key: "core-site.xml"
+                path: "core-site.xml"
+              - key: "hdfs-site.xml"
+                path: "hdfs-site.xml"

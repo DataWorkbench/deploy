@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "databench.fullname" . }}-notifier
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: notifier-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: {{ .Values.ports.notifier }}
+      targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.ports.notifierMetrics }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: notifier

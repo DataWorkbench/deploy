@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "databench.fullname" . }}-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.{{- .Values.domain }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "databench.fullname" . }}-apiserver
+              port:
+                number: {{ .Values.ports.apiServer }}
+    - host: jaeger.{{- .Values.domain }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "databench.fullname" . }}-jaeger
+              port:
+                number: {{ .Values.ports.jaeger }}

@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-jobwatcher
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: jobwatcher
+annotations:
+  {{- range $key, $value := .Values.jobwatcher.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.jobwatcher.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.jobwatcher.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: jobwatcher
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: jobwatcher
+      annotations:
+      {{- range $key, $value := .Values.jobwatcher.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: jobwatcher
+        image: {{ include "databench.image" . | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/common-config.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.jobWatcher }}
+            name: service
+          - containerPort: {{ .Values.ports.jobWatcherMetrics }}
+            name: metrics
+        env:
+          - name: JOB_WATCHER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobWatcher }}"
+          - name: JOB_WATCHER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.jobWatcherMetrics }}"
+          - name: JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS
+            value: {{ include "service.jobdeveloper" . | quote }}
+          - name: JOB_WATCHER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mysql-secrets
+                key: root
+          {{- range $ename, $evalue := .Values.jobwatcher.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
+          {{- if .Values.jobwatcher.readinessProbe }}
+          periodSeconds: {{ .Values.jobwatcher.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobwatcher.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
+          {{- if .Values.jobwatcher.livenessProbe }}
+          periodSeconds: {{ .Values.jobwatcher.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jobwatcher.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

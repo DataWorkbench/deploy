@@ -1,0 +1,242 @@
+# Default values for databench.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+domain: databench.io
+
+image:
+#  pullPolicy: IfNotPresent
+  pullPolicy: Always
+  registry: dockerhub.databench.io/databench
+  databench: databench
+  flyway: flyway
+  tag: dev
+  zeppelin: zeppelin
+  zeppelinTag: 0.9.0-dev
+  jaeger: jaegertracing/all-in-one:1.22
+
+
+## hdfs settings
+hdfs-cluster:
+  hdfsHome: /data
+
+hdfsConfigDir: "/etc/hdfs"
+
+
+# common settings for all service
+common:
+  replicas: 1
+  strategy: RollingUpdate
+  logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+  grpcLog:
+    level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
+    verbosity: 99
+  metrics:
+    enabled: true
+    urlPath: "/metrics"
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    periodSeconds: 10
+    initialDelaySeconds: 20
+
+
+## mysql settings
+# mysql pxc-cluster settings
+mysql-cluster:
+  storageClassName: "local"
+
+# mysql config for databench-service
+mysql:
+  # if deploy single mysql for testing
+  singleMysql: true
+
+  user: "root"
+  database: "data_workbench"
+  maxIdleConn: 16
+  maxOpenConn: 128
+  connMaxLifetime: 10m
+  logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
+  slowTshreshold: 2s
+
+
+# redis settings
+redisoperator:
+  rbac:
+    install: true
+
+redis:
+  database: 0
+  masterName: "mymaster"
+
+# apiserver settings
+apiserver:
+  envs:
+    API_SERVER_READ_TIMEOUT: 30s
+    API_SERVER_WRITE_TIMEOUT: 30s
+    API_SERVER_DLE_TIMEOUT: 30s
+    API_SERVER_EXIT_TIMEOUT: 5m
+    API_SERVER_TRACER_SERVICE_NAME: "apiserver"
+
+# account settings
+account:
+  envs:
+    ACCOUNT_SOURCE: "qingcloud"
+    ACCOUNT_QINGCLOUD_CONFIG_ACCESS_KEY_ID: "LTMJGBXPHSEZRNVKKPHU"
+    ACCOUNT_QINGCLOUD_CONFIG_SECRET_ACCESS_KEY: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+    ACCOUNT_QINGCLOUD_CONFIG_HOST: "api.testing.com"
+    ACCOUNT_QINGCLOUD_CONFIG_PORT: "7777"
+    ACCOUNT_QINGCLOUD_CONFIG_PROTOCOL: "http"
+    ACCOUNT_QINGCLOUD_CONFIG_URI: "/iaas"
+
+# enginemanager settings
+enginemanager:
+  helmRepoPath: "/root/.cache/helm/repository"
+  kubeConfigPath: "/root/.kube/config"
+  envs:
+    ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
+    ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH: "/root/.kube/config"
+    ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
+    ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
+    ENGINE_MANAGER_HELM_DRIVER: ""
+    ENGINE_MANAGER_HELM_DEBUG: false
+    ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
+
+    ENGINE_MANAGER_FLINK_JOB_MANAGER_PORT: "6123"
+    ENGINE_MANAGER_FLINK_WEBUI_PORT: "8081"
+    ENGINE_MANAGER_FLINK_SERVICE_NAME_FMT: "%s-jobmanager"
+
+# flowmanager settings
+flowmanager:
+  envs:
+    FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
+
+# jobdeveloper settings
+jobdeveloper:
+  envs:
+    JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
+    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: "/zeppelin/flink/flink-1.11.2"
+    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/opt/zeppelin/lib/flink-connector-jdbc_2.11-1.11.2.jar,/opt/zeppelin/lib/postgresql-42.2.18.jar;Kafka:/opt/zeppelin/lib/flink-sql-connector-kafka_2.11-1.11.2.jar;ClickHouse:/opt/zeppelin/lib/flink-connector-clickhouse-1.11.0.jar"
+    JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF: "/opt/homebrew/Cellar/hadoop/3.3.1/libexec/etc/hadoop"
+
+# jobmanager settings
+jobmanager:
+  envs:
+    JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
+
+# jobwatcher settings
+jobwatcher:
+  envs:
+    JOB_WATCHER_JOB_WORKS: 16
+    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
+    JOB_WATCHER_TRACER_SERVICE_NAME: "jobwatcher"
+
+# logmanager settings
+logmanager:
+  envs:
+    LOG_MANAGER_TRACER_SERVICE_NAME: "logmanager"
+    LOG_MANAGER_HDFS_SERVER_USER_NAME: "root"
+    LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE: 1024
+
+# notifier settings
+notifier:
+  envs:
+    NOTIFIER_NF_CONFIG_CHANNEL: "SMTPChannel"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_ACCESS_KEY_ID: "IKSMDBWVIECPIVNDYZAB"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_SECRET_ACCESS_KEY: "JnEco2qZ6EvXt89mJpCVdkBoc5AwPA0unrkFkOxq"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_HOST: "api.alphacloud.com"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_PORT: 7777
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_PROTOCOL: "http"
+    NOTIFIER_NF_CONFIG_SDK_CONFIG_URI: "/iaas"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_HOST: "smtp.163.com"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PORT: 25
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_USER_NAME: "xiaobai417sos@163.com"
+    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PASSWORD: "82717785"
+
+# observer settings
+observer:
+  envs: {}
+
+# resourcemanager settings
+resourcemanager:
+  envs: {}
+
+# scheduler settings
+scheduler:
+  envs:
+    SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
+    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
+
+# sourcemanager settings
+sourcemanager:
+  envs:
+    SOURCE_MANAGER_TRACER_SERVICE_NAME: "sourcemanager"
+
+# spacemanager settings
+spacemanager:
+  envs:
+    SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
+
+# udfmanager settings
+udfmanager:
+  envs:
+    UDF_MANAGER_TRACER_SERVICE_NAME: "udfmanager"
+
+# zeppelin settings
+zeppelin:
+  envs:
+    ZEPPELIN_RUN_MODE: local
+
+# zeppelinscale settings
+zeppelinscale:
+  envs:
+    ZEPPELIN_SCALE_TRACER_SERVICE_NAME: "zeppelinscale"
+
+# jaeger settings
+jaeger:
+  envs:
+    COLLECTOR_ZIPKIN_HTTP_PORT: 9411
+
+
+# serviceName: port
+ports:
+  jaeger: 6831
+  jaegerWeb: 16686
+  mysql: 3306
+  etcd: 2379
+  zeppelin: 8080
+  hdfs: 8020
+  redis: 26379  # keep same as the port of redis cluster
+
+  apiServer: 9001
+  spaceManager: 9101
+  spaceManagerMetrics: 9201
+  flowManager: 9102
+  flowManagerMetrics: 9202
+  scheduler: 9103
+  schedulerMetrics: 9203
+  sourceManager: 9104
+  sourceManagerMetrics: 9204
+  jobManager: 9105
+  jobManagerMetrics: 9205
+  udfManager: 9106
+  udfManagerMetrics: 9206
+  zeppelinScale: 9107
+  zeppelinScaleMetrics: 9207
+  jobWatcher: 9108
+  jobWatcherMetrics: 9208
+  jobDeveloper: 9109
+  jobDeveloperMetrics: 9209
+  account: 9110
+  accountMetrics: 9210
+  resourceManager: 9111
+  resourceManagerMetrics: 9211
+  observer: 9112
+  observerMetrics: 9212
+  notifier: 9113
+  notifierMetrics: 9213
+  engineManager: 9114
+  engineManagerMetrics: 9214
+  logManager: 9115
+  logManagerMetrics: 9215

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "databench.fullname" . }}-scheduler
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: scheduler-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      protocol: TCP
+      port: {{ .Values.ports.scheduler }}
+      targetPort: service
+    - name: metrics
+      protocol: TCP
+      port: {{ .Values.ports.schedulerMetrics }}
+      targetPort: metrics
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: scheduler

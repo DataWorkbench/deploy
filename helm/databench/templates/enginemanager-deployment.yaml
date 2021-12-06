@@ -1,0 +1,110 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-enginemanager
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: enginemanager
+annotations:
+  {{- range $key, $value := .Values.enginemanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.enginemanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.enginemanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: enginemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: enginemanager
+      annotations:
+      {{- range $key, $value := .Values.enginemanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      serviceAccountName: sa-engine-manager
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: enginemanager
+        image: {{ include "databench.image" . | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.engineManager }}
+            name: service
+          - containerPort: {{ .Values.ports.engineManagerMetrics }}
+            name: metrics
+        env:
+          - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.engineManager }}"
+          - name: ENGINE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.engineManagerMetrics }}"
+          - name: ENGINE_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mysql-secrets
+                key: root
+          - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
+            value: '{{- include "service.hdfs" . }}'
+          - name: ENGINE_MANAGER_FLINK_DOMAIN_FMT
+            value: "%s.flink.{{- .Values.domain }}"
+          {{- range $ename, $evalue := .Values.enginemanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        volumeMounts:
+          - name: helm-repo-volume
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+            readOnly: true
+          - name: kube-config-volume
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
+            readOnly: true
+          - name: databench-config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}"]
+          {{- if .Values.enginemanager.readinessProbe }}
+          periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}" ]
+          {{- if .Values.enginemanager.livenessProbe }}
+          periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+      volumes:
+        - name: helm-repo-volume
+          hostPath:
+            path: {{ .Values.enginemanager.helmRepoPath }}
+            type: Directory
+        - name: kube-config-volume
+          hostPath:
+            path: {{ .Values.enginemanager.kubeConfigPath }}
+            type: File
+        - name: databench-config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

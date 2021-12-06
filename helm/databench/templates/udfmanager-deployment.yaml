@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "databench.fullname" . }}-udfmanager
+  labels:
+{{ include "databench.labels" . | indent 4 }}
+    component: udfmanager
+annotations:
+  {{- range $key, $value := .Values.udfmanager.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.common.replicas .Values.udfmanager.replicas }}
+  strategy:
+    type: {{ coalesce .Values.common.strategy .Values.udfmanager.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: udfmanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: udfmanager
+      annotations:
+      {{- range $key, $value := .Values.udfmanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: busybox:1.28.4
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: udfmanager
+        image: {{ include "databench.image" . | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "udfmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        ports:
+          - containerPort: {{ .Values.ports.udfManager }}
+            name: service
+          - containerPort: {{ .Values.ports.udfManagerMetrics }}
+            name: metrics
+        env:
+          - name: UDF_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.udfManager }}"
+          - name: UDF_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.udfManagerMetrics }}"
+          - name: UDF_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mysql-secrets
+                key: root
+          {{- range $ename, $evalue := .Values.udfmanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
+          {{- if .Values.udfmanager.readinessProbe }}
+          periodSeconds: {{ .Values.udfmanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.udfmanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
+          {{- if .Values.udfmanager.livenessProbe }}
+          periodSeconds: {{ .Values.udfmanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.udfmanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: "/etc/dataworkbench"
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+
