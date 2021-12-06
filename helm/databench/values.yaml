@@ -14,7 +14,7 @@ image:
   databench: dockerhub.databench.io/databench/databench:dev
   flyway: dockerhub.databench.io/databench/flyway:dev
   zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
-  zeppelinInterpreter: apache/zeppelin:0.9.0
+  zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
 
   jaeger: jaegertracing/all-in-one:1.22
 
@@ -193,7 +193,11 @@ udfmanager:
 # zeppelin configuration
 zeppelin:
   envs:
-    ZEPPELIN_RUN_MODE: local
+    ZEPPELIN_HOME: /opt/zeppelin
+    ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
+    ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE: spark:2.4.5
+    SPARK_MASTER: k8s://https://kubernetes.default.svc
+    SPARK_HOME: /spark
 
 # jaeger configuration
 jaeger:

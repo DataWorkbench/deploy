@@ -1,27 +1,3 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: zeppelin-server-conf-map
-data:
-  # 'serviceDomain' is a Domain name to use for accessing Zeppelin UI.
-  # Should point IP address of 'zeppelin-server' service.
-  #
-  # Wildcard subdomain need to be point the same IP address to access service inside of Pod (such as SparkUI).
-  # i.e. if service domain is 'local.zeppelin-project.org', DNS configuration should make 'local.zeppelin-project.org' and '*.local.zeppelin-project.org' point the same address.
-  #
-  # Default value is 'local.zeppelin-project.org' while it points 127.0.0.1 and `kubectl port-forward zeppelin-server` will give localhost to connects.
-  # If you have your ingress controller configured to connect to `zeppelin-server` service and have a domain name for it (with wildcard subdomain point the same address), you can replace serviceDomain field with your own domain.
-  SERVICE_DOMAIN: zeppelin.{{ .Values.domain }}
-  ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE: spark:2.4.5
-  ZEPPELIN_K8S_CONTAINER_IMAGE: {{ .Values.image.zeppelinInterpreter }}
-  ZEPPELIN_HOME: /opt/zeppelin
-  ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
-  # default value of 'master' property for spark interpreter.
-  SPARK_MASTER: k8s://https://kubernetes.default.svc
-  # default value of 'SPARK_HOME' property for spark interpreter.
-  SPARK_HOME: /spark
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -68,9 +44,20 @@ spec:
                 fieldRef:
                   apiVersion: v1
                   fieldPath: metadata.name
-          envFrom:
-            - configMapRef:
-                name: zeppelin-server-conf-map
+            - name: SERVICE_DOMAIN
+              value: zeppelin.{{ .Values.domain }}
+            - name: ZEPPELIN_K8S_CONTAINER_IMAGE
+              value: {{ .Values.image.zeppelinInterpreter }}
+            - name: ZEPPELIN_ALLOWED_ORIGINS
+              value: "*"
+            - name: ZEPPELIN_K8S_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: ZEPPELIN_K8S_SERVICE_NAME
+              value: {{ include "databench.fullname" . }}-zeppelin-server
+            {{- range $ename, $evalue := .Values.zeppelin.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
         # volumeMounts:
         #  - name: zeppelin-server-notebook-volume     # configure this to persist notebook
         #    mountPath: /zeppelin/notebook
@@ -104,6 +91,7 @@ kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: zeppelin-server-role
+  namespace: {{ .Release.Namespace }}
 rules:
   - apiGroups: [""]
     resources: ["pods", "services"]
