@@ -54,8 +54,8 @@ mysql:
   # common mysql configuration for databench services
   user: "root"
   database: "data_workbench"
-  maxIdleConn: 16
-  maxOpenConn: 128
+  maxIdleConn: 2
+  maxOpenConn: 16
   connMaxLifetime: 10m
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
