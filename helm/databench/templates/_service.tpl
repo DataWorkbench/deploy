@@ -114,18 +114,18 @@ Service Addresses For ApiServer
 Mysql Settings
 */}}
 {{- define "mysql.host" -}}
-{{- if .Values.mysql.usePxcDb -}}
-{{ .Release.Name }}-mysql-haproxy
-{{- else -}}
+{{- if .Values.mysql.internal -}}
 {{ .Release.Name }}-mysql
+{{- else -}}
+{{ .Values.mysql.externalHost }}
 {{- end -}}
 {{- end -}}
 
 {{- define "mysql.hostPort" -}}
-{{- if .Values.mysql.usePxcDb -}}
-{{ .Release.Name }}-mysql-haproxy:{{ .Values.ports.mysql }}
-{{- else -}}
+{{- if .Values.mysql.internal -}}
 {{ .Release.Name }}-mysql:{{ .Values.ports.mysql }}
+{{- else -}}
+{{ .Values.mysql.externalHost }}:{{ .Values.ports.mysql }}
 {{- end -}}
 {{- end -}}
 
@@ -141,13 +141,13 @@ hdfs://{{ .Release.Name }}-hdfs-http:{{ .Values.ports.hdfs }}
 Etcd Settings
 */}}
 {{- define "etcd.endpoints" -}}
-{{ .Release.Name }}-etcd-cluster-client:{{- .Values.ports.etcd }}
+{{ .Values.etcd.endpoint }}:{{- .Values.ports.etcd }}
 {{- end -}}
 
 {{- define "etcd.waiting.cmd" -}}
-until nc -z {{ .Release.Name }}-etcd-cluster-client {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
+until nc -z {{ .Values.etcd.endpoint }} {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
 {{- end -}}
 
 {{- define "service.redis" -}}
-rfs-{{ .Release.Name }}-redis-cluster:{{ .Values.ports.redis }}
+{{ .Values.redis.address }}:{{ .Values.ports.redis }}
 {{- end -}}

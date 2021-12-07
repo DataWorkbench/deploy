@@ -4,7 +4,7 @@ fullnameOverride: ""
 
 storageClass: ""
 
-hdfsHome: /mnt
+hdfsHome: /data
 
 version: 2.9.2
 

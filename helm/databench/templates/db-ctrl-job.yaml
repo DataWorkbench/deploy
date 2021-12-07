@@ -40,7 +40,7 @@ spec:
             - name: MYSQL_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql
+                  name: {{ .Values.mysql.secretName }}
                   key: root
       containers:
         - name: db-ctrl-job
@@ -57,7 +57,7 @@ spec:
             - name: FLYWAY_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Release.Name }}-mysql
+                  name: {{ .Values.mysql.secretName }}
                   key: root
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File

@@ -20,23 +20,13 @@ image:
 
   flink: dockerhub.databench.io/databench/flink
 
-
-## hdfs configuration
-hdfs-cluster:
-  hdfsHome: /data
-
-hdfs:
-  configDir: /etc/hdfs
-  configmapName: databench-common-config
-
-
 # common configuration for all service
 common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
   grpcLog:
-    level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
+    level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
   metrics:
     enabled: true
@@ -48,10 +38,15 @@ common:
     periodSeconds: 10
     initialDelaySeconds: 20
 
+etcd:
+  endpoint: etcd-cluster-client
+
 # mysql configuration
 mysql:
-  usePxcDb: true  # use pxc mysql cluster, false: use single mysql for testing
+  internal: false  # if use internal mysql in dependencies
   # common mysql configuration for databench services
+  externalHost: mysql-cluster-pxc-db-haproxy
+  secretName: mysql-cluster-pxc-db
   user: "root"
   database: "data_workbench"
   maxIdleConn: 16
@@ -60,21 +55,13 @@ mysql:
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
 
-# pxc mysql-cluster configuration
-mysql-cluster:
-  pxc.persistence.storageClass: "local"
-  pxc.persistence.size: 2Gi
-  backup.storages.fs-pvc.volume.persistentVolumeClaim.storageClassName: "local"
-  backup.storages.qingstor.s3.bucket: "pxc-mysql-backup-newtesting"
-
-
-# redis-operator configuration
-redisoperator:
-  rbac:
-    install: true
+hdfs:
+  configDir: /etc/hdfs
+  configmapName: hdfs-common-config
 
 # redis-cluster configuration
 redis:
+  address: rfs-redis-cluster
   database: 0
   masterName: "mymaster"
 
@@ -115,6 +102,8 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+
+    ENGINE_MANAGER_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:

@@ -5,9 +5,9 @@
 finalizers:
   - delete-pxc-pods-in-order
 ## Set this if you want to delete proxysql persistent volumes on cluster deletion
-  - delete-proxysql-pvc
+#  - delete-proxysql-pvc
 ## Set this if you want to delete database persistent volumes on cluster deletion
-  - delete-pxc-pvc
+#  - delete-pxc-pvc
 
 nameOverride: ""
 fullnameOverride: ""
@@ -228,7 +228,7 @@ backup:
     qingstor:
       type: s3
       s3:
-        bucket: mysql-backup-pxc
+        bucket: pxc-mysql-backup-newtesting
         credentialsAccessKey: MUBDSNZZSLGKHEYVAFKW
         credentialsSecretKey: FEMsN6sXZ0U1iaRar2MfLiIxMx9ULUHNOurscoa5
         region: pek3b
@@ -241,7 +241,7 @@ backup:
 
 secrets:
   passwords:
-    root: insecure-root-password
+    root: pa88w0rd
     xtrabackup: insecure-xtrabackup-password
     monitor: insecure-monitor-password
     clustercheck: insecure-clustercheck-password
