@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zeppelin-server
+  name: {{ include "databench.fullname" . }}-zeppelin-server
   labels:
     app.kubernetes.io/name: zeppelin-server
 spec:
