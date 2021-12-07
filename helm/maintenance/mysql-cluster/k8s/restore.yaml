@@ -4,6 +4,6 @@ metadata:
   name: restore1
 spec:
   # update this for your mysql-cluster that restore to
-  pxcCluster: cluster1
+  pxcCluster: databench-mysql
   # update this for restore from the backup-name
   backupName: cron-cluster1-20210927075056-372f8

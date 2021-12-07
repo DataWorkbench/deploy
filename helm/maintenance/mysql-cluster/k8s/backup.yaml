@@ -1,8 +1,7 @@
 apiVersion: pxc.percona.com/v1
 kind: PerconaXtraDBClusterBackup
 metadata:
-  name: backup1
+  name: pxc-backup
 spec:
-  # update this for your mysql-cluster to backup
-  pxcCluster: cluster1
+  pxcCluster: databench-mysql
   storageName: fs-pvc
