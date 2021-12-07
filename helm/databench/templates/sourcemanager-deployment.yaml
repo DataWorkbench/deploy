@@ -47,10 +47,10 @@ spec:
         env:
           - name: SOURCE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.sourceManager }}"
-          - name: SOURCE_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
-            value: '{{ include "service.enginemanager" . }}'
           - name: SOURCE_MANAGER_METRICS_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.sourceManagerMetrics }}"
+          - name: SOURCE_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
+            value: '{{ include "service.enginemanager" . }}'
           - name: SOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:

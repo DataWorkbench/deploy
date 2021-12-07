@@ -36,7 +36,7 @@ common:
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
   grpcLog:
-    level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
+    level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
   metrics:
     enabled: true
@@ -115,6 +115,8 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+
+    ENGINE_MANAGER_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:
