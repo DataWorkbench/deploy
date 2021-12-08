@@ -26,7 +26,7 @@ spec:
             service:
               name: {{ include "databench.fullname" . }}-jaeger
               port:
-                number: {{ .Values.ports.jaeger }}
+                number: {{ .Values.ports.jaegerWeb }}
     - host: zeppelin.{{ .Values.domain }}
       http:
         paths:
