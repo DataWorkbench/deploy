@@ -10,9 +10,9 @@ annotations:
   {{ $key | quote }}: {{ $value | quote }}
   {{- end }}
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.jobmanager.replicas }}
+  replicas: {{ coalesce .Values.jobmanager.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.jobmanager.strategy }}
+    type: {{ coalesce .Values.jobmanager.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
