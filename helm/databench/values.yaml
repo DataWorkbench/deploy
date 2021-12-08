@@ -88,6 +88,7 @@ account:
 
 # enginemanager configuration
 enginemanager:
+  replicas: 1
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
@@ -104,6 +105,7 @@ enginemanager:
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
 
     ENGINE_MANAGER_LOG_LEVEL: 1
+    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:

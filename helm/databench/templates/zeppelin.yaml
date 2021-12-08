@@ -20,6 +20,7 @@ spec:
       containers:
         - name: zeppelin-server
           image: {{ .Values.image.zeppelin }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["sh", "-c", "$(ZEPPELIN_HOME)/bin/zeppelin.sh"]
           lifecycle:
             preStop:
