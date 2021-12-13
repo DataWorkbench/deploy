@@ -35,9 +35,11 @@ pxc:
   readinessDelaySec: 15
   livenessDelaySec: 300
   forceUnsafeBootstrap: false
-    configuration: |
-      [mysqld]
-      max_connections=10000
+  configuration: |
+    [mysqld]
+    max_connections=10000
+    slow_query_log=ON
+    long_query_time=3
   resources:
     requests:
       memory: 1G
