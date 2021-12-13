@@ -64,10 +64,11 @@ pxc:
     maxUnavailable: 1
     # minAvailable: 0
   persistence:
-    enabled: true
-    storageClass: "local"
-    accessMode: ReadWriteOnce
-    size: 2Gi
+    storageClassName: local
+    accessModes: [ "ReadWriteOnce" ]
+    resources:
+      requests:
+        storage: 2G
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: false
