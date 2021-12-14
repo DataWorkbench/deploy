@@ -674,7 +674,7 @@ services:
 
   clickhouse:
     image: "yandex/clickhouse-server:latest"
-    container_name: "dataworkbench-clickhouse-for-test"
+    container_name: "databench-clickhouse-for-test"
     ports:
       - "8123:8123"
     logging:
@@ -683,13 +683,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - clickhouse
 
   postgres:
     image: "postgres:12.1"
-    container_name: "dataworkbench-postgres-for-test"
+    container_name: "databench-postgres-for-test"
     environment:
       - POSTGRES_PASSWORD=password
     ports:
@@ -700,7 +700,7 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - postgres
 
