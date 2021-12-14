@@ -35,15 +35,20 @@ pxc:
   readinessDelaySec: 15
   livenessDelaySec: 300
   forceUnsafeBootstrap: false
+#    innodb_log_file_size=2G
+#    innodb_buffer_pool_size=8G
+#    innodb_log_buffer_size=8M
   configuration: |
     [mysqld]
+    datadir=/var/lib/mysql
     max_connections=10000
+    max_user_connections=9000
     slow_query_log=ON
     long_query_time=3
   resources:
     requests:
-      memory: 1G
-      cpu: 100m
+      memory: 4G
+      cpu: 2G
     limits: {}
       # memory: 1G
       # cpu: 600m
@@ -70,7 +75,7 @@ pxc:
     accessModes: [ "ReadWriteOnce" ]
     resources:
       requests:
-        storage: 2G
+        storage: 100G
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: false
@@ -105,7 +110,7 @@ haproxy:
   resources:
     requests:
       memory: 1G
-      cpu: 100m
+      cpu: 500m
     limits: {}
       # memory: 1G
       # cpu: 600m
@@ -192,11 +197,11 @@ logcollector:
     limits: {}
 
 pmm:
-  enabled: false
+  enabled: true
   image:
     repository: percona/pmm-client
     tag: 2.18.0
-  serverHost: monitoring-service
+  serverHost: mysql-monitor-service
   serverUser: admin
   resources:
     requests: {}
