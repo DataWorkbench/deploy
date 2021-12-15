@@ -1,0 +1,9 @@
+apiVersion: "pxc.percona.com/v1"
+kind: "PerconaXtraDBClusterRestore"
+metadata:
+  name: "restore1"
+spec:
+  pxcCluster: "pxc-cluster-pxc-db"
+  backupSource:
+    destination: pvc/xb-cron-mysql-cluster-px-fs-pvc-20211213000-372f8
+    storageName: fs-pvc
