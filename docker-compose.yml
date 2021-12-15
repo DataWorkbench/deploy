@@ -760,6 +760,7 @@ services:
     command: "observer start -c ${DATABENCH_CONF}/observer.yaml"
     ports:
       - "${OBSERVER_PORT}:${OBSERVER_PORT}"
+      - "${OBSERVER_METRICS_PORT}:${OBSERVER_METRICS_PORT}"
     links:
       - databench-db:databench-db
     depends_on:
