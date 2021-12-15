@@ -71,11 +71,10 @@ pxc:
     maxUnavailable: 1
     # minAvailable: 0
   persistence:
-    storageClassName: local
-    accessModes: [ "ReadWriteOnce" ]
-    resources:
-      requests:
-        storage: 100G
+    enabled: true
+    storageClass: "local"
+    accessMode: ReadWriteOnce
+    size: 10Gi
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: false
@@ -254,7 +253,7 @@ secrets:
     monitor: insecure-monitor-password
     clustercheck: insecure-clustercheck-password
     proxyadmin: insecure-proxyadmin-password
-    pmmserver: insecure-pmmserver-password
+    pmmserver: admin123456
     operator: insecure-operator-password
     replication: insecure-replication-password
   ## If you are using `cert-manager` you can skip this next section.
