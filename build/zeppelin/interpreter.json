@@ -1898,7 +1898,7 @@
         },
         "HADOOP_CONF_DIR": {
           "name": "HADOOP_CONF_DIR",
-          "value": "/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop",
+          "value": "/etc/hdfs",
           "type": "string",
           "description": "Location of hadoop conf (core-site.xml, hdfs-site.xml and etc.)"
         },
