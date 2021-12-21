@@ -185,6 +185,7 @@ udfmanager:
 
 # zeppelin configuration
 zeppelin:
+  hdfsConfigDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   envs:
     ZEPPELIN_HOME: /opt/zeppelin
     ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
