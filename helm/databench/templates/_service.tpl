@@ -109,6 +109,13 @@ Service Addresses For ApiServer
   value: '{{ include "service.flowmanager" . }}'
 {{- end -}}
 
+{{- define "spacemanager.link.services" -}}
+- name: SCHEDULER_JOB_MANAGER_ADDRESS
+  value: '{{ include "service.jobmanager" . }}'
+- name: SCHEDULER_FLOW_MANAGER_ADDRESS
+  value: '{{ include "service.flowmanager" . }}'
+{{- end -}}
+
 
 {{/*
 Mysql Settings

@@ -58,6 +58,11 @@ spec:
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+{{ include "spacemanager.link.services" . | indent 10 }}
+          {{ - range $ename, $evalue := .Values.scheduler.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{ - end }}
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spaceManager }}"]
