@@ -9,7 +9,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   serviceName: {{ template "percona.fullname" . }}
-  replicas: 1
+  replicas: {{ .Values.replicas }}
   updateStrategy:
     type: RollingUpdate
   selector:

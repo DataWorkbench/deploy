@@ -44,7 +44,7 @@ pxc:
     max_connections=10000
     max_user_connections=9000
     slow_query_log=ON
-    long_query_time=3
+    long_query_time=10
   resources:
     requests:
       memory: 4G
