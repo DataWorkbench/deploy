@@ -53,6 +53,7 @@ spec:
   pxc:
     size: {{ $pxc.size }}
     image: "{{ $pxc.image.repository }}:{{ $pxc.image.tag }}"
+    imagePullPolicy: IfNotPresent
     autoRecovery: {{ $pxc.autoRecovery }}
     readinessDelaySec: {{ $pxc.readinessDelaySec }}
     livenessDelaySec: {{ $pxc.livenessDelaySec }}
@@ -285,6 +286,7 @@ spec:
     {{- $logcollector := .Values.logcollector }}
     enabled: true
     image: {{ include "pxc-db.logcollector-image" . }}
+    imagePullPolicy: IfNotPresent
     {{- if $logcollector.configuration }}
     configuration: |
     {{ tpl $logcollector.configuration $ | nindent 6 }}
@@ -302,6 +304,7 @@ spec:
     {{- $pmm := .Values.pmm }}
     enabled: true
     image: {{ $pmm.image.repository }}:{{ $pmm.image.tag }}
+    imagePullPolicy: IfNotPresent
     serverHost: {{ $pmm.serverHost }}
     serverUser: {{ $pmm.serverUser }}
     resources:
@@ -318,6 +321,7 @@ spec:
   {{- end }}
     image: {{ include "pxc-db.backup-image" . }}
     {{- if $backup.imagePullSecrets }}
+    imagePullPolicy: IfNotPresent
     imagePullSecrets:
 {{ $backup.imagePullSecrets | toYaml | indent 6 }}
     {{- end }}
