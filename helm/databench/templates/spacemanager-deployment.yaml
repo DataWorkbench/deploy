@@ -54,12 +54,8 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
-          {{- range $ename, $evalue := .Values.spacemanager.envs }}
-          - name: {{ $ename }}
-            value: {{ $evalue | quote }}
-          {{- end }}
 {{ include "spacemanager.link.services" . | indent 10 }}
-          {{- range $ename, $evalue := .Values.scheduler.envs }}
+          {{- range $ename, $evalue := .Values.spacemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}

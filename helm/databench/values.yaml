@@ -177,6 +177,7 @@ sourcemanager:
 spacemanager:
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
+    SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
 
 # udfmanager configuration
 udfmanager:
