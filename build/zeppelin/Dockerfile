@@ -15,4 +15,6 @@ COPY zeppelin-site.xml /opt/zeppelin/conf/
 
 ADD 1.12_lib /zeppelin/flink/1.12_lib/
 ADD depends /zeppelin/flink/depends/
+USER root
+RUN chmod 777 -R /zeppelin/flink/
 CMD ["bin/zeppelin.sh"]
