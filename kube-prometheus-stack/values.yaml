@@ -8,7 +8,7 @@ nameOverride: ""
 
 ## Override the deployment namespace
 ##
-namespaceOverride: "dev"
+namespaceOverride: "kubesphere-monitoring-system"
 
 ## Provide a k8s version to auto dashboard import script example: kubeTargetVersionOverride: 1.16.6
 ##
@@ -119,7 +119,7 @@ alertmanager:
 
   ## Deploy alertmanager
   ##
-  enabled: true
+  enabled: false
 
   ## Annotations for Alertmanager
   ##
@@ -208,7 +208,7 @@ alertmanager:
   #       {{ end }}
 
   ingress:
-    enabled: true
+    enabled: false
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
@@ -220,17 +220,17 @@ alertmanager:
 
     ## Hosts must be provided if Ingress is enabled.
     ##
-    hosts:
-      - alertmanager.example.com
+    hosts: []
+      # - alertmanager.domain.com
 
     ## Paths to use for ingress rules - one path should match the alertmanagerSpec.routePrefix
     ##
-    paths:
-      - /
+    paths: []
+    # - /
 
     ## For Kubernetes >= 1.18 you should specify the pathType (determines how Ingress paths should be matched)
     ## See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#better-path-matching-with-path-types
-    pathType: Prefix
+    # pathType: ImplementationSpecific
 
     ## TLS configuration for Alertmanager Ingress
     ## Secret must be manually created in the namespace
@@ -467,7 +467,7 @@ alertmanager:
 
     ## Size is the expected size of the alertmanager cluster. The controller will eventually make the size of the
     ## running cluster equal to the expected size.
-    replicas: 3
+    replicas: 1
 
     ## Time duration Alertmanager shall retain data for. Default is '120h', and must match the regular expression
     ## [0-9]+(ms|s|m|h) (milliseconds seconds minutes hours).
@@ -477,18 +477,20 @@ alertmanager:
     ## Storage is the definition of how storage will be used by the Alertmanager instances.
     ## ref: https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/user-guides/storage.md
     ##
-    storage:
-     volumeClaimTemplate:
-       spec:
-         accessModes: ["ReadWriteOnce"]
-         resources:
-           requests:
-             storage: 30Gi
+    storage: {}
+    # volumeClaimTemplate:
+    #   spec:
+    #     storageClassName: gluster
+    #     accessModes: ["ReadWriteOnce"]
+    #     resources:
+    #       requests:
+    #         storage: 50Gi
+    #   selector: {}
 
 
     ## The external URL the Alertmanager instances will be available under. This is necessary to generate correct URLs. This is necessary if Alertmanager is not served from root of a DNS name. string  false
     ##
-    externalUrl: "http://alertmanager.example.com"
+    externalUrl:
 
     ## The route prefix Alertmanager registers HTTP handlers for. This is useful, if using ExternalURL and a proxy is rewriting HTTP routes of a request, and the actual ExternalURL is still true,
     ## but the server serves requests under a different route prefix. For example for use with kubectl proxy.
@@ -596,7 +598,7 @@ alertmanager:
 
     ## PortName to use for Alert Manager.
     ##
-    portName: "web"
+    portName: "http-web"
 
     ## ClusterAdvertiseAddress is the explicit address to advertise in cluster. Needs to be provided for non RFC1918 [1] (public) addresses. [1] RFC1918: https://tools.ietf.org/html/rfc1918
     ##
@@ -621,7 +623,7 @@ alertmanager:
 ##
 grafana:
   enabled: true
-  namespaceOverride: ""
+  namespaceOverride: "kubesphere-monitoring-system"
 
   ## ForceDeployDatasources Create datasource configmap even if grafana deployment has been disabled
   ##
@@ -655,6 +657,7 @@ grafana:
     ## If true, Grafana Ingress will be created
     ##
     enabled: true
+    ingressClassName: nginx
 
     ## Annotations for Grafana Ingress
     ##
@@ -728,6 +731,10 @@ grafana:
   #   configMap: certs-configmap
   #   readOnly: true
 
+  deleteDatasources: []
+  # - name: example-datasource
+  #   orgId: 1
+
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: http://docs.grafana.org/administration/provisioning/#datasources
   additionalDataSources: []
@@ -747,7 +754,7 @@ grafana:
   ## Passed to grafana subchart and used by servicemonitor below
   ##
   service:
-    portName: service
+    portName: http-web
 
   ## If true, create a serviceMonitor for grafana
   ##
@@ -784,7 +791,7 @@ grafana:
 ## Component scraping the kube api server
 ##
 kubeApiServer:
-  enabled: true
+  enabled: false
   tlsConfig:
     serverName: kubernetes
     insecureSkipVerify: false
@@ -826,7 +833,7 @@ kubeApiServer:
 ## Component scraping the kubelet and kubelet-hosted cAdvisor
 ##
 kubelet:
-  enabled: true
+  enabled: false
   namespace: kube-system
 
   serviceMonitor:
@@ -960,7 +967,7 @@ kubelet:
 ## Component scraping the kube controller manager
 ##
 kubeControllerManager:
-  enabled: true
+  enabled: false
 
   ## If your kube controller manager is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1021,7 +1028,7 @@ kubeControllerManager:
 ## Component scraping coreDns. Use either this or kubeDns
 ##
 coreDns:
-  enabled: true
+  enabled: false
   service:
     port: 9153
     targetPort: 9153
@@ -1118,7 +1125,7 @@ kubeDns:
 ## Component scraping etcd
 ##
 kubeEtcd:
-  enabled: true
+  enabled: false
 
   ## If your etcd is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1185,7 +1192,7 @@ kubeEtcd:
 ## Component scraping kube scheduler
 ##
 kubeScheduler:
-  enabled: true
+  enabled: false
 
   ## If your kube scheduler is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1245,7 +1252,7 @@ kubeScheduler:
 ## Component scraping kube proxy
 ##
 kubeProxy:
-  enabled: true
+  enabled: false
 
   ## If your kube proxy is not deployed as a pod, specify IPs it can be found on
   ##
@@ -1296,7 +1303,7 @@ kubeProxy:
 ## Component scraping kube state metrics
 ##
 kubeStateMetrics:
-  enabled: true
+  enabled: false
   serviceMonitor:
     ## Scrape interval. If not set, the Prometheus default scrape interval is used.
     ##
@@ -1349,7 +1356,7 @@ kube-state-metrics:
 ## Deploy node exporter as a daemonset to all nodes
 ##
 nodeExporter:
-  enabled: true
+  enabled: false
 
   ## Use the value configured in prometheus-node-exporter.podLabels
   ##
@@ -1400,11 +1407,13 @@ prometheus-node-exporter:
   extraArgs:
     - --collector.filesystem.ignored-mount-points=^/(dev|proc|sys|var/lib/docker/.+|var/lib/kubelet/.+)($|/)
     - --collector.filesystem.ignored-fs-types=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$
+  service:
+    portName: http-metrics
 
 ## Manages Prometheus and Alertmanager components
 ##
 prometheusOperator:
-  enabled: true
+  enabled: false
 
   ## Prometheus-Operator v0.39.0 and later support TLS natively.
   ##
@@ -1548,6 +1557,8 @@ prometheusOperator:
   kubeletService:
     enabled: true
     namespace: kube-system
+    ## Use '{{ template "kube-prometheus-stack.fullname" . }}-kubelet' by default
+    name: ""
 
   ## Create a servicemonitor for the operator
   ##
@@ -1650,20 +1661,23 @@ prometheusOperator:
   ##
   # alertmanagerDefaultBaseImage: quay.io/prometheus/alertmanager
 
-  ## Prometheus-config-reloader image to use for config and rule reloading
+  ## Prometheus-config-reloader
   ##
-  prometheusConfigReloaderImage:
-    repository: dataworkbench/prometheus-config-reloader
-    tag: v0.47.0
-    sha: ""
+  prometheusConfigReloader:
+    # image to use for config and rule reloading
+    image:
+      repository: dataworkbench/prometheus-config-reloader
+      tag: v0.47.0
+      sha: ""
 
-  ## Set the prometheus config reloader side-car CPU limit
-  ##
-  configReloaderCpu: 100m
-
-  ## Set the prometheus config reloader side-car memory limit
-  ##
-  configReloaderMemory: 50Mi
+    # resource config for prometheusConfigReloader
+    resources:
+      requests:
+        cpu: 100m
+        memory: 50Mi
+      limits:
+        cpu: 100m
+        memory: 50Mi
 
   ## Thanos side-car image when configured
   ##
@@ -1680,7 +1694,7 @@ prometheusOperator:
 ##
 prometheus:
 
-  enabled: true
+  enabled: false
 
   ## Annotations for Prometheus
   ##
@@ -1901,7 +1915,7 @@ prometheus:
 
     # For Kubernetes >= 1.18 you should specify the ingress-controller via the field ingressClassName
     # See https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/#specifying-the-class-of-an-ingress
-    # ingressClassName: nginx
+    ingressClassName: nginx
 
     annotations: {}
     labels: {}
@@ -2260,7 +2274,7 @@ prometheus:
     ## Number of replicas of each shard to deploy for a Prometheus deployment.
     ## Number of replicas multiplied by shards is the total number of Pods created.
     ##
-    replicas: 3
+    replicas: 1
 
     ## EXPERIMENTAL: Number of shards to distribute targets onto.
     ## Number of replicas multiplied by shards is the total number of Pods created.
@@ -2269,7 +2283,7 @@ prometheus:
     ## To query globally use Thanos sidecar and Thanos querier or remote write data to a central location.
     ## Sharding is done on the content of the `__address__` target meta-label.
     ##
-    shards: 1
+    shards: null
 
     ## Log level for Prometheus be configured in
     ##
@@ -2351,7 +2365,7 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 2Gi
 
     ## Using tmpfs volume
     ##
@@ -2491,7 +2505,7 @@ prometheus:
 
     ## PortName to use for Prometheus.
     ##
-    portName: "web"
+    portName: "http-web"
 
     ## ArbitraryFSAccessThroughSMs configures whether configuration based on a service monitor can access arbitrary files
     ## on the file system of the Prometheus container e.g. bearer token files.

@@ -239,3 +239,22 @@ ports:
   engineManagerMetrics: 9214
   logManager: 9115
   logManagerMetrics: 9215
+
+serviceMonitor:
+  defaults:
+    labels: {}
+  namespace: kubesphere-monitoring-system
+  enabled: true
+  port: metrics
+  interval: 30s
+  targets:
+    - name: engine-manager
+      labels:
+        app: engine-manager
+      selectors:
+        component: enginemanager-service
+    - name: job-manager
+      labels:
+        app: job-manager
+      selectors:
+        component: jobmanager-service
