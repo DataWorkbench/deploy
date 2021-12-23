@@ -56,7 +56,7 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configDir: /etc/hdfs
+  configDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   configmapName: hdfs-common-config
 
 # redis-cluster configuration

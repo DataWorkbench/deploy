@@ -1898,7 +1898,7 @@
         },
         "HADOOP_CONF_DIR": {
           "name": "HADOOP_CONF_DIR",
-          "value": "/etc/hdfs",
+          "value": "/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop",
           "type": "string",
           "description": "Location of hadoop conf (core-site.xml, hdfs-site.xml and etc.)"
         },
@@ -2042,13 +2042,13 @@
         },
         "flink.interpreter.close.shutdown_cluster": {
           "name": "flink.interpreter.close.shutdown_cluster",
-          "value": true,
+          "value": false,
           "type": "checkbox",
           "description": "Whether shutdown flink cluster when close interpreter"
         },
         "zeppelin.interpreter.close.cancel_job": {
           "name": "zeppelin.interpreter.close.cancel_job",
-          "value": true,
+          "value": false,
           "type": "checkbox",
           "description": "Whether cancel flink job when closing interpreter"
         },
