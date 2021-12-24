@@ -40,3 +40,8 @@ data:
     etcd:
       endpoints: {{ include "etcd.endpoints" . | quote }}
       dial_timeout: 5s
+
+    # region info for apiglobal
+    regions:
+      {{ .Values.apiglobal.regions }}
+

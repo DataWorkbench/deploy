@@ -6,9 +6,9 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: apiserver
 annotations:
-  {{- range $key, $value := .Values.apiserver.annotations }}
+{{- range $key, $value := .Values.apiserver.annotations }}
   {{ $key | quote }}: {{ $value | quote }}
-  {{- end }}
+{{- end }}
 spec:
   replicas: {{ coalesce .Values.apiserver.replicas .Values.common.replicas }}
   strategy:
@@ -26,7 +26,7 @@ spec:
         component: apiserver
       annotations:
       {{- range $key, $value := .Values.apiserver.podAnnotations }}
-      {{ $key | quote }}: {{ $value | quote }}
+        {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
       containers:

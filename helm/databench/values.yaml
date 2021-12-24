@@ -2,7 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# for apiserver and flink web
 domain: databench.io
+#
 dns:
   ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
@@ -62,6 +64,22 @@ redis:
   address: rfs-redis-cluster
   database: 0
   masterName: "mymaster"
+
+# apiglobal settings
+apiglobal:
+  # region settings
+  regions:
+    testing:
+      hosts: "http://databench-apiserver:9001"
+      names:
+        zh_cn: "开发测试区"
+        en_us: "testing"
+  envs:
+    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
+    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
 
 # apiserver configuration
 apiserver:
@@ -209,6 +227,7 @@ ports:
   hdfs: 8020
   redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
+  apiGlobal: 8001
   apiServer: 9001
   spaceManager: 9101
   spaceManagerMetrics: 9201
