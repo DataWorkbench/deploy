@@ -1335,6 +1335,8 @@
       "option": {
         "remote": true,
         "port": -1,
+        "perNote": "isolated",
+        "perUser": "",
         "isExistingProcess": false,
         "setPermission": false,
         "owners": [],
