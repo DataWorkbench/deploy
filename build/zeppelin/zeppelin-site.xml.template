@@ -55,12 +55,19 @@
   <description>Location of jetty temporary directory</description>
 </property>
 
+<!--
 <property>
-  <name>zeppelin.notebook.dir</name>
-  <value>/notebook</value>
-  <description>path or URI for notebook persist</description>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.FileSystemNotebookRepo</value>
+  <description>Hadoop compatible file system notebook persistence layer implementation, such as local file system, hdfs, azure wasb, s3 and etc.</description>
 </property>
 
+<property>
+  <name>zeppelin.notebook.dir</name>
+  <value>/notebook/metadata</value>
+  <description>path or URI for notebook persist</description>
+</property>
+-->
 <property>
   <name>zeppelin.interpreter.include</name>
   <value></value>
@@ -294,7 +301,7 @@
 </property>
 -->
 
-<!-- Notebook storage layer using hadoop compatible file system-->
+<!-- Notebook storage layer using hadoop compatible file system
 <property>
   <name>zeppelin.notebook.storage</name>
   <value>org.apache.zeppelin.notebook.repo.FileSystemNotebookRepo</value>
@@ -312,6 +319,7 @@
   <value></value>
   <description>principal for accessing kerberized hdfs</description>
 </property>
+-->
 
 <!-- For connecting your Zeppelin with ZeppelinHub -->
 <!--
@@ -354,12 +362,13 @@
   <description>import local notes into MongoDB automatically on startup, reset to false after import to avoid repeated import</description>
 </property>
 -->
+<!--TODO gxlevi-->
 
-<!--<property>-->
-<!--  <name>zeppelin.notebook.storage</name>-->
-<!--  <value>org.apache.zeppelin.notebook.repo.GitNotebookRepo</value>-->
-<!--  <description>versioned notebook persistence layer implementation</description>-->
-<!--</property>-->
+<property>
+  <name>zeppelin.notebook.storage</name>
+  <value>org.apache.zeppelin.notebook.repo.GitNotebookRepo</value>
+  <description>versioned notebook persistence layer implementation</description>
+</property>
 
 <property>
   <name>zeppelin.notebook.one.way.sync</name>
@@ -688,11 +697,6 @@
 </property>
 -->
 
-<property>
-  <name>zeppelin.recovery.storage.class</name>
-  <value>org.apache.zeppelin.interpreter.recovery.FileSystemRecoveryStorage</value>
-  <description>ReoveryStorage implementation based on hadoop FileSystem</description>
-</property>
 <!--
 <property>
   <name>zeppelin.recovery.storage.class</name>
@@ -707,12 +711,13 @@
 </property>
 -->
 
+<!--
 <property>
   <name>zeppelin.recovery.dir</name>
-  <value>/recovery</value>
+  <value>recovery</value>
   <description>Location where recovery metadata is stored</description>
 </property>
-
+-->
 
 <!-- GitHub configurations
 <property>
