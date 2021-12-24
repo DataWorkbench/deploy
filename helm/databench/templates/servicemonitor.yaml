@@ -6,10 +6,11 @@ kind: ServiceMonitor
 metadata:
   name: {{ .name }}-service-monitor
   labels:
-    {{- toYaml (.labels | default $.Values.serviceMonitor.defaults.labels) | nindent 4 }}
+    {{- toYaml $.Values.serviceMonitor.defaults.labels | nindent 4 }}
+    {{- toYaml .labels | nindent 4 }}
   namespace: {{ $.Values.serviceMonitor.namespace }}
 spec:
-  jobLabel: engine-exporter
+  jobLabel: {{ .name }}-exporter
   selector:
     matchLabels:
       {{- toYaml .selectors | nindent 6 }}

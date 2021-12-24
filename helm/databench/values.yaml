@@ -242,7 +242,8 @@ ports:
 
 serviceMonitor:
   defaults:
-    labels: {}
+    labels:
+      project: dataworkbench
   namespace: kubesphere-monitoring-system
   enabled: true
   port: metrics
@@ -258,3 +259,28 @@ serviceMonitor:
         app: job-manager
       selectors:
         component: jobmanager-service
+    - name: jobdeveloper
+      labels:
+        app: jobdeveloper
+      selectors:
+        component: jobdeveloper-service
+    - name: jobwatcher
+      labels:
+        app: jobwatcher
+      selectors:
+        component: jobwatcher-service
+    - name: jaeger
+      labels:
+        app: jaeger
+      selectors:
+        component: jaeger-service
+    - name: flowmanager
+      labels:
+        app: flowmanager
+      selectors:
+        component: flowmanager-service
+    - name: resourcemanager
+      labels:
+        app: resourcemanager
+      selectors:
+        component: resourcemanager-service
