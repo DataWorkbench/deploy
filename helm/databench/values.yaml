@@ -89,6 +89,7 @@ apiserver:
     API_SERVER_DLE_TIMEOUT: 30s
     API_SERVER_EXIT_TIMEOUT: 5m
     API_SERVER_TRACER_SERVICE_NAME: "apiserver"
+    API_SERVER_REGION_ID: "testing"
 
 # account configuration
 account:

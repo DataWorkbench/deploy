@@ -71,3 +71,14 @@ spec:
             periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
+          volumeMounts:
+            - name: databench-config
+              mountPath: "/etc/dataworkbench"
+              readOnly: true
+      volumes:
+        - name: databench-config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

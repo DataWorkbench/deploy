@@ -33,7 +33,7 @@ spec:
         - name: apiglobal
           image: "{{ .Values.image.databench }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/apiglobal.yaml"]
+          command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/common-config.yaml"]
           ports:
             - containerPort: {{ .Values.ports.apiGlobal }}
               name: service
@@ -42,8 +42,6 @@ spec:
               value: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel | quote }}
             - name: API_GLOBAL_HTTP_SERVER_ADDRESS
               value: "0.0.0.0:{{ .Values.ports.apiGlobal }}"
-            - name: API_GLOBAL_TRACER_LOCAL_AGENT
-              value: '{{ include "service.jaeger" . }}'
             - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
               value: '{{ include "service.account" . }}'
             {{- range $ename, $evalue := .Values.apiglobal.envs }}
@@ -70,6 +68,17 @@ spec:
             periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
+          volumeMounts:
+            - name: databench-config
+              mountPath: "/etc/dataworkbench"
+              readOnly: true
+      volumes:
+        - name: databench-config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
 ---
 apiVersion: v1
 kind: Service

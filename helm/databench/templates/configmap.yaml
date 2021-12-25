@@ -43,5 +43,11 @@ data:
 
     # region info for apiglobal
     regions:
-      {{ .Values.apiglobal.regions }}
+    {{- range $regionId, $region := .Values.apiglobal.regions }}
+      {{ $regionId }}:
+        hosts: {{ $region.hosts }}
+        names:
+          zh_cn: {{ $region.names.zh_cn | quote }}
+          en_us: {{ $region.names.en_us | quote }}
+    {{- end }}
 
