@@ -61,8 +61,16 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
-          - name: ENGINE_MANAGER_FLINK_ENGINE_HDFS_HOST
-            value: '{{- include "service.hdfs" . }}'
+          - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: access_key_id
+          - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: secret_access_key
           - name: ENGINE_MANAGER_FLINK_DOMAIN
             value: {{ .Values.domain | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}

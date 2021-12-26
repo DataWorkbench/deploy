@@ -140,10 +140,6 @@ Mysql Settings
 until nc -z {{ include "mysql.host" . }} {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
 {{- end -}}
 
-{{- define "service.hdfs" -}}
-hdfs://{{ .Release.Name }}-hdfs-http:{{ .Values.ports.hdfs }}
-{{- end -}}
-
 {{/*
 Etcd Settings
 */}}
