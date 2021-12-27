@@ -651,7 +651,7 @@ grafana:
 
   grafana.ini:
     server:
-      root_url: "http://grafana.example.com/"
+      root_url: "http://grafana.192.168.27.90.nip.io/"
 
   ingress:
     ## If true, Grafana Ingress will be created
@@ -675,7 +675,7 @@ grafana:
     # hosts:
     #   - grafana.domain.com
     hosts:
-      - grafana.example.com
+      - grafana.192.168.27.90.nip.io
 
     ## Path for grafana ingress
     path: /
