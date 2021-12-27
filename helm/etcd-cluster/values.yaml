@@ -1,0 +1,24 @@
+# Default values for etcd-cluster.
+
+replicaCount: 3
+
+nodes:    # The length of nodes is equal to etcd-cluster replicaCount
+  - "worker-s001"
+  - "worker-s002"
+  - "worker-s003"
+
+resources:
+   limits:
+     cpu: 1000m
+     memory: 2048Mi
+   requests:
+     cpu: 100m
+     memory: 128Mi
+
+persistentVolume:
+  reclaimPolicy: Retain
+  etcdHome: /data/etcd-cluster
+
+persistent:
+  size: 5Gi
+  accessModes: ["ReadWriteOnce"]

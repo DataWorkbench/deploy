@@ -1,0 +1,25 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: "{{ template "percona.fullname" . }}-service"
+  labels:
+    component: pmm
+    app: {{ template "percona.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  ports:
+    - name: https
+      protocol: TCP
+      port: {{ .Values.service.port }}
+      targetPort: 443
+  selector:
+    component: pmm
+    app: {{ template "percona.fullname" . }}
+  type: {{ .Values.service.type | quote }}
+{{- if eq .Values.service.type "LoadBalancer" }}
+{{- if .Values.service.loadBalancerIP }}
+  loadBalancerIP: {{ .Values.service.loadBalancerIP | quote }}
+{{- end -}}
+{{- end -}}

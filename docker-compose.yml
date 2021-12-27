@@ -674,7 +674,7 @@ services:
 
   clickhouse:
     image: "yandex/clickhouse-server:latest"
-    container_name: "dataworkbench-clickhouse-for-test"
+    container_name: "databench-clickhouse-for-test"
     ports:
       - "8123:8123"
     logging:
@@ -683,13 +683,13 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - clickhouse
 
   postgres:
     image: "postgres:12.1"
-    container_name: "dataworkbench-postgres-for-test"
+    container_name: "databench-postgres-for-test"
     environment:
       - POSTGRES_PASSWORD=password
     ports:
@@ -700,7 +700,7 @@ services:
         max-size: ${LOG_MAX_SIZE}
         max-file: ${LOG_MAX_FILE}
     networks:
-      dataworkbench-net:
+      databench-net:
         aliases:
           - postgres
 
@@ -760,6 +760,7 @@ services:
     command: "observer start -c ${DATABENCH_CONF}/observer.yaml"
     ports:
       - "${OBSERVER_PORT}:${OBSERVER_PORT}"
+      - "${OBSERVER_METRICS_PORT}:${OBSERVER_METRICS_PORT}"
     links:
       - databench-db:databench-db
     depends_on:
@@ -880,6 +881,7 @@ services:
       command: "enginemanager start -c ${DATABENCH_CONF}/enginemanager.yaml"
       ports:
         - "${ENGINE_MANAGER_PORT}:${ENGINE_MANAGER_PORT}"
+        - "${ENGINE_MANAGER_METRICS_PORT}:${ENGINE_MANAGER_METRICS_PORT}"
       links:
         - databench-db:databench-db
       depends_on:

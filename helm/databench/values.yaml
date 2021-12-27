@@ -2,7 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# for apiserver and flink web
 domain: databench.io
+#
 dns:
   ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
@@ -18,25 +20,13 @@ image:
 
   jaeger: jaegertracing/all-in-one:1.22
 
-  flink: dockerhub.databench.io/databench/flink
-
-
-## hdfs configuration
-hdfs-cluster:
-  hdfsHome: /data
-
-hdfs:
-  configDir: /etc/hdfs
-  configmapName: databench-common-config
-
-
 # common configuration for all service
 common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
   grpcLog:
-    level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
+    level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
   metrics:
     enabled: true
@@ -48,10 +38,15 @@ common:
     periodSeconds: 10
     initialDelaySeconds: 20
 
+etcd:
+  endpoint: etcd-cluster-client
+
 # mysql configuration
 mysql:
-  usePxcDb: true  # use pxc mysql cluster, false: use single mysql for testing
+  internal: false  # if use internal mysql in dependencies
   # common mysql configuration for databench services
+  externalHost: mysql-cluster-pxc-db-haproxy
+  secretName: mysql-cluster-pxc-db
   user: "root"
   database: "data_workbench"
   maxIdleConn: 16
@@ -60,23 +55,31 @@ mysql:
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
   slowTshreshold: 2s
 
-# pxc mysql-cluster configuration
-mysql-cluster:
-  pxc.persistence.storageClass: "local"
-  pxc.persistence.size: 2Gi
-  backup.storages.fs-pvc.volume.persistentVolumeClaim.storageClassName: "local"
-  backup.storages.qingstor.s3.bucket: "pxc-mysql-backup-newtesting"
-
-
-# redis-operator configuration
-redisoperator:
-  rbac:
-    install: true
+hdfs:
+  configDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
+  configmapName: hdfs-common-config
 
 # redis-cluster configuration
 redis:
+  address: rfs-redis-cluster
   database: 0
   masterName: "mymaster"
+
+# apiglobal settings
+apiglobal:
+  # region settings
+  regions:
+    testing:
+      hosts: "http://databench-apiserver:9001"
+      names:
+        zh_cn: "开发测试区"
+        en_us: "testing"
+  envs:
+    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
+    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
 
 # apiserver configuration
 apiserver:
@@ -86,21 +89,17 @@ apiserver:
     API_SERVER_DLE_TIMEOUT: 30s
     API_SERVER_EXIT_TIMEOUT: 5m
     API_SERVER_TRACER_SERVICE_NAME: "apiserver"
+    API_SERVER_REGION_ID: "testing"
 
 # account configuration
 account:
   envs:
     ACCOUNT_TRACER_SERVICE_NAME: "account"
     ACCOUNT_SOURCE: "qingcloud"
-    ACCOUNT_QINGCLOUD_ACCESS_KEY_ID: "LTMJGBXPHSEZRNVKKPHU"
-    ACCOUNT_QINGCLOUD_SECRET_ACCESS_KEY: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
-    ACCOUNT_QINGCLOUD_HOST: "api.testing.com"
-    ACCOUNT_QINGCLOUD_PORT: "7777"
-    ACCOUNT_QINGCLOUD_PROTOCOL: "http"
-    ACCOUNT_QINGCLOUD_URI: "/iaas"
 
 # enginemanager configuration
 enginemanager:
+  replicas: 1
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
@@ -112,9 +111,13 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
+    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.databench.io/databench/flink"
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+
+    ENGINE_MANAGER_LOG_LEVEL: 1
+    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:
@@ -126,7 +129,7 @@ jobdeveloper:
   envs:
     JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
     JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: "/zeppelin/flink/flink-1.12.3"
-    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-mysql-cdc-1.3.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-elasticsearch7_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.0.0.jar;HBase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar"
+    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.0.0.jar;HBase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-elasticsearch7_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-mysql-cdc-1.3.0.jar"
     JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF: "/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop"
 
 # jobmanager configuration
@@ -186,6 +189,7 @@ sourcemanager:
 spacemanager:
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
+    SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
 
 # udfmanager configuration
 udfmanager:
@@ -194,6 +198,7 @@ udfmanager:
 
 # zeppelin configuration
 zeppelin:
+  hdfsConfigDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   envs:
     ZEPPELIN_HOME: /opt/zeppelin
     ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
@@ -206,6 +211,16 @@ jaeger:
   envs:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
+# iaas configuration
+iaas:
+  zone: "testing"
+  protocol: "http"
+  host: "api.testing.com"
+  port: "7777"
+  uri: "/iaas/"
+  timeout: 600
+  access_key_id: "LTMJGBXPHSEZRNVKKPHU"
+  secret_access_key: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
 
 # serviceName: port
 ports:
@@ -217,6 +232,7 @@ ports:
   hdfs: 8020
   redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
+  apiGlobal: 8001
   apiServer: 9001
   spaceManager: 9101
   spaceManagerMetrics: 9201
@@ -246,3 +262,48 @@ ports:
   engineManagerMetrics: 9214
   logManager: 9115
   logManagerMetrics: 9215
+
+serviceMonitor:
+  defaults:
+    labels:
+      project: dataworkbench
+  namespace: kubesphere-monitoring-system
+  enabled: true
+  port: metrics
+  interval: 30s
+  targets:
+    - name: engine-manager
+      labels:
+        app: engine-manager
+      selectors:
+        component: enginemanager-service
+    - name: job-manager
+      labels:
+        app: job-manager
+      selectors:
+        component: jobmanager-service
+    - name: jobdeveloper
+      labels:
+        app: jobdeveloper
+      selectors:
+        component: jobdeveloper-service
+    - name: jobwatcher
+      labels:
+        app: jobwatcher
+      selectors:
+        component: jobwatcher-service
+    - name: jaeger
+      labels:
+        app: jaeger
+      selectors:
+        component: jaeger-service
+    - name: flowmanager
+      labels:
+        app: flowmanager
+      selectors:
+        component: flowmanager-service
+    - name: resourcemanager
+      labels:
+        app: resourcemanager
+      selectors:
+        component: resourcemanager-service

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: zeppelin-server
+  name: {{ include "databench.fullname" . }}-zeppelin-server
   labels:
     app.kubernetes.io/name: zeppelin-server
 spec:
@@ -20,6 +20,7 @@ spec:
       containers:
         - name: zeppelin-server
           image: {{ .Values.image.zeppelin }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["sh", "-c", "$(ZEPPELIN_HOME)/bin/zeppelin.sh"]
           lifecycle:
             preStop:
@@ -66,7 +67,7 @@ spec:
           #  - name: zeppelin-server-custom-k8s          # configure this to mount customized Kubernetes spec for interpreter
           #    mountPath: /zeppelin/k8s
             - name: hdfs-config         # configure this to mount customized Kubernetes spec for interpreter
-              mountPath: {{ .Values.hdfs.configDir }}
+              mountPath: {{ .Values.zeppelin.hdfsConfigDir }}
               readOnly: true
       volumes:
         - name: hdfs-config

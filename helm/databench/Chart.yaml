@@ -7,18 +7,3 @@ maintainers:
   - name: QingCloud Databench
     email: databench@yunify.com
 home: https://github.com/DataWorkbench
-dependencies:
-  - name: etcd-cluster
-    version: 0.11.2
-    repository: file://./charts/etcd-cluster
-  - name: redis-cluster
-    version: 1.0.0
-    repository: file://./charts/redis-cluster
-  - name: pxc-db
-    version: 1.9.1
-    repository: file://./charts/mysql-cluster
-    condition: mysql.usePxcDb
-    alias: mysql
-  - name: hdfs-cluster
-    version: 0.1.1
-    repository: file://../charts/hdfs-cluster

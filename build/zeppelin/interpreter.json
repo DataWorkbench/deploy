@@ -1335,6 +1335,8 @@
       "option": {
         "remote": true,
         "port": -1,
+        "perNote": "isolated",
+        "perUser": "",
         "isExistingProcess": false,
         "setPermission": false,
         "owners": [],
@@ -2042,13 +2044,13 @@
         },
         "flink.interpreter.close.shutdown_cluster": {
           "name": "flink.interpreter.close.shutdown_cluster",
-          "value": true,
+          "value": false,
           "type": "checkbox",
           "description": "Whether shutdown flink cluster when close interpreter"
         },
         "zeppelin.interpreter.close.cancel_job": {
           "name": "zeppelin.interpreter.close.cancel_job",
-          "value": true,
+          "value": false,
           "type": "checkbox",
           "description": "Whether cancel flink job when closing interpreter"
         },

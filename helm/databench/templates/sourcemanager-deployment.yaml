@@ -10,9 +10,9 @@ annotations:
   {{ $key | quote }}: {{ $value | quote }}
   {{- end }}
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.sourcemanager.replicas }}
+  replicas: {{ coalesce .Values.sourcemanager.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.sourcemanager.strategy }}
+    type: {{ coalesce .Values.sourcemanager.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
@@ -47,14 +47,14 @@ spec:
         env:
           - name: SOURCE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.sourceManager }}"
-          - name: SOURCE_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
-            value: '{{ include "service.enginemanager" . }}'
           - name: SOURCE_MANAGER_METRICS_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.sourceManagerMetrics }}"
+          - name: SOURCE_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
+            value: '{{ include "service.enginemanager" . }}'
           - name: SOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql
+                name: {{ .Values.mysql.secretName }}
                 key: root
           {{- range $ename, $evalue := .Values.sourcemanager.envs }}
           - name: {{ $ename }}

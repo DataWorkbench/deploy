@@ -10,9 +10,9 @@ annotations:
   {{ $key | quote }}: {{ $value | quote }}
   {{- end }}
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.notifier.replicas }}
+  replicas: {{ coalesce .Values.notifier.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.notifier.strategy }}
+    type: {{ coalesce .Values.notifier.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
@@ -52,7 +52,7 @@ spec:
           - name: NOTIFIER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql
+                name: {{ .Values.mysql.secretName }}
                 key: root
           {{- range $ename, $evalue := .Values.notifier.envs }}
           - name: {{ $ename }}

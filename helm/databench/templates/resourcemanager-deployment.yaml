@@ -6,9 +6,9 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: resourcemanager
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.resourcemanager.replicas }}
+  replicas: {{ coalesce .Values.resourcemanager.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.resourcemanager.strategy }}
+    type: {{ coalesce .Values.resourcemanager.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
@@ -50,7 +50,7 @@ spec:
           - name: RESOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql
+                name: {{ .Values.mysql.secretName }}
                 key: root
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
           - name: {{ $ename }}

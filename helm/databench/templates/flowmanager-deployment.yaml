@@ -10,9 +10,9 @@ annotations:
   {{ $key | quote }}: {{ $value | quote }}
   {{- end }}
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.flowmanager.replicas }}
+  replicas: {{ coalesce .Values.flowmanager.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.flowmanager.strategy }}
+    type: {{ coalesce .Values.flowmanager.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
@@ -54,7 +54,7 @@ spec:
           - name: FLOW_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Release.Name }}-mysql
+                name: {{ .Values.mysql.secretName }}
                 key: root
           {{- range $ename, $evalue := .Values.flowmanager.envs }}
           - name: {{ $ename }}
