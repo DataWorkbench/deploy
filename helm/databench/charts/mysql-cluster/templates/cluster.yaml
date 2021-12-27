@@ -51,7 +51,11 @@ spec:
   {{- end }}
   {{- $pxc := .Values.pxc }}
   pxc:
+    {{- if .Values.pxcNodes }}
+    size: {{ len .Values.pxcNodes }}
+    {{- else }}
     size: {{ $pxc.size }}
+    {{- end }}
     image: "{{ $pxc.image.repository }}:{{ $pxc.image.tag }}"
     autoRecovery: {{ $pxc.autoRecovery }}
     readinessDelaySec: {{ $pxc.readinessDelaySec }}
@@ -110,11 +114,15 @@ spec:
         type: Directory
     {{- else }}
       persistentVolumeClaim:
+        {{- if .Values.pxcNodes }}
+        storageClassName: {{ include "pxc-database.fullname" . }}-sc
+        {{- else }}
         {{- if $pxc.persistence.storageClass }}
         {{- if (eq "-" $pxc.persistence.storageClass) }}
         storageClassName: ""
         {{- else }}
         storageClassName: "{{ $pxc.persistence.storageClass }}"
+        {{- end }}
         {{- end }}
         {{- end }}
         accessModes: [{{ $pxc.persistence.accessMode | quote }}]
