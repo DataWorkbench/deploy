@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: databench-config
+  labels:
+{{ include "databench.labels" . | indent 4 }}
 data:
   config.yaml: |
     log_level: {{ .Values.common.logLevel }}
@@ -40,3 +42,23 @@ data:
     etcd:
       endpoints: {{ include "etcd.endpoints" . | quote }}
       dial_timeout: 5s
+
+    # iaas api configuration
+    iaas:
+      zone: {{ .Values.iaas.zone }}
+      protocol: {{ .Values.iaas.protocol }}
+      host: {{ .Values.iaas.host }}
+      port: {{ .Values.iaas.port }}
+      uri: {{ .Values.iaas.uri }}
+      timeout: {{ .Values.iaas.timeout }}
+
+    # region info for apiglobal
+    regions:
+    {{- range $regionId, $region := .Values.apiglobal.regions }}
+      {{ $regionId }}:
+        hosts: {{ $region.hosts }}
+        names:
+          zh_cn: {{ $region.names.zh_cn | quote }}
+          en_us: {{ $region.names.en_us | quote }}
+    {{- end }}
+

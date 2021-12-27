@@ -2,7 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# for apiserver and flink web
 domain: databench.io
+#
 dns:
   ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
@@ -17,8 +19,6 @@ image:
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
 
   jaeger: jaegertracing/all-in-one:1.22
-
-  flink: dockerhub.databench.io/databench/flink
 
 # common configuration for all service
 common:
@@ -56,7 +56,7 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configDir: /etc/hdfs
+  configDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   configmapName: hdfs-common-config
 
 # redis-cluster configuration
@@ -64,6 +64,22 @@ redis:
   address: rfs-redis-cluster
   database: 0
   masterName: "mymaster"
+
+# apiglobal settings
+apiglobal:
+  # region settings
+  regions:
+    testing:
+      hosts: "http://databench-apiserver:9001"
+      names:
+        zh_cn: "开发测试区"
+        en_us: "testing"
+  envs:
+    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
+    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
+    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
 
 # apiserver configuration
 apiserver:
@@ -73,18 +89,13 @@ apiserver:
     API_SERVER_DLE_TIMEOUT: 30s
     API_SERVER_EXIT_TIMEOUT: 5m
     API_SERVER_TRACER_SERVICE_NAME: "apiserver"
+    API_SERVER_REGION_ID: "testing"
 
 # account configuration
 account:
   envs:
     ACCOUNT_TRACER_SERVICE_NAME: "account"
     ACCOUNT_SOURCE: "qingcloud"
-    ACCOUNT_QINGCLOUD_ACCESS_KEY_ID: "LTMJGBXPHSEZRNVKKPHU"
-    ACCOUNT_QINGCLOUD_SECRET_ACCESS_KEY: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
-    ACCOUNT_QINGCLOUD_HOST: "api.testing.com"
-    ACCOUNT_QINGCLOUD_PORT: "7777"
-    ACCOUNT_QINGCLOUD_PROTOCOL: "http"
-    ACCOUNT_QINGCLOUD_URI: "/iaas"
 
 # enginemanager configuration
 enginemanager:
@@ -100,6 +111,7 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
+    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.databench.io/databench/flink"
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
@@ -177,6 +189,7 @@ sourcemanager:
 spacemanager:
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
+    SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
 
 # udfmanager configuration
 udfmanager:
@@ -198,6 +211,16 @@ jaeger:
   envs:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
+# iaas configuration
+iaas:
+  zone: "testing"
+  protocol: "http"
+  host: "api.testing.com"
+  port: "7777"
+  uri: "/iaas/"
+  timeout: 600
+  access_key_id: "LTMJGBXPHSEZRNVKKPHU"
+  secret_access_key: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
 
 # serviceName: port
 ports:
@@ -209,6 +232,7 @@ ports:
   hdfs: 8020
   redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
+  apiGlobal: 8001
   apiServer: 9001
   spaceManager: 9101
   spaceManagerMetrics: 9201
@@ -238,3 +262,48 @@ ports:
   engineManagerMetrics: 9214
   logManager: 9115
   logManagerMetrics: 9215
+
+serviceMonitor:
+  defaults:
+    labels:
+      project: dataworkbench
+  namespace: kubesphere-monitoring-system
+  enabled: true
+  port: metrics
+  interval: 30s
+  targets:
+    - name: engine-manager
+      labels:
+        app: engine-manager
+      selectors:
+        component: enginemanager-service
+    - name: job-manager
+      labels:
+        app: job-manager
+      selectors:
+        component: jobmanager-service
+    - name: jobdeveloper
+      labels:
+        app: jobdeveloper
+      selectors:
+        component: jobdeveloper-service
+    - name: jobwatcher
+      labels:
+        app: jobwatcher
+      selectors:
+        component: jobwatcher-service
+    - name: jaeger
+      labels:
+        app: jaeger
+      selectors:
+        component: jaeger-service
+    - name: flowmanager
+      labels:
+        app: flowmanager
+      selectors:
+        component: flowmanager-service
+    - name: resourcemanager
+      labels:
+        app: resourcemanager
+      selectors:
+        component: resourcemanager-service

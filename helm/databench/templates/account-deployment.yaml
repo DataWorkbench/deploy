@@ -33,7 +33,7 @@ spec:
       hostAliases:
         - ip: {{ .Values.dns.qingcloudApiIP | quote }}
           hostnames:
-            - {{ .Values.account.envs.ACCOUNT_QINGCLOUD_HOST }}
+            - {{ .Values.iaas.host }}
       {{- end }}
       initContainers:
       - name: wait-mysql
@@ -60,6 +60,16 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
+          - name: ACCOUNT_IAAS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: access_key_id
+          - name: ACCOUNT_IAAS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: databench-secret
+                key: secret_access_key
           {{- range $ename, $evalue := .Values.account.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

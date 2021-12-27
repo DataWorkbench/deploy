@@ -6,9 +6,9 @@ metadata:
 {{ include "databench.labels" . | indent 4 }}
     component: apiserver
 annotations:
-  {{- range $key, $value := .Values.apiserver.annotations }}
+{{- range $key, $value := .Values.apiserver.annotations }}
   {{ $key | quote }}: {{ $value | quote }}
-  {{- end }}
+{{- end }}
 spec:
   replicas: {{ coalesce .Values.apiserver.replicas .Values.common.replicas }}
   strategy:
@@ -26,7 +26,7 @@ spec:
         component: apiserver
       annotations:
       {{- range $key, $value := .Values.apiserver.podAnnotations }}
-      {{ $key | quote }}: {{ $value | quote }}
+        {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
       containers:
@@ -71,3 +71,14 @@ spec:
             periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
+          volumeMounts:
+            - name: databench-config
+              mountPath: "/etc/dataworkbench"
+              readOnly: true
+      volumes:
+        - name: databench-config
+          configMap:
+            name: databench-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"

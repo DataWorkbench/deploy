@@ -87,3 +87,8 @@ helm -n databench install databench ./helm/databench
 cd code/deploy
 helm -n databench delete databench
 ```
+
+## upgrade databench
+```shell
+helm -n databench upgrade databench ./helm/databench/
+```

@@ -109,6 +109,13 @@ Service Addresses For ApiServer
   value: '{{ include "service.flowmanager" . }}'
 {{- end -}}
 
+{{- define "spacemanager.link.services" -}}
+- name: SPACE_MANAGER_JOB_MANAGER_ADDRESS
+  value: '{{ include "service.jobmanager" . }}'
+- name: SPACE_MANAGER_ENGINE_MANAGER_ADDRESS
+  value: '{{ include "service.enginemanager" . }}'
+{{- end -}}
+
 
 {{/*
 Mysql Settings
@@ -131,10 +138,6 @@ Mysql Settings
 
 {{- define "mysql.waiting.cmd" -}}
 until nc -z {{ include "mysql.host" . }} {{ .Values.ports.mysql }}; do echo "waiting for mysql.."; sleep 2; done;
-{{- end -}}
-
-{{- define "service.hdfs" -}}
-hdfs://{{ .Release.Name }}-hdfs-http:{{ .Values.ports.hdfs }}
 {{- end -}}
 
 {{/*
