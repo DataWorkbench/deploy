@@ -42,7 +42,7 @@ spec:
             name: metrics
         env:
           - name: RESOURCE_MANAGER_HADOOP_CONF_DIR
-            value: {{ .Values.hdfsConfigDir }}
+            value: {{ .Values.hdfs.configDir }}
           - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.resourceManager }}"
           - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
@@ -78,23 +78,23 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataworkbench"
+            mountPath: /etc/dataworkbench
             readOnly: true
           - name: hdfs-config
-            mountPath: {{ .Values.hdfsConfigDir }}
+            mountPath: {{ .Values.hdfs.configDir }}
             readOnly: true
       volumes:
         - name: config
           configMap:
             name: databench-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: config.yaml
+                path: common-config.yaml
         - name: hdfs-config
           configMap:
-            name: databench-common-config
+            name: {{ .Values.hdfs.configmapName }}
             items:
-              - key: "core-site.xml"
-                path: "core-site.xml"
-              - key: "hdfs-site.xml"
-                path: "hdfs-site.xml"
+              - key: core-site.xml
+                path: core-site.xml
+              - key: hdfs-site.xml
+                path: hdfs-site.xml
