@@ -3,7 +3,18 @@
 ##
 imageRepo: "percona/pmm-server"
 imageTag: "2.24.0"
-replicas: 2
+replicas: 1
+
+
+mysqlclustername: mysql-cluster
+mysqlmonitorservice: mysql-monitor-service
+mysqluser: root
+mysqlpassword: admin123456
+pmmclientname0: pmm-client-0-pxc
+pmmclientname1: pmm-client-1-pxc
+pmmclientname2: pmm-client-2-pxc
+
+
 ## A choice between "kubernetes" and "openshift"
 platform: "kubernetes"
 
@@ -24,7 +35,7 @@ persistence:
   ##   GKE, AWS & OpenStack)
   ##
   enabled: true
-  storageClassName: "local"
+  storageClassName: "managed-nfs-storage"
   accessMode: ReadWriteOnce
   size: 2Gi
 
@@ -49,7 +60,7 @@ resources:
 
 supresshttp2: true
 service:
-  type: LoadBalancer
+  type: ClusterIP
   port: 443
   loadBalancerIP: ""
 
