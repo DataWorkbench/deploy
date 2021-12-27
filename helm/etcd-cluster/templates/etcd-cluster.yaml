@@ -7,20 +7,13 @@ metadata:
   annotations:
     etcd.database.coreos.com/scope: clusterwide
 spec:
-  {{- if .Values.nodes }}
-  size: {{ len .Values.nodes }}
-  {{- else }}
   size: {{ .Values.replicaCount }}
-  {{- end }}
   version: {{ .Chart.AppVersion | quote }}
   resources:
 {{ toYaml .Values.resources | indent 4 }}
   pod:
     persistentVolumeClaimSpec:
       accessModes: {{ .Values.persistent.accessModes }}
-      {{- if .Values.nodes }}
-      storageClassName: {{ include "etcd-cluster.fullname" . }}-sc
-      {{- end }}
       resources:
         requests:
           storage: {{ .Values.persistent.size }}
