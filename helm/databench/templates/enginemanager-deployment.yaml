@@ -47,15 +47,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "enginemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.engineManager }}
-            name: service
-          - containerPort: {{ .Values.ports.engineManagerMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.enginemanager }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.enginemanager }}
         env:
           - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.engineManager }}"
+            value: "0.0.0.0:{{- .Values.ports.enginemanager }}"
           - name: ENGINE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.engineManagerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.enginemanager }}"
           - name: ENGINE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -89,7 +89,7 @@ spec:
             readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
           {{- if .Values.enginemanager.readinessProbe }}
           periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
@@ -99,7 +99,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.engineManager }}" ]
+            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}" ]
           {{- if .Values.enginemanager.livenessProbe }}
           periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}

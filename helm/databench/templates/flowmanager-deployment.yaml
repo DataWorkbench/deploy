@@ -40,15 +40,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "flowmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.flowManager }}
-            name: service
-          - containerPort: {{ .Values.ports.flowManagerMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.flowmanager }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.flowmanager }}
         env:
           - name: FLOW_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.flowManager }}"
+            value: "0.0.0.0:{{- .Values.ports.flowmanager }}"
           - name: FLOW_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.flowManagerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.flowmanager }}"
           - name: FLOW_MANAGER_SCHEDULER_ADDRESS
             value: {{ include "service.scheduler" . | quote }}
           - name: FLOW_MANAGER_MYSQL_PASSWORD
@@ -66,7 +66,7 @@ spec:
             readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowmanager }}"]
           {{- if .Values.flowmanager.readinessProbe }}
           periodSeconds: {{ .Values.flowmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.readinessProbe.initialDelaySeconds }}
@@ -76,7 +76,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.flowmanager }}"]
           {{- if .Values.flowmanager.livenessProbe }}
           periodSeconds: {{ .Values.flowmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.flowmanager.livenessProbe.initialDelaySeconds }}

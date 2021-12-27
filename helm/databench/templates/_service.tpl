@@ -6,11 +6,11 @@ Service Addresses For ApiServer
 {{- end -}}
 
 {{- define "service.spacemanager" -}}
-{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spaceManager }}
+{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}
 {{- end -}}
 
 {{- define "service.udfmanager" -}}
-{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfManager }}
+{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
 {{- end -}}
 
 {{- define "service.scheduler" -}}
@@ -18,23 +18,23 @@ Service Addresses For ApiServer
 {{- end -}}
 
 {{- define "service.flowmanager" -}}
-{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowManager }}
+{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
 {{- end -}}
 
 {{- define "service.sourcemanager" -}}
-{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourceManager }}
+{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
 {{- end -}}
 
 {{- define "service.jobdeveloper" -}}
-{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobDeveloper }}
+{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
 {{- end -}}
 
 {{- define "service.jobwatcher" -}}
-{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobWatcher }}
+{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
 {{- end -}}
 
 {{- define "service.jobmanager" -}}
-{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobManager }}
+{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
 {{- end -}}
 
 {{- define "service.zeppelin" -}}
@@ -42,11 +42,11 @@ Service Addresses For ApiServer
 {{- end -}}
 
 {{- define "service.resourcemanager" -}}
-{{ include "databench.fullname" . }}-resourcemanager:{{ .Values.ports.resourceManager }}
+{{ include "databench.fullname" . }}-resourcemanager:{{ .Values.ports.resourcemanager }}
 {{- end -}}
 
 {{- define "service.enginemanager" -}}
-{{ include "databench.fullname" . }}-enginemanager:{{ .Values.ports.engineManager }}
+{{ include "databench.fullname" . }}-enginemanager:{{ .Values.ports.enginemanager }}
 {{- end -}}
 
 {{- define "service.account" -}}

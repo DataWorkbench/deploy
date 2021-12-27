@@ -41,14 +41,14 @@ spec:
         command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - name: service
-            containerPort: {{ .Values.ports.jobManager }}
+            containerPort: {{ .Values.ports.jobmanager }}
           - name: metrics
-            containerPort: {{ .Values.ports.jobManagerMetrics }}
+            containerPort: {{ .Values.metricsPorts.jobmanager }}
         env:
           - name: JOB_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobManager }}"
+            value: "0.0.0.0:{{- .Values.ports.jobmanager }}"
           - name: JOB_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobManagerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.jobmanager }}"
           - name: JOB_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -65,7 +65,7 @@ spec:
             readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
           {{- if .Values.jobmanager.readinessProbe }}
           periodSeconds: {{ .Values.jobmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobmanager.readinessProbe.initialDelaySeconds }}
@@ -75,7 +75,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobmanager }}"]
           {{- if .Values.jobmanager.livenessProbe }}
           periodSeconds: {{ .Values.jobmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobmanager.livenessProbe.initialDelaySeconds }}

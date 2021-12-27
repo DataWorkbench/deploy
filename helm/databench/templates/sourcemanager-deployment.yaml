@@ -41,14 +41,14 @@ spec:
         command: ["sh", "-c", "sourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
           - name: service
-            containerPort: {{ .Values.ports.sourceManager }}
+            containerPort: {{ .Values.ports.sourcemanager }}
           - name: metrics
-            containerPort: {{ .Values.ports.sourceManagerMetrics }}
+            containerPort: {{ .Values.metricsPorts.sourcemanager }}
         env:
           - name: SOURCE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.sourceManager }}"
+            value: "0.0.0.0:{{- .Values.ports.sourcemanager }}"
           - name: SOURCE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.sourceManagerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.sourcemanager }}"
           - name: SOURCE_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
             value: '{{ include "service.enginemanager" . }}'
           - name: SOURCE_MANAGER_MYSQL_PASSWORD
@@ -62,7 +62,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourceManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
           {{- if .Values.sourcemanager.readinessProbe }}
           periodSeconds: {{ .Values.sourcemanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.readinessProbe.initialDelaySeconds }}
@@ -72,7 +72,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourceManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.sourcemanager }}"]
           {{- if .Values.sourcemanager.livenessProbe }}
           periodSeconds: {{ .Values.sourcemanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.sourcemanager.livenessProbe.initialDelaySeconds }}

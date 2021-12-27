@@ -46,15 +46,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "account start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.account }}
-            name: service
-          - containerPort: {{ .Values.ports.accountMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.account }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.account }}
         env:
           - name: ACCOUNT_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.account }}"
           - name: ACCOUNT_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.accountMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.account }}"
           - name: ACCOUNT_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:

@@ -9,11 +9,11 @@ spec:
   type: ClusterIP
   ports:
     - name: service
-      port: {{ .Values.ports.jobDeveloper }}
+      port: {{ .Values.ports.jobdeveloper }}
       targetPort: service
       protocol: TCP
     - name: metrics
-      port: {{ .Values.ports.jobDeveloperMetrics }}
+      port: {{ .Values.metricsPorts.jobdeveloper }}
       targetPort: metrics
       protocol: TCP
   selector:

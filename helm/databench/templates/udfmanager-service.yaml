@@ -9,11 +9,11 @@ spec:
   type: ClusterIP
   ports:
     - name: service
-      port: {{ .Values.ports.udfManager }}
+      port: {{ .Values.ports.udfmanager }}
       targetPort: service
       protocol: TCP
     - name: metrics
-      port: {{ .Values.ports.udfManagerMetrics }}
+      port: {{ .Values.metricsPorts.udfmanager }}
       targetPort: metrics
       protocol: TCP
   selector:
