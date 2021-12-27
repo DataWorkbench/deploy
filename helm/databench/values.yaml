@@ -17,6 +17,7 @@ image:
   flyway: dockerhub.databench.io/databench/flyway:dev
   zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
+  webconsole: dockerhub.qingcloud.com/databench/web-console:0.1.0
 
   jaeger: jaegertracing/all-in-one:1.22
 
@@ -273,3 +274,6 @@ serviceMonitor:
   namespace: kubesphere-monitoring-system
   port: metrics
   interval: 30s
+
+webconsole:
+  enabled: true

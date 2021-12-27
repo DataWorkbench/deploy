@@ -10,9 +10,9 @@ annotations:
   {{ $key | quote }}: {{ $value | quote }}
 {{- end }}
 spec:
-  replicas: {{ coalesce .Values.common.replicas .Values.apiglobal.replicas }}
+  replicas: {{ coalesce .Values.apiglobal.replicas .Values.common.replicas }}
   strategy:
-    type: {{ coalesce .Values.common.strategy .Values.apiglobal.strategy }}
+    type: {{ coalesce .Values.apiglobal.strategy .Values.common.strategy }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ .Chart.Name }}
