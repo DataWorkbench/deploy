@@ -96,6 +96,15 @@ pxc:
     successThreshold: 1
     failureThreshold: 3
 
+pxcNodes:      # The length of nodes is equal to pxc size
+  - "worker-s001"
+  - "worker-s002"
+  - "worker-s003"
+
+localPvs:
+  reclaimPolicy: Retain
+  mysqlHome: /data/mysql-cluster
+
 haproxy:
   enabled: true
   size: 3
