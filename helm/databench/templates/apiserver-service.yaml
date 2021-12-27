@@ -9,7 +9,7 @@ spec:
   type: ClusterIP
   ports:
     - name: service
-      port: {{ .Values.ports.apiServer }}
+      port: {{ .Values.ports.apiserver }}
       targetPort: service
       protocol: TCP
   selector:

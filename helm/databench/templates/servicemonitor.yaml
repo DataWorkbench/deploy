@@ -1,19 +1,19 @@
 {{- if .Values.serviceMonitor.enabled }}
-{{- range .Values.serviceMonitor.targets }}
+{{- range $component, $_ := .Values.metricsPorts }}
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ .name }}-service-monitor
+  name: {{ $component }}-servicemonitor
   labels:
     {{- toYaml $.Values.serviceMonitor.defaults.labels | nindent 4 }}
-    {{- toYaml .labels | nindent 4 }}
+    componet: {{ $component }}-servicemonitor
   namespace: {{ $.Values.serviceMonitor.namespace }}
 spec:
-  jobLabel: {{ .name }}-exporter
+  jobLabel: {{ $component }}-exporter
   selector:
     matchLabels:
-      {{- toYaml .selectors | nindent 6 }}
+      component: {{ $component }}
   namespaceSelector:
     any: true
   endpoints:

@@ -13,7 +13,7 @@ spec:
       targetPort: service
       protocol: TCP
     - name: web
-      port: {{ .Values.ports.jaegerWeb }}
+      port: {{ .Values.ports.jaegerweb }}
       targetPort: web
       protocol: TCP
   selector:

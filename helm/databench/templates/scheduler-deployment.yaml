@@ -44,15 +44,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "scheduler start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.scheduler }}
-            name: service
-          - containerPort: {{ .Values.ports.schedulerMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.scheduler }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.scheduler }}
         env:
           - name: SCHEDULER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.scheduler }}"
           - name: SCHEDULER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.schedulerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.scheduler }}"
           - name: SCHEDULER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
