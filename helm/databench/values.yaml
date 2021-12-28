@@ -225,85 +225,51 @@ iaas:
 # serviceName: port
 ports:
   jaeger: 6831
-  jaegerWeb: 16686
+  jaegerweb: 16686
   mysql: 3306
   etcd: 2379
   zeppelin: 8080
   hdfs: 8020
   redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
-  apiGlobal: 8001
-  apiServer: 9001
-  spaceManager: 9101
-  spaceManagerMetrics: 9201
-  flowManager: 9102
-  flowManagerMetrics: 9202
+  apiglobal: 8001
+  apiserver: 9001
+  spacemanager: 9101
+  flowmanager: 9102
   scheduler: 9103
-  schedulerMetrics: 9203
-  sourceManager: 9104
-  sourceManagerMetrics: 9204
-  jobManager: 9105
-  jobManagerMetrics: 9205
-  udfManager: 9106
-  udfManagerMetrics: 9206
-  jobWatcher: 9108
-  jobWatcherMetrics: 9208
-  jobDeveloper: 9109
-  jobDeveloperMetrics: 9209
+  sourcemanager: 9104
+  jobmanager: 9105
+  udfmanager: 9106
+  jobwatcher: 9108
+  jobdeveloper: 9109
   account: 9110
-  accountMetrics: 9210
-  resourceManager: 9111
-  resourceManagerMetrics: 9211
+  resourcemanager: 9111
   observer: 9112
-  observerMetrics: 9212
   notifier: 9113
-  notifierMetrics: 9213
-  engineManager: 9114
-  engineManagerMetrics: 9214
-  logManager: 9115
-  logManagerMetrics: 9215
+  enginemanager: 9114
+  logmanager: 9115
+
+metricsPorts: # key must be same as component in deployment
+  spacemanager: 9201
+  flowmanager: 9202
+  scheduler: 9203
+  sourcemanager: 9204
+  jobmanager: 9205
+  udfmanager: 9206
+  jobwatcher: 9208
+  jobdeveloper: 9209
+  account: 9210
+  resourcemanager: 9211
+#  observer: 9212
+  notifier: 9213
+  enginemanager: 9214
+#  logmanager: 9215
 
 serviceMonitor:
+  enabled: true
   defaults:
     labels:
-      project: dataworkbench
+      project: databench
   namespace: kubesphere-monitoring-system
-  enabled: true
   port: metrics
   interval: 30s
-  targets:
-    - name: engine-manager
-      labels:
-        app: engine-manager
-      selectors:
-        component: enginemanager-service
-    - name: job-manager
-      labels:
-        app: job-manager
-      selectors:
-        component: jobmanager-service
-    - name: jobdeveloper
-      labels:
-        app: jobdeveloper
-      selectors:
-        component: jobdeveloper-service
-    - name: jobwatcher
-      labels:
-        app: jobwatcher
-      selectors:
-        component: jobwatcher-service
-    - name: jaeger
-      labels:
-        app: jaeger
-      selectors:
-        component: jaeger-service
-    - name: flowmanager
-      labels:
-        app: flowmanager
-      selectors:
-        component: flowmanager-service
-    - name: resourcemanager
-      labels:
-        app: resourcemanager
-      selectors:
-        component: resourcemanager-service

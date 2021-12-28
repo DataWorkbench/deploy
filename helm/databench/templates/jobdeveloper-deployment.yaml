@@ -35,15 +35,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobdeveloper start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.jobDeveloper }}
-            name: service
-          - containerPort: {{ .Values.ports.jobDeveloperMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.jobdeveloper }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.jobdeveloper }}
         env:
           - name: JOB_DEVELOPER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobDeveloper }}"
+            value: "0.0.0.0:{{- .Values.ports.jobdeveloper }}"
           - name: JOB_DEVELOPER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobDeveloperMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.jobdeveloper }}"
 {{ include "jobdeveloper.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobdeveloper.envs }}
           - name: {{ $ename }}
@@ -55,7 +55,7 @@ spec:
             readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobDeveloper }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
           {{- if .Values.jobdeveloper.readinessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.readinessProbe.initialDelaySeconds }}
@@ -65,7 +65,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobDeveloper }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobdeveloper }}"]
           {{- if .Values.jobdeveloper.livenessProbe }}
           periodSeconds: {{ .Values.jobdeveloper.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobdeveloper.livenessProbe.initialDelaySeconds }}

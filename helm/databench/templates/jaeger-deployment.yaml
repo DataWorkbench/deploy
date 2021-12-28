@@ -34,10 +34,10 @@ spec:
         image: {{ .Values.image.jaeger | quote }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
-          - containerPort: {{ .Values.ports.jaeger }}
-            name: service
-          - containerPort: {{ .Values.ports.jaegerWeb }}
-            name: web
+          - name: service
+            containerPort: {{ .Values.ports.jaeger }}
+          - name: web
+            containerPort: {{ .Values.ports.jaegerweb }}
         env:
           {{- range $ename, $evalue := .Values.jaeger.envs }}
           - name: {{ $ename }}

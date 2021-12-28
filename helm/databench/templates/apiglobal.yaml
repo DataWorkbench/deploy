@@ -35,13 +35,13 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/common-config.yaml"]
           ports:
-            - containerPort: {{ .Values.ports.apiGlobal }}
-              name: service
+            - name: service
+              containerPort: {{ .Values.ports.apiglobal }}
           env:
             - name: API_GLOBAL_LOG_LEVEL
               value: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel | quote }}
             - name: API_GLOBAL_HTTP_SERVER_ADDRESS
-              value: "0.0.0.0:{{ .Values.ports.apiGlobal }}"
+              value: "0.0.0.0:{{ .Values.ports.apiglobal }}"
             - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
               value: '{{ include "service.account" . }}'
             {{- range $ename, $evalue := .Values.apiglobal.envs }}
@@ -91,7 +91,7 @@ spec:
   type: ClusterIP
   ports:
     - name: service
-      port: {{ .Values.ports.apiGlobal }}
+      port: {{ .Values.ports.apiglobal }}
       targetPort: service
       protocol: TCP
   selector:
