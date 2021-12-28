@@ -7,15 +7,12 @@ ENV HADOOP_CLASSPATH /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop:/zeppelin/hadoop/h
 COPY --from=builder /opt/flink-1.12.3 /zeppelin/flink/flink-1.12.3
 COPY --from=builder /opt/hadoop-2.7.5 ${HADOOP_HOME}
 
-COPY interpreter.json /opt/zeppelin/conf/
-COPY zeppelin-env.sh /opt/zeppelin/conf/
-COPY zeppelin-site.xml /opt/zeppelin/conf/
-COPY core-site.xml ${HADOOP_HOME}/etc/hadoop/
-COPY hdfs-site.xml ${HADOOP_HOME}/etc/hadoop/
+COPY conf/* /opt/zeppelin/conf/
 COPY zeppelin.sh /opt/zeppelin/bin/
+COPY 100-interpreter-spec.yaml /opt/zeppelin/k8s/interpreter/
+COPY 1.12_lib/* /zeppelin/flink/1.12_lib/
+COPY depends/* /zeppelin/flink/depends/
 
-ADD 1.12_lib /zeppelin/flink/1.12_lib/
-ADD depends /zeppelin/flink/depends/
 USER root
 RUN chmod 777 -R /zeppelin/flink/ && \
     chmod 777 -R /opt/zeppelin/bin
