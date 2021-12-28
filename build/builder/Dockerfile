@@ -8,12 +8,14 @@ ARG WORKSPACE=/opt
 WORKDIR ${WORKSPACE}
 
 # compress cmds (do not need to un-compress while run)
-RUN wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz && \
+#RUN wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux.tar.xz && \
+RUN wget https://api.anybox.qingcloud.com/v1/downloads/LusWibcaSabCXsXkHAdnosiCeJxLElF8eWhjbmrxzlCHlgru45tMTkGBGEPss5zUrGBOw5HM1YjIT1joAHJcuzLZtovgGFfHwL1tuL1ceAHxeEqKeNL5Zz5GIbadmSyJ/upx-3.95-amd64_linux.tar.xz && \
     tar -Jxf upx-3.95-amd64_linux.tar.xz
 
-# install grpc_health_probe for status probe of dataworkbench service on k8s
-RUN GRPC_HEALTH_PROBE_VERSION=v0.4.4 && \
-    wget -qO grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+# install grpc_health_probe: v0.4.4 for status probe of dataworkbench service on k8s
+#RUN GRPC_HEALTH_PROBE_VERSION=v0.4.4 && \
+#    wget -qO grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
+RUN wget -qO grpc_health_probe https://api.anybox.qingcloud.com/v1/downloads/VrZ76Pr4qxKLv3WjTJoqq00dJxwIg30Ie0XVh5fpQOnI2wGjCzd3OLuSyZwXE0d8PLkzCokx8YT4vmzBpNJ49HlUIggrPopCL1uTwHPikUkJTVt26hyRIUia1ZxcNZOg/grpc_health_probe-linux-amd64 && \
     chmod +x grpc_health_probe
 
 FROM golang:1.15.5-alpine3.12
@@ -26,5 +28,5 @@ RUN go env -w GOPROXY=https://goproxy.cn,direct
 RUN go env -w GOCACHE=/go/cache
 
 RUN mkdir -p /opt/bin
-COPY --from=builder ${WORKSPACE}/upx-*/upx /opt/bin/
-COPY --from=builder ${WORKSPACE}/grpc_health_probe /opt/bin/
+COPY --from=builder ${WORKSPACE}/upx-*/upx /usr/local/bin/
+COPY --from=builder ${WORKSPACE}/grpc_health_probe /usr/local/bin/

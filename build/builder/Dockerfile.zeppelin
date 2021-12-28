@@ -2,14 +2,15 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-FROM maven:3.5-jdk-8 as builder
+FROM golang:1.15.5-alpine3.12 as builder
 
 WORKDIR /opt
 
 # for zeppelin
-RUN wget https://archive.apache.org/dist/flink/flink-1.12.3/flink-1.12.3-bin-scala_2.11.tgz && \
-    tar -zxvf flink-1.12.3-bin-scala_2.11.tgz && \
-    rm flink-1.12.3-bin-scala_2.11.tgz
+# flink that fixed log4j on anybox
+RUN wget https://api.anybox.qingcloud.com/v1/downloads/RKAC6KedUWRIe8YVttOUoZokBwDx3h1dWU2CiNdCMUHK4GGCR1ujYzoZ0uNEMeKvTudRICgVnHOGGTWkS9dvCDuBmmyt51Z1gjL1DTHByGnZUl4vBBlNq0mByaDvORGA/flink-1.12.3-bin-scala_2.11.tar.gz && \
+    tar -zxvf flink-1.12.3-bin-scala_2.11.tar.gz && \
+    rm flink-1.12.3-bin-scala_2.11.tar.gz
 
 RUN wget https://archive.apache.org/dist/hadoop/common/hadoop-2.7.5/hadoop-2.7.5.tar.gz && \
     tar -zxvf hadoop-2.7.5.tar.gz && \

@@ -1,4 +1,6 @@
 FROM dataworkbench/builder:zeppelin as builder
+
+
 FROM apache/zeppelin:0.9.0
 
 ENV HADOOP_HOME /zeppelin/hadoop/hadoop-2.7.5

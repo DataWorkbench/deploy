@@ -8,7 +8,7 @@ FROM alpine:3.12
 ENV DATABENCH_CONF=/etc/dataworkbench
 RUN mkdir -p ${DATABENCH_CONF}
 
-COPY --from=builder /opt/bin/ /usr/local/bin
+COPY --from=builder /usr/local/bin/ /usr/local/bin
 
 COPY ./deploy/tmp/bin/ /usr/local/bin/
 COPY ./deploy/tmp/conf/ ${DATABENCH_CONF}/
