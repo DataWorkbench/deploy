@@ -205,7 +205,7 @@ logcollector:
     limits: {}
 
 pmm:
-  enabled: true
+  enabled: false
   image:
     repository: percona/pmm-client
     tag: 2.18.0

@@ -40,15 +40,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobwatcher start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.jobWatcher }}
-            name: service
-          - containerPort: {{ .Values.ports.jobWatcherMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.jobwatcher }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.jobwatcher }}
         env:
           - name: JOB_WATCHER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobWatcher }}"
+            value: "0.0.0.0:{{- .Values.ports.jobwatcher }}"
           - name: JOB_WATCHER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.jobWatcherMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.jobwatcher }}"
           - name: JOB_WATCHER_JOBDEVELOPER_SERVER_ADDRESS
             value: {{ include "service.jobdeveloper" . | quote }}
           - name: JOB_WATCHER_MYSQL_PASSWORD
@@ -66,7 +66,7 @@ spec:
             readOnly: true
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
           {{- if .Values.jobwatcher.readinessProbe }}
           periodSeconds: {{ .Values.jobwatcher.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.readinessProbe.initialDelaySeconds }}
@@ -76,7 +76,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobWatcher }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.jobwatcher }}"]
           {{- if .Values.jobwatcher.livenessProbe }}
           periodSeconds: {{ .Values.jobwatcher.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.jobwatcher.livenessProbe.initialDelaySeconds }}

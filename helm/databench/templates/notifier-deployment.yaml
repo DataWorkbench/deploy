@@ -40,15 +40,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.notifier }}
-            name: service
-          - containerPort: {{ .Values.ports.notifierMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.notifier }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.notifier }}
         env:
           - name: NOTIFIER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.notifier }}"
           - name: NOTIFIER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.notifierMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.notifier }}"
           - name: NOTIFIER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:

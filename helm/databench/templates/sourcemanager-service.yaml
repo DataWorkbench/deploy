@@ -10,11 +10,11 @@ spec:
   ports:
     - name: service
       protocol: TCP
-      port: {{ .Values.ports.sourceManager }}
+      port: {{ .Values.ports.sourcemanager }}
       targetPort: service
     - name: metrics
       protocol: TCP
-      port: {{ .Values.ports.sourceManagerMetrics }}
+      port: {{ .Values.metricsPorts.sourcemanager }}
       targetPort: metrics
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}

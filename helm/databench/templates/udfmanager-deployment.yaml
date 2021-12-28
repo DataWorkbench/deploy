@@ -40,15 +40,15 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "udfmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
-          - containerPort: {{ .Values.ports.udfManager }}
-            name: service
-          - containerPort: {{ .Values.ports.udfManagerMetrics }}
-            name: metrics
+          - name: service
+            containerPort: {{ .Values.ports.udfmanager }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.udfmanager }}
         env:
           - name: UDF_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.udfManager }}"
+            value: "0.0.0.0:{{- .Values.ports.udfmanager }}"
           - name: UDF_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.udfManagerMetrics }}"
+            value: "0.0.0.0:{{- .Values.metricsPorts.udfmanager }}"
           - name: UDF_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -60,7 +60,7 @@ spec:
           {{- end }}
         readinessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfmanager }}"]
           {{- if .Values.udfmanager.readinessProbe }}
           periodSeconds: {{ .Values.udfmanager.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.udfmanager.readinessProbe.initialDelaySeconds }}
@@ -70,7 +70,7 @@ spec:
           {{- end }}
         livenessProbe:
           exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfManager }}"]
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.udfmanager }}"]
           {{- if .Values.udfmanager.livenessProbe }}
           periodSeconds: {{ .Values.udfmanager.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.udfmanager.livenessProbe.initialDelaySeconds }}
