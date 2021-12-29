@@ -57,7 +57,6 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   configmapName: hdfs-common-config
 
 # redis-cluster configuration
@@ -118,8 +117,6 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
-    ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAME: "hdfs-common-config"
-
 
 # flowmanager configuration
 flowmanager:
@@ -174,7 +171,8 @@ observer:
 
 # resourcemanager configuration
 resourcemanager:
-  envs: {}
+  envs:
+    RESOURCE_MANAGER_HADOOP_CONF_DIR: /etc/hadoop
 
 # scheduler configuration
 scheduler:

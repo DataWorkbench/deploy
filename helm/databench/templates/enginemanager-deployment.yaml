@@ -73,6 +73,8 @@ spec:
                 key: secret_access_key
           - name: ENGINE_MANAGER_FLINK_DOMAIN
             value: {{ .Values.domain | quote }}
+          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAME
+            value: {{ .Values.hdfs.configmapName }}
           - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAMESPACE
             value: {{ .Release.Namespace | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
