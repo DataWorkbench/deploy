@@ -221,7 +221,7 @@ backup:
   imagePullSecrets: []
   # - name: private-registry-credentials
   pitr:
-    enabled: true
+    enabled: false
     storageName: qingstor
     timeBetweenUploads: 60
   storages:
@@ -245,8 +245,8 @@ backup:
       type: s3
       s3:
         bucket: pxc-mysql-backup-newtesting
-        credentialsAccessKey: MUBDSNZZSLGKHEYVAFKW
-        credentialsSecretKey: FEMsN6sXZ0U1iaRar2MfLiIxMx9ULUHNOurscoa5
+        credentialsAccessKey:
+        credentialsSecretKey:
         region: pek3b
         endpointUrl: https://s3.pek3b.qingstor.com
   schedule:
