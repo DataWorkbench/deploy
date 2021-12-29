@@ -29,12 +29,6 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
-      {{- if .Values.dns.qingcloudApiIP }}
-      hostAliases:
-        - ip: {{ .Values.dns.qingcloudApiIP | quote }}
-          hostnames:
-            - {{ .Values.iaas.host }}
-      {{- end }}
       initContainers:
       - name: wait-mysql
         image: busybox:1.28.4
