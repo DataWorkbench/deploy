@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # for apiserver and flink web
-domain: databench.io
+domain: databench.192.168.27.90.nip.io
 #
 dns:
   ksLBIP: 172.20.0.2
@@ -276,4 +276,4 @@ serviceMonitor:
   interval: 30s
 
 web:
-  enabled: true
+  enabled: false
