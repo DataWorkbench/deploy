@@ -277,4 +277,4 @@ serviceMonitor:
   interval: 30s
 
 web:
-  enabled: false
+  enabled: ture
