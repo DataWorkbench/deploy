@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: {{ $.Values.namenode.storage.reclaimPolicy }}
   storageClassName: {{ $fullname }}-namenode-sc
   local:
-    path: {{ $.Values.hdfsHome }}/hdfs-cluster/{{ $.Release.Name }}/namenode
+    path: {{ $.Values.hdfsHome }}/{{ $.Release.Name }}/namenode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -55,7 +55,7 @@ spec:
   persistentVolumeReclaimPolicy: {{ $.Values.datanode.storage.reclaimPolicy }}
   storageClassName: {{ $fullname }}-datanode-sc
   local:
-    path: {{ $.Values.hdfsHome }}/hdfs-cluster/{{ $.Release.Name }}/datanode
+    path: {{ $.Values.hdfsHome }}/{{ $.Release.Name }}/datanode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -89,7 +89,7 @@ spec:
   persistentVolumeReclaimPolicy: {{ $.Values.journalnode.storage.reclaimPolicy }}
   storageClassName: {{ $fullname }}-journalnode-sc
   local:
-    path: {{ $.Values.hdfsHome }}/hdfs-cluster/{{ $.Release.Name }}/journalnode
+    path: {{ $.Values.hdfsHome }}/{{ $.Release.Name }}/journalnode
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -124,7 +124,7 @@ spec:
   persistentVolumeReclaimPolicy: {{ $.Values.zookeeper.storage.reclaimPolicy }}
   storageClassName: {{ $fullname }}-zookeeper-sc
   local:
-    path: {{ $.Values.hdfsHome }}/hdfs-cluster/{{ $.Release.Name }}/zookeeper
+    path: {{ $.Values.hdfsHome }}/{{ $.Release.Name }}/zookeeper
   nodeAffinity:
     required:
       nodeSelectorTerms:

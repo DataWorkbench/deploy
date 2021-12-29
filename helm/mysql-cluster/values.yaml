@@ -74,7 +74,7 @@ pxc:
     enabled: true
     storageClass: "local"
     accessMode: ReadWriteOnce
-    size: 10Gi
+    size: 20Gi
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: true
@@ -97,13 +97,13 @@ pxc:
     failureThreshold: 3
 
 pxcNodes:      # The length of nodes is equal to pxc size
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
+  - "worker-1"
+  - "worker-2"
+  - "master"
 
 localPvs:
   reclaimPolicy: Retain
-  mysqlHome: /data/mysql-cluster
+  mysqlHome: /data/databench
 
 haproxy:
   enabled: true

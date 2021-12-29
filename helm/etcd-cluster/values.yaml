@@ -3,9 +3,9 @@
 replicaCount: 3
 
 nodes:    # The length of nodes is equal to etcd-cluster replicaCount
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
+  - "worker-1"
+  - "worker-2"
+  - "master"
 
 resources:
    limits:
@@ -17,8 +17,8 @@ resources:
 
 persistentVolume:
   reclaimPolicy: Retain
-  etcdHome: /data/etcd-cluster
+  etcdHome: /data/databench
 
 persistent:
-  size: 5Gi
+  size: 10Gi
   accessModes: ["ReadWriteOnce"]

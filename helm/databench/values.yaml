@@ -268,7 +268,7 @@ metricsPorts: # key must be same as component in deployment
 #  logmanager: 9215
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   defaults:
     labels:
       project: databench

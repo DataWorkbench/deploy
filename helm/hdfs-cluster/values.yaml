@@ -4,36 +4,36 @@ fullnameOverride: ""
 
 storageClass: ""
 
-hdfsHome: /data
+hdfsHome: /data/databench
 
 version: 2.9.2
 
-image: dataworkbench/hadoop-test:2.9.2   #  dataworkbench/hdfs-metrics:3.1.0
+image: dockerhub.qingcloud.com/hadoop:2.9.2   #  dataworkbench/hdfs-metrics:3.1.0
 
 namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
   nodes:
-    - "worker-s001"
-    - "worker-s002"
+    - "worker-1"
+    - "worker-2"
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
 
 datanode:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - "worker-1"
+    - "worker-2"
+    - "master"
   storage:
     capacity: 50Gi
     reclaimPolicy: Retain
 
 journalnode:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - "worker-1"
+    - "worker-2"
+    - "master"
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
@@ -41,11 +41,11 @@ journalnode:
 zookeeper:
   quorum:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - "worker-1"
+    - "worker-2"
+    - "master"
   storage:
-    capacity: 1Gi
+    capacity: 5Gi
     reclaimPolicy: Retain
 
 yarn:
