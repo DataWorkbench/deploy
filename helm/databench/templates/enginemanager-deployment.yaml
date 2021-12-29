@@ -73,6 +73,8 @@ spec:
                 key: secret_access_key
           - name: ENGINE_MANAGER_FLINK_DOMAIN
             value: {{ .Values.domain | quote }}
+          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAMESPACE
+            value: {{ .Release.Namespace | quote }}
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -82,7 +84,7 @@ spec:
             mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
             readOnly: true
           - name: kube-config-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH }}
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
             readOnly: true
           - name: databench-config
             mountPath: "/etc/dataworkbench"

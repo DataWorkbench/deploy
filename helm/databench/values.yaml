@@ -104,8 +104,10 @@ enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
+    ENGINE_MANAGER_LOG_LEVEL: 1
+    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
     ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
-    ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH: "/root/.kube/config"
+    ENGINE_MANAGER_KUBE_CONF_PATH: "/root/.kube/config"
     ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
     ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
     ENGINE_MANAGER_HELM_DRIVER: ""
@@ -116,9 +118,8 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+    ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAME: "hdfs-common-config"
 
-    ENGINE_MANAGER_LOG_LEVEL: 1
-    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:
