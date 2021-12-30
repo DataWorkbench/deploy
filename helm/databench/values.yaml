@@ -9,11 +9,11 @@ image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
 
-  databench: dockerhub.qingcloud.com/databench/databench:enfi-0.1.0
-  flyway: dockerhub.qingcloud.com/databench/flyway:enfi-0.1.0
-  zeppelin: dockerhub.qingcloud.com/databench/zeppelin:0.9.0
-  zeppelinInterpreter: dockerhub.qingcloud.com/databench/zeppelin:0.9.0
-  web: dockerhub.qingcloud.com/databench/web:0.1.0
+  databench: dataworkbench/databench:enfi-0.1.0
+  flyway: dataworkbench/flyway:enfi-0.1.0
+  zeppelin: dataworkbench/zeppelin:0.9.0
+  zeppelinInterpreter: dataworkbench/zeppelin:0.9.0
+  web: dataworkbench/web:0.1.0
 
   jaeger: jaegertracing/all-in-one:1.22
 
@@ -110,7 +110,7 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
-    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.qingcloud.com/databench/flink"
+    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dataworkbench/flink"
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
