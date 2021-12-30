@@ -84,7 +84,7 @@ metadata:
   name: {{ include "databench.fullname" . }}-web-ingress
   annotations:
     # support websocket
-    nginx.org/websocket-services: {{ include "databench.fullname" . }}-zeppelin-server
+    nginx.org/websocket-services: {{ include "databench.fullname" . }}-web
 spec:
   ingressClassName: nginx
   rules:
