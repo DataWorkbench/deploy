@@ -70,7 +70,7 @@ apiglobal:
   # region settings
   regions:
     testing:
-      hosts: "http://databench-apiserver:9001"
+      hosts: "http://api.databench.192.168.27.90.nip.io" # apiserver export service
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
