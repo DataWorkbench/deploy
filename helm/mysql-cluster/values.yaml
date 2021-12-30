@@ -47,11 +47,11 @@ pxc:
     long_query_time=10
   resources:
     requests:
+      memory: 1G
+      cpu: 500m
+    limits:
       memory: 4G
-      cpu: 2G
-    limits: {}
-      # memory: 1G
-      # cpu: 600m
+      cpu: 2000m
   sidecars: []
   sidecarResources:
     requests: {}
@@ -99,7 +99,7 @@ pxc:
 pxcNodes:      # The length of nodes is equal to pxc size
   - "worker-1"
   - "worker-2"
-  - "master"
+  - "worker-3"
 
 localPvs:
   reclaimPolicy: Retain
@@ -117,11 +117,11 @@ haproxy:
   livenessDelaySec: 300
   resources:
     requests:
+      memory: 0.5G
+      cpu: 100m
+    limits:
       memory: 1G
-      cpu: 500m
-    limits: {}
-      # memory: 1G
-      # cpu: 600m
+      cpu: 600m
   sidecars: []
   sidecarResources:
     requests: {}

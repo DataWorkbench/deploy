@@ -5,7 +5,7 @@ replicaCount: 3
 nodes:    # The length of nodes is equal to etcd-cluster replicaCount
   - "worker-1"
   - "worker-2"
-  - "master"
+  - "worker-3"
 
 resources:
    limits:

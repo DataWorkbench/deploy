@@ -8,14 +8,14 @@ hdfsHome: /data/databench
 
 version: 2.9.2
 
-image: dockerhub.qingcloud.com/databench/hadoop:2.9.2   #  dataworkbench/hdfs-metrics:3.1.0
+image: dataworkbench/hadoop:2.9.2   #  dataworkbench/hdfs-metrics:3.1.0
 
 namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
   nodes:
     - "worker-1"
-    - "worker-2"
+    - "worker-3"
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
@@ -24,7 +24,7 @@ datanode:
   nodes:
     - "worker-1"
     - "worker-2"
-    - "master"
+    - "worker-3"
   storage:
     capacity: 50Gi
     reclaimPolicy: Retain
@@ -33,7 +33,7 @@ journalnode:
   nodes:
     - "worker-1"
     - "worker-2"
-    - "master"
+    - "worker-3"
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
@@ -43,9 +43,9 @@ zookeeper:
   nodes:
     - "worker-1"
     - "worker-2"
-    - "master"
+    - "worker-3"
   storage:
-    capacity: 5Gi
+    capacity: 10Gi
     reclaimPolicy: Retain
 
 yarn:
