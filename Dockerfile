@@ -9,6 +9,7 @@ ARG CONF_IN_BUILDER=/dataworkbench/conf
 ARG COMPILE_CMD=./deploy/build/scripts/compile.sh
 ARG SERVICES=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,resourcemanager,notifier,account,enginemanager
 WORKDIR /go/src/DataWorkbench
+ENV GOPROXY=https://goproxy.io,direct
 
 COPY . .
 # compile service in databench
@@ -18,13 +19,14 @@ RUN find ${BIN_IN_BUILDER} -type f -exec upx {} \;
 
 
 FROM alpine:3.12
+
 ARG BIN_IN_BUILDER=/dataworkbench/bin
 ARG CONF_IN_BUILDER=/dataworkbench/conf
 ENV DATABENCH_CONF=/etc/dataworkbench
 RUN mkdir -p ${DATABENCH_CONF}
 
-COPY --from=builder /usr/local/go/lib/time/zoneinfo.zip /usr/local/go/lib/time/zoneinfo.zip
-COPY --from=builder /usr/local/bin/* /usr/local/bin/
+RUN apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+COPY --from=builder /usr/local/bin/grpc_health_probe /usr/local/bin/
 COPY --from=builder ${BIN_IN_BUILDER}/* /usr/local/bin/
 COPY --from=builder ${CONF_IN_BUILDER}/* ${DATABENCH_CONF}/
 

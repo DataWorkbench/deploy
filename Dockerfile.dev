@@ -5,12 +5,14 @@ FROM dataworkbench/builder as builder
 
 FROM alpine:3.12
 
+RUN apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
 ENV DATABENCH_CONF=/etc/dataworkbench
 RUN mkdir -p ${DATABENCH_CONF}
 
-COPY --from=builder /usr/local/bin/ /usr/local/bin
+COPY --from=builder /usr/local/bin/grpc_health_probe /usr/local/bin/
 
-COPY ./deploy/tmp/bin/ /usr/local/bin/
 COPY ./deploy/tmp/conf/ ${DATABENCH_CONF}/
+COPY ./deploy/tmp/bin/ /usr/local/bin/
 
 CMD ["sh"]
