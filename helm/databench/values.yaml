@@ -67,7 +67,7 @@ apiglobal:
   # region settings
   regions:
     testing:
-      hosts: "http://databench-apiserver:9001"
+      hosts: "http://api.databench.10.10.7.51.nip.io:30476"
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
