@@ -103,7 +103,7 @@ pxcNodes:      # The length of nodes is equal to pxc size
 
 localPvs:
   reclaimPolicy: Retain
-  mysqlHome: /data/mysql-cluster
+  mysqlHome: /data/databench
 
 haproxy:
   enabled: true
