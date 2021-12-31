@@ -17,7 +17,7 @@ image:
   flyway: dockerhub.databench.io/databench/flyway:dev
   zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
-  web: dockerhub.qingcloud.com/databench/web:0.1.0
+  web: dataworkbench/web:0.1.0
 
   jaeger: jaegertracing/all-in-one:1.22
 
@@ -275,4 +275,4 @@ serviceMonitor:
   interval: 30s
 
 web:
-  enabled: false
+  enabled: true
