@@ -67,7 +67,7 @@ apiglobal:
   # region settings
   regions:
     testing:
-      hosts: "http://api.databench.10.10.7.51.nip.io:30476"
+      hosts: "http://api.databench.10.10.7.51.nip.io"
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
@@ -114,7 +114,6 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
-    ENGINE_MANAGER_FLINK_INGRESS_PORT: 30476
 
 # flowmanager configuration
 flowmanager:
