@@ -106,7 +106,6 @@ enginemanager:
     ENGINE_MANAGER_LOG_LEVEL: 1
     ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
     ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
-    ENGINE_MANAGER_KUBE_CONF_PATH: "/root/.kube/config"
     ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
     ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
     ENGINE_MANAGER_HELM_DRIVER: ""
