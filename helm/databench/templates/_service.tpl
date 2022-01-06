@@ -91,14 +91,14 @@ Service Addresses For ApiServer
 
 
 {{- define "jobmanager.link.services" -}}
-- name: JOB_MANAGER_JOBDEVELOPER_SERVER_ADDRESS
-  value: '{{ include "service.jobdeveloper" . }}'
-- name: JOB_MANAGER_JOBWATCHER_SERVER_ADDRESS
-  value: '{{ include "service.jobwatcher" . }}'
-- name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.enginemanager" . }}'
 - name: JOB_MANAGER_ZEPPELIN_ADDRESS
   value: '{{ include "service.zeppelin" . }}'
+- name: JOB_MANAGER_RESOURCEMANAGER_SERVER_ADDRESS
+  value: '{{ include "service.resourcemanager" . }}'
+- name: JOB_MANAGER_UDFMANAGER_SERVER_ADDRESS
+  value: '{{ include "service.udfmanager" . }}'
+- name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
+  value: '{{ include "service.enginemanager" . }}'
 {{- end -}}
 
 

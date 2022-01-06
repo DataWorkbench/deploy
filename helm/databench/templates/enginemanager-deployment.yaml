@@ -82,14 +82,16 @@ spec:
             value: {{ $evalue | quote }}
           {{- end }}
         volumeMounts:
-          - name: helm-repo-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+          - name: databench-config
+            mountPath: "/etc/dataworkbench"
             readOnly: true
+         {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
           - name: kube-config-volume
             mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
             readOnly: true
-          - name: databench-config
-            mountPath: "/etc/dataworkbench"
+        {{- end }}
+          - name: helm-repo-volume
+            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
             readOnly: true
         readinessProbe:
           exec:
@@ -112,17 +114,19 @@ spec:
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
       volumes:
-        - name: helm-repo-volume
-          hostPath:
-            path: {{ .Values.enginemanager.helmRepoPath }}
-            type: Directory
-        - name: kube-config-volume
-          hostPath:
-            path: {{ .Values.enginemanager.kubeConfigPath }}
-            type: File
         - name: databench-config
           configMap:
             name: databench-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"
+        {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+        - name: kube-config-volume
+          hostPath:
+            path: {{ .Values.enginemanager.kubeConfigPath }}
+            type: File
+        {{- end }}
+        - name: helm-repo-volume
+          hostPath:
+            path: {{ .Values.enginemanager.helmRepoPath }}
+            type: Directory
