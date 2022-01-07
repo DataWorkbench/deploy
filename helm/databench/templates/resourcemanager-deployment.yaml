@@ -41,8 +41,6 @@ spec:
           - name: metrics
             containerPort: {{ .Values.metricsPorts.resourcemanager }}
         env:
-          - name: RESOURCE_MANAGER_HADOOP_CONF_DIR
-            value: {{ .Values.hdfs.configDir }}
           - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
           - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
@@ -81,7 +79,7 @@ spec:
             mountPath: /etc/dataworkbench
             readOnly: true
           - name: hdfs-config
-            mountPath: {{ .Values.hdfs.configDir }}
+            mountPath: {{ .Values.resourcemanager.envs.RESOURCE_MANAGER_HADOOP_CONF_DIR }}
             readOnly: true
       volumes:
         - name: config

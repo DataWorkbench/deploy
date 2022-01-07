@@ -14,4 +14,5 @@ clean:
 
 build:
 	docker build -t dataworkbench/builder .
+	docker build -t dataworkbench/builder:zeppelin -f Dockerfile.zeppelin .
 	@echo "ok"

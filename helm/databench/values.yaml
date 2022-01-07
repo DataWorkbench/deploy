@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # for apiserver and flink web
-domain: databench.io
+domain: databench.192.168.27.90.nip.io
 #
 dns:
   ksLBIP: 172.20.0.2
@@ -17,6 +17,7 @@ image:
   flyway: dockerhub.databench.io/databench/flyway:dev
   zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
+  web: dataworkbench/web:0.1.0
 
   jaeger: jaegertracing/all-in-one:1.22
 
@@ -56,7 +57,6 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
   configmapName: hdfs-common-config
 
 # redis-cluster configuration
@@ -70,7 +70,7 @@ apiglobal:
   # region settings
   regions:
     testing:
-      hosts: "http://databench-apiserver:9001"
+      hosts: "http://api.databench.192.168.27.90.nip.io" # apiserver export service
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
@@ -103,8 +103,9 @@ enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
+    ENGINE_MANAGER_LOG_LEVEL: 1
+    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
     ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
-    ENGINE_MANAGER_HELM_KUBE_CONFIG_PATH: "/root/.kube/config"
     ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
     ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
     ENGINE_MANAGER_HELM_DRIVER: ""
@@ -115,9 +116,6 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
-
-    ENGINE_MANAGER_LOG_LEVEL: 1
-    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
 
 # flowmanager configuration
 flowmanager:
@@ -172,7 +170,8 @@ observer:
 
 # resourcemanager configuration
 resourcemanager:
-  envs: {}
+  envs:
+    RESOURCE_MANAGER_HADOOP_CONF_DIR: /etc/hadoop
 
 # scheduler configuration
 scheduler:
@@ -273,3 +272,6 @@ serviceMonitor:
   namespace: kubesphere-monitoring-system
   port: metrics
   interval: 30s
+
+web:
+  enabled: true

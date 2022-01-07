@@ -17,7 +17,7 @@ resources:
 
 persistentVolume:
   reclaimPolicy: Retain
-  etcdHome: /data/etcd-cluster
+  etcdHome: /data/databench
 
 persistent:
   size: 5Gi
