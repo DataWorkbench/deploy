@@ -1,4 +1,4 @@
-{{- if Values.apiglobal.enable }}
+{{- if .Values.apiglobal.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
