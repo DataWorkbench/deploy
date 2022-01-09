@@ -47,11 +47,11 @@ pxc:
     long_query_time=10
   resources:
     requests:
-      memory: 4G
-      cpu: 2G
-    limits: {}
-      # memory: 1G
-      # cpu: 600m
+      cpu: 1000m
+      memory: 2Gi
+    limits:
+      cpu: 4000m
+      memory: 8Gi
   sidecars: []
   sidecarResources:
     requests: {}
@@ -117,11 +117,11 @@ haproxy:
   livenessDelaySec: 300
   resources:
     requests:
-      memory: 1G
+      memory: 1Gi
       cpu: 500m
-    limits: {}
-      # memory: 1G
-      # cpu: 600m
+    limits:
+      memory: 4Gi
+      cpu: 2000m
   sidecars: []
   sidecarResources:
     requests: {}
