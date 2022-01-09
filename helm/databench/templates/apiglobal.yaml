@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: apiglobal
-          image: {{ .Values.image.repo }}/apiglobal:{{ .Values.image.repo }}
+          image: {{ .Values.image.repo }}/apiglobal:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/common-config.yaml"]
           ports:

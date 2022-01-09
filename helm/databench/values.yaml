@@ -16,13 +16,12 @@ image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
   repo: dockerhub.databench.io/databench
-  tag: devs
+  tag: dev
+  flywayTag: dev
+  zeppelinTag: 0.9.0
 
-  flyway: dockerhub.databench.io/databench/flyway:dev
-  zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
   web: dataworkbench/web:0.1.0
-
   jaeger: jaegertracing/all-in-one:1.22
 
 # common configuration for all service

@@ -36,7 +36,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: spacemanager
-        image: {{ .Values.image.repo }}/spacemanager:{{ .Values.image.repo }}
+        image: {{ .Values.image.repo }}/spacemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "spacemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:
