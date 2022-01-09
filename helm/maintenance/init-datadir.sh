@@ -14,6 +14,8 @@ EtcdReleaseName=etcd-cluster
 
 
 ###############################################################################################
+AllNodes=(worker-s001 worker-s002 worker-s003)
+
 # hdfsDatadir format: ${VolumeHome}/${HdfsReleaseName}/datanode ..
 # hdfs role-node map
 HdfsDatanodeNodes=(worker-s001 worker-s002 worker-s003)
@@ -59,4 +61,11 @@ done
 for node in ${EtcdNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${EtcdReleaseName}"
+done
+
+# HelmRepodir: /root/.cache/helm/repository
+# create it on all node
+for node in ${AllNodes[@]}
+do
+  ssh root@${node} "mkdir -p /root/.cache/helm/repository"
 done
