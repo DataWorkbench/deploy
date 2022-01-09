@@ -1,6 +1,7 @@
 # Default values for redis-cluster.
 
 sentinel:
+  image: redis
   replicaCount: 3
   resource:
     requests:
@@ -14,6 +15,7 @@ sentinel:
     - "failover-timeout 3000"
 
 redis:
+  image: redis
   replicaCount: 3
   resource:
     requests:
