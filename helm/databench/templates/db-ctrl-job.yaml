@@ -18,7 +18,7 @@ spec:
     spec:
       initContainers:
         - name: wait-mysql
-          image: busybox:1.28.4
+          image: {{ .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'

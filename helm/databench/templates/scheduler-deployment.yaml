@@ -31,11 +31,11 @@ spec:
     spec:
       initContainers:
       - name: wait-mysql
-        image: busybox:1.28.4
+        image: {{ .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       - name: wait-etcd
-        image: busybox:1.28.4
+        image: {{ .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
