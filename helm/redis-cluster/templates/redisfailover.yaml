@@ -16,7 +16,7 @@ spec:
     customConfig:
 {{ toYaml .Values.sentinel.config | indent 6 }}
   redis:
-    image: {{ include "sentinel.image" . }}
+    image: {{ include "redis.image" . }}
     imagePullPolicy: IfNotPresent
     replicas: {{ .Values.redis.replicaCount }}
     resources:

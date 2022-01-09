@@ -28,7 +28,7 @@ controller:
 
   image:
     ## The image repository of the Ingress controller.
-    repository: nginx/nginx-ingress
+    repository: dockerhub.dataomnis.io/nginx/nginx-ingress
 
     ## The tag of the Ingress controller image.
     tag: "2.0.3"

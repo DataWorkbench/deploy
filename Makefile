@@ -2,12 +2,11 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Repo:=dockerhub.databench.io/databench
-TARG.Name:=databench
+TARG.Repo:=dockerhub.dataomnis.io/dataomnis
 TRAG.Gopkg:=DataWorkbench
 #TRAG.Version:=$(TRAG.Gopkg)/pkg/version
 
-TAG:=dev
+TAG:=v0.8-alpha
 FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
 ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0
 FLINK_IMAGE:=$(TARG.Repo)/flinkutile:1.12.3-scala_2.11
@@ -66,7 +65,7 @@ build-all: build-flyway build-dev build-zeppelin
 
 .PHONY: push-images  ## push all images
 push-images:
-	docker push $(ZEPPELIN_IMAGE)
+	#docker push $(ZEPPELIN_IMAGE)
 	docker push $(FLYWAY_IMAGE)
 	@$(foreach S,$(SERVICE_ARRAY),docker push $(TARG.Repo)/$(S):$(TAG);)
 	@echo "push image done"

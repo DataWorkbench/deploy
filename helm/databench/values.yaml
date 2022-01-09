@@ -3,25 +3,25 @@
 # Declare variables to be passed into your templates.
 
 # for apiserver and flink web
-domain: databench.192.168.27.90.nip.io
+domain: gd2.data.qingcloud.link
 
 # the host info for pod
 # qingcloudApiIP: the ip of api.qingcloud.com
 dns:
-  qingcloudApiIP: 172.31.60.141
+  qingcloudApiIP: 
 
 image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
-  repo: dockerhub.databench.io/databench
-  tag: dev
-  flywayTag: dev
+  repo: dockerhub.dataomnis.io/dataomnis
+  tag: v0.8-alpha
+  flywayTag: v0.8-alpha
   zeppelinTag: 0.9.0
 
-  busybox: busybox:1.28.4
+  busybox: dockerhub.dataomnis.io/library/busybox:1.28.4
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
   web: dataworkbench/web:0.1.0
-  jaeger: jaegertracing/all-in-one:1.22
+  jaeger: dockerhub.dataomnis.io/jaegertracing/all-in-one:1.22
 
 # common configuration for all service
 common:
@@ -59,7 +59,7 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configmapName: hdfs-common-config
+  configmapName: hdfs-cluster-common-config
 
 # redis-cluster configuration
 redis:
@@ -69,7 +69,7 @@ redis:
 
 # apiglobal settings
 apiglobal:
-  enable: true
+  enable: false
   # region settings
   regions:
     testing:
@@ -277,4 +277,4 @@ serviceMonitor:
   interval: 30s
 
 web:
-  enabled: true
+  enabled: false

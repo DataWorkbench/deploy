@@ -11,8 +11,7 @@ finalizers:
 
 nameOverride: ""
 fullnameOverride: ""
-
-operatorImageRepository: percona/percona-xtradb-cluster-operator
+operatorImageRepository: dockerhub.dataomnis.io/percona/percona-xtradb-cluster-operator
 
 crVersion: 1.9.0
 pause: false
@@ -26,7 +25,7 @@ upgradeOptions:
 pxc:
   size: 3
   image:
-    repository: percona/percona-xtradb-cluster
+    repository: dockerhub.dataomnis.io/percona/percona-xtradb-cluster
     tag: 8.0.23-14.1
   autoRecovery: true
   imagePullSecrets: []
@@ -207,7 +206,7 @@ logcollector:
 pmm:
   enabled: false
   image:
-    repository: percona/pmm-client
+    repository: dockerhub.dataomnis.io/percona/pmm-client
     tag: 2.18.0
   serverHost: mysql-monitor-service
   serverUser: admin

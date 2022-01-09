@@ -1,2 +1,2 @@
 
-operatorImage: "dataworkbench/hadoop-operator:0.0.1"
+operatorImage: "dockerhub.dataomnis.io/hadoop/hadoop-operator:0.0.1"

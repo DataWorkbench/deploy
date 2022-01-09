@@ -4,7 +4,7 @@
 
 replicaCount: 1
 
-operatorImageRepository: percona/percona-xtradb-cluster-operator
+operatorImageRepository: dockerhub.dataomnis.io/percona/percona-xtradb-cluster-operator
 imagePullPolicy: IfNotPresent
 image: ""
 
