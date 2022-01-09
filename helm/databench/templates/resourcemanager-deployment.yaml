@@ -32,7 +32,7 @@ spec:
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: resourcemanager
-        image: "{{ .Values.image.databench }}"
+        image: {{ .Values.image.repo }}/resourcemanager:{{ .Values.image.repo }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

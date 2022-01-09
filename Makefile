@@ -19,6 +19,8 @@ LOCAL_MODCACHE:=`go env GOPATH`/pkg
 WORKDIR_IN_DOCKER=/$(TRAG.Gopkg)
 RUN_IN_DOCKER:=docker run -it --rm -v `pwd`/..:$(WORKDIR_IN_DOCKER) -v ${LOCAL_CACHE}:/go/cache -v $(LOCAL_MODCACHE):/go/pkg -w $(WORKDIR_IN_DOCKER) $(BUILDER_IMAGE)
 
+PWD_DIR:=$(shell pwd)
+
 comma:= ,
 empty:=
 space:= $(empty) $(empty)
@@ -55,18 +57,19 @@ build-flink-utile:
 
 .PHONY: build-dev
 build-dev: compile  ## Build databench image
-	@cd .. && docker build -t $(TARG.Repo)/$(TARG.Name):$(TAG) -f ./deploy/Dockerfile.dev .
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(TARG.Repo)/$(S):$(TAG) -f ./deploy/Dockerfile.dev .;)
 	docker image prune -f 1>/dev/null 2>&1
-	@echo "build done"
+	@echo "build $(service) done"
 
 .PHONY: build-all  ## Build all images
 build-all: build-flyway build-dev build-zeppelin
 
 .PHONY: push-images  ## push all images
 push-images:
-	docker push $(TARG.Repo)/$(TARG.Name):$(TAG)
 	docker push $(ZEPPELIN_IMAGE)
 	docker push $(FLYWAY_IMAGE)
+	@$(foreach S,$(SERVICE_ARRAY),docker push $(TARG.Repo)/$(S):$(TAG);)
+	@echo "push image done"
 
 .PHONY: pull-images
 pull-images: ## Pull images for docker-compose
@@ -99,9 +102,7 @@ update: build-dev ## Update some service
 	docker-compose up --no-deps -d $(SERVICE_ARRAY)
 	@echo "update service $(service) done"
 
-update-service: build-dev ## Update databench service in k8s, eg: make update-k8s service=s1,s2
-	docker push $(TARG.Repo)/$(TARG.Name):$(TAG)
-	@echo "push image done"
+update-service: build-dev push-images ## Update databench service in k8s, eg: make update-k8s service=s1,s2
 	@$(foreach s,$(SERVICE_ARRAY),kubectl -n databench rollout restart deployment databench-$(s);)
 	@echo "update service $(service) done"
 

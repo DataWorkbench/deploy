@@ -1,3 +1,4 @@
+{{- if Values.apiglobal.enable }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,7 +32,7 @@ spec:
     spec:
       containers:
         - name: apiglobal
-          image: "{{ .Values.image.databench }}"
+          image: {{ .Values.image.repo }}/apiglobal:{{ .Values.image.repo }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/common-config.yaml"]
           ports:
@@ -98,3 +99,5 @@ spec:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
     component: apiglobal
+
+{{- end -}}
