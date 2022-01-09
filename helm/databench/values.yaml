@@ -6,10 +6,8 @@
 domain: databench.192.168.27.90.nip.io
 
 # the host info for pod
-# ksLBIP: the ip of master for pod that init kube client from kubeConfPath
 # qingcloudApiIP: the ip of api.qingcloud.com
 dns:
-  ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
 
 image:
