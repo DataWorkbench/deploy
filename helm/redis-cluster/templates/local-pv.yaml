@@ -1,13 +1,13 @@
 {{ $fullname := include "redis-cluster.fullname" . }}
 
-{{- if .Values.nodes }}
+{{- if .Values.redis.persistent.localPv.enable }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: {{ $fullname }}-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- range $node := .Values.nodes }}
+{{- range $node := .Values.redis.persistent.localPv.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -18,10 +18,10 @@ spec:
     storage: {{ $.Values.redis.persistent.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ $.Values.persistentVolume.reclaimPolicy }}
+  persistentVolumeReclaimPolicy: {{ $.Values.redis.persistent.localPv.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ $.Values.persistentVolume.redisHome }}/{{ $.Release.Name }}
+    path: {{ $.Values.redis.persistent.localPv.home }}/{{ $.Release.Name }}
   nodeAffinity:
     required:
       nodeSelectorTerms:
