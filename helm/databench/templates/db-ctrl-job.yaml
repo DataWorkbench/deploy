@@ -18,14 +18,14 @@ spec:
     spec:
       initContainers:
         - name: wait-mysql
-          image: busybox:1.28.4
+          image: {{ .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'
             - '-c'
             - '{{ include "mysql.waiting.cmd" . }}'
         - name: database-init
-          image: "{{ .Values.image.flyway }}"
+          image: {{ .Values.image.repo }}/flyway:{{- .Values.image.flywayTag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/flyway/ddl/ddl_init.sh"
@@ -44,7 +44,7 @@ spec:
                   key: root
       containers:
         - name: db-ctrl-job
-          image: "{{ .Values.image.flyway }}"
+          image: {{ .Values.image.repo }}/flyway:{{- .Values.image.flywayTag }}
           imagePullPolicy: IfNotPresent
           command:
             - "flyway"

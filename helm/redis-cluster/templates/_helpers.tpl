@@ -25,9 +25,9 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{- define "sentinel.image" -}}
-redis:{{- .Chart.AppVersion }}
+{{ .Values.sentinel.image }}:{{- .Chart.AppVersion }}
 {{- end }}
 
 {{- define "redis.image" -}}
-redis:{{- .Chart.AppVersion }}
+{{ .Values.redis.image }}:{{- .Chart.AppVersion }}
 {{- end }}

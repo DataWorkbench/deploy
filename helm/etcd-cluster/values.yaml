@@ -7,6 +7,10 @@ nodes:    # The length of nodes is equal to etcd-cluster replicaCount
   - "worker-s002"
   - "worker-s003"
 
+image:
+  etcd: quay.io/coreos/etcd  # tag is same as appVersion in Chart.yaml
+  busyBox: busybox:1.28.0-glibc
+
 resources:
    limits:
      cpu: 1000m

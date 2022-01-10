@@ -39,6 +39,7 @@ journalnode:
     reclaimPolicy: Retain
 
 zookeeper:
+  image: fastop/zookeeper:3.4.10
   quorum:
   nodes:
     - "worker-s001"

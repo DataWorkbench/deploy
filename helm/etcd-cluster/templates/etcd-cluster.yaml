@@ -7,15 +7,17 @@ metadata:
   annotations:
     etcd.database.coreos.com/scope: clusterwide
 spec:
+  version: {{ .Chart.AppVersion | quote }}
+  repository: "{{ .Values.image.etcd }}"
   {{- if .Values.nodes }}
   size: {{ len .Values.nodes }}
   {{- else }}
   size: {{ .Values.replicaCount }}
   {{- end }}
-  version: {{ .Chart.AppVersion | quote }}
   resources:
 {{ toYaml .Values.resources | indent 4 }}
   pod:
+    busyboxImage: {{ .Values.image.busyBox }}
     persistentVolumeClaimSpec:
       accessModes: {{ .Values.persistent.accessModes }}
       {{- if .Values.nodes }}

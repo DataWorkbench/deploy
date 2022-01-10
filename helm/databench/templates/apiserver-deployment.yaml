@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
         - name: apiserver
-          image: "{{ .Values.image.databench }}"
+          image: {{ .Values.image.repo }}/apiserver:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiserver start -c ${DATABENCH_CONF}/apiserver.yaml"]
           ports:

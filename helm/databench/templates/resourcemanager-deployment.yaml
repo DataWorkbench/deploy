@@ -27,12 +27,12 @@ spec:
     spec:
       initContainers:
       - name: wait-mysql
-        image: busybox:1.28.4
+        image: {{ .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: resourcemanager
-        image: "{{ .Values.image.databench }}"
+        image: {{ .Values.image.repo }}/resourcemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

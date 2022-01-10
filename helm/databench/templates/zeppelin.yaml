@@ -19,7 +19,7 @@ spec:
       serviceAccountName: zeppelin-server
       containers:
         - name: zeppelin-server
-          image: {{ .Values.image.zeppelin }}
+          image: {{ .Values.image.repo }}/zeppelin:{{- .Values.image.zeppelinTag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["sh", "-c", "$(ZEPPELIN_HOME)/bin/zeppelin.sh"]
           lifecycle:

@@ -31,7 +31,7 @@ spec:
     spec:
       containers:
       - name: jobdeveloper
-        image: "{{ .Values.image.databench }}"
+        image: {{ .Values.image.repo }}/jobdeveloper:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "jobdeveloper start -c ${DATABENCH_CONF}/common-config.yaml"]
         ports:

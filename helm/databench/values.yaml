@@ -4,21 +4,23 @@
 
 # for apiserver and flink web
 domain: databench.192.168.27.90.nip.io
-#
+
+# the host info for pod
+# qingcloudApiIP: the ip of api.qingcloud.com
 dns:
-  ksLBIP: 172.20.0.2
   qingcloudApiIP: 172.31.60.141
 
 image:
 #  pullPolicy: IfNotPresent
   pullPolicy: Always
+  repo: dockerhub.databench.io/databench
+  tag: dev
+  flywayTag: dev
+  zeppelinTag: 0.9.0
 
-  databench: dockerhub.databench.io/databench/databench:dev
-  flyway: dockerhub.databench.io/databench/flyway:dev
-  zeppelin: dockerhub.databench.io/databench/zeppelin:0.9.0
+  busybox: busybox:1.28.4
   zeppelinInterpreter: dockerhub.databench.io/databench/zeppelin:0.9.0
   web: dataworkbench/web:0.1.0
-
   jaeger: jaegertracing/all-in-one:1.22
 
 # common configuration for all service
@@ -67,6 +69,7 @@ redis:
 
 # apiglobal settings
 apiglobal:
+  enable: true
   # region settings
   regions:
     testing:
