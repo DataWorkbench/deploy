@@ -72,9 +72,17 @@ pxc:
     # minAvailable: 0
   persistence:
     enabled: true
-    storageClass: "local"
     accessMode: ReadWriteOnce
     size: 10Gi
+    localPv:
+      enabled: true
+      reclaimPolicy: Retain
+      home: /data/dataomnis
+      nodes: # The length of nodes is equal to pxc size
+        - worker-s001
+        - worker-s002
+        - worker-s003
+
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: true
@@ -96,14 +104,6 @@ pxc:
     successThreshold: 1
     failureThreshold: 3
 
-pxcNodes:      # The length of nodes is equal to pxc size
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
-
-localPvs:
-  reclaimPolicy: Retain
-  mysqlHome: /data/databench
 
 haproxy:
   enabled: true

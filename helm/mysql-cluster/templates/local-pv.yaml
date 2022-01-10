@@ -1,13 +1,13 @@
 {{ $fullname := include "pxc-database.fullname" . }}
 
-{{- if .Values.pxcNodes }}
+{{- if .Values.pxc.persistence.localpv.enabled }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: {{ $fullname }}-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- range $node := .Values.pxcNodes }}
+{{- range $node := .Values.pxc.persistence.localpv.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -18,10 +18,10 @@ spec:
     storage: {{ $.Values.pxc.persistence.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ $.Values.localPvs.reclaimPolicy }}
+  persistentVolumeReclaimPolicy: {{ $.Values.pxc.persistence.localpv.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ $.Values.localPvs.mysqlHome }}/{{ $.Release.Name }}
+    path: {{ $.Values.pxc.persistence.localpv.home }}/{{ $.Release.Name }}
   nodeAffinity:
     required:
       nodeSelectorTerms:
