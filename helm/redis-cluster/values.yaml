@@ -33,6 +33,14 @@ redis:
     - "client-output-buffer-limit slave 1000000000 1000000000 0"
     - "client-output-buffer-limit pubsub 33554432 8388608 60"
   persistent:
-    enable: false
+    enable: true
     size: 20Gi
     accessModes: ["ReadWriteOnce"]
+    localPv:
+      enable: true # if use local pv with hostPath
+      home: /data/dataomnis
+      reclaimPolicy: Retain
+      nodes: # the length of nodes must be equal to replicaCount
+        - worker-s001
+        - worker-s002
+        - worker-s003

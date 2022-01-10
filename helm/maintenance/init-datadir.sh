@@ -3,7 +3,7 @@
 
 ###############################################################################################
 # home dir for hdfs / mysql / etcd volume
-VolumeHome=/data/databench
+VolumeHome=/data/dataomnis
 
 
 ###############################################################################################
@@ -11,9 +11,12 @@ VolumeHome=/data/databench
 HdfsReleaseName=hdfs-cluster
 MysqlReleaseName=mysql-cluster
 EtcdReleaseName=etcd-cluster
+RedisReleaseName=redis-cluster
 
 
 ###############################################################################################
+AllNodes=(worker-s001 worker-s002 worker-s003)
+
 # hdfsDatadir format: ${VolumeHome}/${HdfsReleaseName}/datanode ..
 # hdfs role-node map
 HdfsDatanodeNodes=(worker-s001 worker-s002 worker-s003)
@@ -29,8 +32,19 @@ MysqlNodes=(worker-s001 worker-s002 worker-s003)
 # etcd role-node map
 EtcdNodes=(worker-s001 worker-s002 worker-s003)
 
+# RedisDatadir format: ${VolumeHome}/${RedisReleaseName}
+# redis role-node map
+RedisNodes=(worker-s001 worker-s002 worker-s003)
+
 
 ###############################################################################################
+# HelmRepodir: /root/.cache/helm/repository
+# create it on all node
+for node in ${AllNodes[@]}
+do
+  ssh root@${node} "mkdir -p /root/.cache/helm/repository"
+done
+
 # create hdfs dir
 for node in ${HdfsDatanodeNodes[@]}
 do
@@ -59,4 +73,10 @@ done
 for node in ${EtcdNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${EtcdReleaseName}"
+done
+
+# create etcd dir
+for node in ${RedisNodes[@]}
+do
+  ssh root@${node} "mkdir -p ${VolumeHome}/${RedisReleaseName}"
 done
