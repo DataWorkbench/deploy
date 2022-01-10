@@ -8,7 +8,7 @@ hdfsHome: /data/dataomnis
 
 version: 2.9.2
 
-image: dockerhub.qingcloud.com/dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
+image: dockerhub.databench.io/dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
 
 namenode:
   nodePort: 30091

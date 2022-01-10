@@ -2,7 +2,7 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Repo:=dockerhub.dataomnis.io/dataomnis
+TARG.Repo:=dockerhub.databench.io/dataomnis
 TRAG.Gopkg:=DataWorkbench
 
 TAG:=dev
