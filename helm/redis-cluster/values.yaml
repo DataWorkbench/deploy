@@ -36,3 +36,12 @@ redis:
     enable: true
     size: 10Gi
     accessModes: ["ReadWriteOnce"]
+
+nodes:
+  - "worker-s001"
+  - "worker-s002"
+  - "worker-s003"
+
+persistentVolume:
+  reclaimPolicy: Retain
+  redisHome: /data/redis-cluster

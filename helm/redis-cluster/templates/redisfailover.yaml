@@ -10,7 +10,11 @@ spec:
   sentinel:
     image: {{ include "sentinel.image" . }}
     imagePullPolicy: IfNotPresent
+    {{- if .Values.nodes }}
+    replicas: {{ len .Values.nodes }}
+    {{- else }}
     replicas: {{ .Values.sentinel.replicaCount }}
+    {{- end }}
     resources:
 {{ toYaml .Values.sentinel.resource | indent 6 }}
     customConfig:
@@ -31,6 +35,9 @@ spec:
           name: {{ .Release.Name }}-persistent
         spec:
           accessModes: {{ .Values.redis.persistent.accessModes }}
+          {{- if .Values.nodes }}
+          storageClassName: {{ include "redis-cluster.fullname" . }}-sc
+          {{- end }}
           resources:
             requests:
               storage: {{ .Values.redis.persistent.size }}
