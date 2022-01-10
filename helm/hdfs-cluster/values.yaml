@@ -4,7 +4,7 @@ fullnameOverride: ""
 
 storageClass: ""
 
-hdfsHome: /data/databench
+hdfsHome: /data/dataomnis
 
 version: 2.9.2
 
