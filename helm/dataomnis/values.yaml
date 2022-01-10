@@ -48,8 +48,8 @@ etcd:
 mysql:
   internal: false  # if use internal mysql in dependencies
   # common mysql configuration for dataomnis services
-  externalHost: mysql-cluster-pxc-db-haproxy
-  secretName: mysql-cluster-pxc-db
+  externalHost: mysql-pxc-db-haproxy
+  secretName: mysql-pxc-db
   user: "root"
   database: "dataomnis"
   maxIdleConn: 16
@@ -59,7 +59,7 @@ mysql:
   slowTshreshold: 2s
 
 hdfs:
-  configmapName: hdfs-common-config
+  configmapName: hdfs-cluster-common-config
 
 # redis-cluster configuration
 redis:
