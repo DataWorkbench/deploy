@@ -1,4 +1,4 @@
-# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Copyright 2020 The Dataomnis Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
@@ -12,10 +12,9 @@ RUN wget https://github.com/upx/upx/releases/download/v3.95/upx-3.95-amd64_linux
     tar -Jxf upx-3.95-amd64_linux.tar.xz && \
     mv upx-*/upx /usr/local/bin/
 
-# install grpc_health_probe: v0.4.4 for status probe of dataworkbench service on k8s
+# install grpc_health_probe: v0.4.4 for status probe of dataomnis service on k8s
 RUN GRPC_HEALTH_PROBE_VERSION=v0.4.4 && \
-    wget -qO grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
-#RUN wget -qO grpc_health_probe https://api.anybox.qingcloud.com/v1/downloads/VrZ76Pr4qxKLv3WjTJoqq00dJxwIg30Ie0XVh5fpQOnI2wGjCzd3OLuSyZwXE0d8PLkzCokx8YT4vmzBpNJ49HlUIggrPopCL1uTwHPikUkJTVt26hyRIUia1ZxcNZOg/grpc_health_probe-linux-amd64 && \
+    wget -O grpc_health_probe https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 && \
     chmod +x grpc_health_probe && \
     upx grpc_health_probe && \
     mv grpc_health_probe /usr/local/bin/

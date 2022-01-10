@@ -4,7 +4,7 @@ metadata:
   name: {{ .Release.Name }}-engine-manager
   labels:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    app: "databench"
+    app: "dataomnis"
     release: {{ .Release.Name }}
 ---
 kind: ClusterRole

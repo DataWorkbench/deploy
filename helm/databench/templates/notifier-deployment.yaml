@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-notifier
+  name: {{ include "dataomnis.fullname" . }}-notifier
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: notifier
 annotations:
   {{- range $key, $value := .Values.notifier.annotations }}
@@ -38,7 +38,7 @@ spec:
       - name: notifier
         image: {{ .Values.image.repo }}/notifier:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "notifier start -c ${DATABENCH_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "notifier start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.notifier }}
@@ -60,7 +60,7 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataworkbench"
+            mountPath: "/etc/dataomnis"
             readOnly: true
         readinessProbe:
           exec:
@@ -85,7 +85,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"

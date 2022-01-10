@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: databench-config
+  name: dataomnis-config
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
 data:
   config.yaml: |
     log_level: {{ .Values.common.logLevel }}

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-sourcemanager
+  name: {{ include "dataomnis.fullname" . }}-sourcemanager
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: sourcemanager
 annotations:
   {{- range $key, $value := .Values.sourcemanager.annotations }}
@@ -38,7 +38,7 @@ spec:
       - name: sourcemanager
         image: {{ .Values.image.repo }}/sourcemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "sourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "sourcemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.sourcemanager }}
@@ -82,12 +82,12 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataworkbench"
+            mountPath: "/etc/dataomnis"
             readOnly: true
       volumes:
         - name: config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"

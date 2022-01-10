@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "databench.fullname" . }}-jaeger
+  name: {{ include "dataomnis.fullname" . }}-jaeger
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: jaeger-service
 spec:
   type: ClusterIP

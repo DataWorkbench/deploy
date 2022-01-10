@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "databench.fullname" . }}-udfmanager
+  name: {{ include "dataomnis.fullname" . }}-udfmanager
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: udfmanager-service
 spec:
   type: ClusterIP

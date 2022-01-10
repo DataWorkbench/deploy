@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "databench.fullname" . }}-api-ingress
+  name: {{ include "dataomnis.fullname" . }}-api-ingress
   annotations:
     # limit the size of uploaded-file
     nginx.org/client-max-body-size: "100m"
@@ -15,14 +15,14 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ include "databench.fullname" . }}-apiserver
+              name: {{ include "dataomnis.fullname" . }}-apiserver
               port:
                 number: {{ .Values.ports.apiserver }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "databench.fullname" . }}-global-ingress
+  name: {{ include "dataomnis.fullname" . }}-global-ingress
   annotations:
     # limit the size of uploaded-file
     nginx.org/client-max-body-size: "100m"
@@ -36,14 +36,14 @@ spec:
           pathType: Prefix
           backend:
             service:
-              name: {{ include "databench.fullname" . }}-apiglobal
+              name: {{ include "dataomnis.fullname" . }}-apiglobal
               port:
                 number: {{ .Values.ports.apiglobal }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "databench.fullname" . }}-jaeger-ingress
+  name: {{ include "dataomnis.fullname" . }}-jaeger-ingress
   annotations:
 spec:
   ingressClassName: nginx
@@ -55,7 +55,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "databench.fullname" . }}-jaeger
+                name: {{ include "dataomnis.fullname" . }}-jaeger
                 port:
                   number: {{ .Values.ports.jaegerweb }}
 
@@ -63,10 +63,10 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "databench.fullname" . }}-zeppelin-ingress
+  name: {{ include "dataomnis.fullname" . }}-zeppelin-ingress
   annotations:
     # support websocket
-    nginx.org/websocket-services: {{ include "databench.fullname" . }}-zeppelin-server
+    nginx.org/websocket-services: {{ include "dataomnis.fullname" . }}-zeppelin-server
 spec:
   ingressClassName: nginx
   rules:
@@ -77,6 +77,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "databench.fullname" . }}-zeppelin-server
+                name: {{ include "dataomnis.fullname" . }}-zeppelin-server
                 port:
                   number: {{ .Values.ports.zeppelin }}

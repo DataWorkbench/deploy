@@ -6,15 +6,15 @@ Develop all service of the data workbench at local that base on docker-compose;
 
 ## Images
 
-#### dataworkbench/builder
+#### dockerhub.qingcloud.com/dataomnis/builder
 
 The base image used to build other images or compile service;
 
-#### dataworkbench/dataworkbench
+#### dataomnis/dataomnis
 
 The main image to run service with docker-compose;
 
-#### dataworkbench/flyway
+#### dataomnis/flyway
 
 The image used to migrate database; If you update the table struct or data, 
 run `make compose-migrate-db` to make it works at local develop environment;
@@ -39,7 +39,7 @@ make update-builder
 
 make build-all
 
-- Launch dataworkbench services at local
+- Launch dataomnis services at local
 
 make compose-up
 
@@ -60,7 +60,6 @@ run `make update [service=apiserver]` to update the service;
 ## add new service
 
 - add the service to `service` in `Makefile`
-- add copy-sentence for default config.yaml in `Dockerfile.dev` if need
 - add copy-sentence for DB schema sql in `build/db/Dockerfile` if need
 - add the service in `docker-compose.yaml` refer to `spacemanager`
 
@@ -76,19 +75,19 @@ run `make update [service=apiserver]` to update the service;
 ## create dir datanode / namenode / journalnode / zookeeper under {{ .Values.hdfs-cluster.hdfsHome }}/hdfs-cluster/{{ .Release.Name }} on all k8s workers for hdfs
 ## create dir /root/.cache/helm/repository on all k8s workers for flink-cluster in enginemanager
 
-### install databench
+### install dataomnis
 ```shell
 cd code/deploy
-helm -n databench install databench ./helm/databench
+helm -n dataomnis install dataomnis ./helm/dataomnis
 ```
 
-## delete databench
+## delete dataomnis
 ```shell
 cd code/deploy
-helm -n databench delete databench
+helm -n dataomnis delete dataomnis
 ```
 
-## upgrade databench
+## upgrade dataomnis
 ```shell
-helm -n databench upgrade databench ./helm/databench/
+helm -n dataomnis upgrade dataomnis ./helm/dataomnis/
 ```

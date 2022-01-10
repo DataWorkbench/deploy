@@ -2,9 +2,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-apiglobal
+  name: {{ include "dataomnis.fullname" . }}-apiglobal
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: apiglobal
 annotations:
 {{- range $key, $value := .Values.apiglobal.annotations }}
@@ -34,7 +34,7 @@ spec:
         - name: apiglobal
           image: {{ .Values.image.repo }}/apiglobal:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/sh", "-c", "apiglobal start -c ${DATABENCH_CONF}/common-config.yaml"]
+          command: ["/bin/sh", "-c", "apiglobal start -c ${DATAOMNIS_CONF}/common-config.yaml"]
           ports:
             - name: service
               containerPort: {{ .Values.ports.apiglobal }}
@@ -70,13 +70,13 @@ spec:
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
           volumeMounts:
-            - name: databench-config
-              mountPath: "/etc/dataworkbench"
+            - name: dataomnis-config
+              mountPath: "/etc/dataomnis"
               readOnly: true
       volumes:
-        - name: databench-config
+        - name: dataomnis-config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"
@@ -84,9 +84,9 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "databench.fullname" . }}-apiglobal
+  name: {{ include "dataomnis.fullname" . }}-apiglobal
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: apiglobal-service
 spec:
   type: ClusterIP

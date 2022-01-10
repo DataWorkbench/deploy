@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "databench.fullname" . }}-db-ctrl-job
+  name: {{ include "dataomnis.fullname" . }}-db-ctrl-job
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: db-ctrl-job
 spec:
   backoffLimit: 6

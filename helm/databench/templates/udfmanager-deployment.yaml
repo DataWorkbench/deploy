@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-udfmanager
+  name: {{ include "dataomnis.fullname" . }}-udfmanager
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: udfmanager
 annotations:
   {{- range $key, $value := .Values.udfmanager.annotations }}
@@ -38,7 +38,7 @@ spec:
       - name: udfmanager
         image: {{ .Values.image.repo }}/udfmanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "udfmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "udfmanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.udfmanager }}
@@ -80,12 +80,12 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataworkbench"
+            mountPath: "/etc/dataomnis"
             readOnly: true
       volumes:
         - name: config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"

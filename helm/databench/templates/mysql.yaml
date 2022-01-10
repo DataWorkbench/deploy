@@ -10,10 +10,10 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-mysql
+  name: {{ include "dataomnis.fullname" . }}-mysql
   labels:
     component: mysql
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
 spec:
   selector:
     matchLabels:
@@ -26,10 +26,10 @@ spec:
     metadata:
       labels:
         component: mysql
-{{ include "databench.labels" . | indent 8 }}
+{{ include "dataomnis.labels" . | indent 8 }}
     spec:
       containers:
-      - name: {{ include "databench.fullname" . }}-mysql
+      - name: {{ include "dataomnis.fullname" . }}-mysql
         image: mysql:8.0
         imagePullPolicy: IfNotPresent
         lifecycle:
@@ -58,10 +58,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "databench.fullname" . }}-mysql
+  name: {{ include "dataomnis.fullname" . }}-mysql
   labels:
     component: mysql
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
 spec:
   type: NodePort
   selector:

@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-jaeger
+  name: {{ include "dataomnis.fullname" . }}-jaeger
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: jaeger
 annotations:
   {{- range $key, $value := .Values.jaeger.annotations }}

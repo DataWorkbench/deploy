@@ -1,6 +1,6 @@
 {{/* vim: set filetype=mustache: */}}
 
-{{- define "databench.fullname" -}}
+{{- define "dataomnis.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -17,16 +17,16 @@
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "databench.chart" -}}
+{{- define "dataomnis.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
-{{- define "databench.labels" -}}
+{{- define "dataomnis.labels" -}}
 app.kubernetes.io/name: {{ .Chart.Name }}
-helm.sh/chart: {{ include "databench.chart" . }}
+helm.sh/chart: {{ include "dataomnis.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

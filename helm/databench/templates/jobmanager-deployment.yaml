@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-jobmanager
+  name: {{ include "dataomnis.fullname" . }}-jobmanager
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: jobmanager
 annotations:
   {{- range $key, $value := .Values.jobmanager.annotations }}
@@ -38,7 +38,7 @@ spec:
       - name: jobmanager
         image: {{ .Values.image.repo }}/jobmanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "jobmanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "jobmanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.jobmanager }}
@@ -61,7 +61,7 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataworkbench"
+            mountPath: "/etc/dataomnis"
             readOnly: true
         readinessProbe:
           exec:
@@ -86,7 +86,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"

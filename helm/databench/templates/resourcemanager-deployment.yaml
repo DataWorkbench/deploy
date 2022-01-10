@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "databench.fullname" . }}-resourcemanager
+  name: {{ include "dataomnis.fullname" . }}-resourcemanager
   labels:
-{{ include "databench.labels" . | indent 4 }}
+{{ include "dataomnis.labels" . | indent 4 }}
     component: resourcemanager
 spec:
   replicas: {{ coalesce .Values.resourcemanager.replicas .Values.common.replicas }}
@@ -34,7 +34,7 @@ spec:
       - name: resourcemanager
         image: {{ .Values.image.repo }}/resourcemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "resourcemanager start -c ${DATABENCH_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "resourcemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.resourcemanager }}
@@ -76,7 +76,7 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: /etc/dataworkbench
+            mountPath: /etc/dataomnis
             readOnly: true
           - name: hdfs-config
             mountPath: {{ .Values.resourcemanager.envs.RESOURCE_MANAGER_HADOOP_CONF_DIR }}
@@ -84,7 +84,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: databench-config
+            name: dataomnis-config
             items:
               - key: config.yaml
                 path: common-config.yaml

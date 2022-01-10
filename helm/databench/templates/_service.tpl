@@ -2,55 +2,55 @@
 Service Addresses For ApiServer
 */}}
 {{- define "service.jaeger" -}}
-{{ include "databench.fullname" . }}-jaeger:{{ .Values.ports.jaeger }}
+{{ include "dataomnis.fullname" . }}-jaeger:{{ .Values.ports.jaeger }}
 {{- end -}}
 
 {{- define "service.spacemanager" -}}
-{{ include "databench.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}
+{{ include "dataomnis.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}
 {{- end -}}
 
 {{- define "service.udfmanager" -}}
-{{ include "databench.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
+{{ include "dataomnis.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
 {{- end -}}
 
 {{- define "service.scheduler" -}}
-{{ include "databench.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}
+{{ include "dataomnis.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}
 {{- end -}}
 
 {{- define "service.flowmanager" -}}
-{{ include "databench.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
+{{ include "dataomnis.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
 {{- end -}}
 
 {{- define "service.sourcemanager" -}}
-{{ include "databench.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
+{{ include "dataomnis.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
 {{- end -}}
 
 {{- define "service.jobdeveloper" -}}
-{{ include "databench.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
+{{ include "dataomnis.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
 {{- end -}}
 
 {{- define "service.jobwatcher" -}}
-{{ include "databench.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
+{{ include "dataomnis.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
 {{- end -}}
 
 {{- define "service.jobmanager" -}}
-{{ include "databench.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
+{{ include "dataomnis.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
 {{- end -}}
 
 {{- define "service.zeppelin" -}}
-{{ include "databench.fullname" . }}-zeppelin-server:{{ .Values.ports.zeppelin }}
+{{ include "dataomnis.fullname" . }}-zeppelin-server:{{ .Values.ports.zeppelin }}
 {{- end -}}
 
 {{- define "service.resourcemanager" -}}
-{{ include "databench.fullname" . }}-resourcemanager:{{ .Values.ports.resourcemanager }}
+{{ include "dataomnis.fullname" . }}-resourcemanager:{{ .Values.ports.resourcemanager }}
 {{- end -}}
 
 {{- define "service.enginemanager" -}}
-{{ include "databench.fullname" . }}-enginemanager:{{ .Values.ports.enginemanager }}
+{{ include "dataomnis.fullname" . }}-enginemanager:{{ .Values.ports.enginemanager }}
 {{- end -}}
 
 {{- define "service.account" -}}
-{{ include "databench.fullname" . }}-account:{{ .Values.ports.account }}
+{{ include "dataomnis.fullname" . }}-account:{{ .Values.ports.account }}
 {{- end -}}
 
 

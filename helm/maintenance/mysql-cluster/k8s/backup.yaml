@@ -3,5 +3,5 @@ kind: PerconaXtraDBClusterBackup
 metadata:
   name: pxc-backup
 spec:
-  pxcCluster: databench-mysql
+  pxcCluster: dataomnis-mysql
   storageName: fs-pvc
