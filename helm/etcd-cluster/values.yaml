@@ -22,8 +22,8 @@ persistent:
     home: /data/dataomnis
     reclaimPolicy: Retain
     nodes: # The length of nodes is equal to etcd-cluster replicaCount
-      - worker-s001
-      - worker-s002
-      - worker-s003
+      - worker-1
+      - worker-2
+      - worker-3
 
 

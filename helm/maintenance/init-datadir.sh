@@ -15,26 +15,26 @@ RedisReleaseName=redis-cluster
 
 
 ###############################################################################################
-AllNodes=(worker-s001 worker-s002 worker-s003)
+AllNodes=(worker-1 worker-2 worker-3)
 
 # hdfsDatadir format: ${VolumeHome}/${HdfsReleaseName}/datanode ..
 # hdfs role-node map
-HdfsDatanodeNodes=(worker-s001 worker-s002 worker-s003)
-HdfsNamenodeNodes=(worker-s001 worker-s002)
-HdfsJournalnodeNodes=(worker-s001 worker-s002 worker-s003)
-HdfsZookeeperNodes=(worker-s001 worker-s002 worker-s003)
+HdfsDatanodeNodes=(worker-1 worker-2 worker-3)
+HdfsNamenodeNodes=(worker-1 worker-2)
+HdfsJournalnodeNodes=(worker-1 worker-2 worker-3)
+HdfsZookeeperNodes=(worker-1 worker-2 worker-3)
 
 # MysqlDatadir format: ${VolumeHome}/${MysqlReleaseName}
 # mysql role-node map
-MysqlNodes=(worker-s001 worker-s002 worker-s003)
+MysqlNodes=(worker-1 worker-2 worker-3)
 
 # EtcdDatadir format: ${VolumeHome}/${EtcdReleaseName}
 # etcd role-node map
-EtcdNodes=(worker-s001 worker-s002 worker-s003)
+EtcdNodes=(worker-1 worker-2 worker-3)
 
 # RedisDatadir format: ${VolumeHome}/${RedisReleaseName}
 # redis role-node map
-RedisNodes=(worker-s001 worker-s002 worker-s003)
+RedisNodes=(worker-1 worker-2 worker-3)
 
 
 ###############################################################################################

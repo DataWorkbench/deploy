@@ -79,9 +79,9 @@ pxc:
       reclaimPolicy: Retain
       home: /data/dataomnis
       nodes: # The length of nodes is equal to pxc size
-        - worker-s001
-        - worker-s002
-        - worker-s003
+        - worker-1
+        - worker-2
+        - worker-3
 
 
   # If you set this to true the cluster will be created without TLS

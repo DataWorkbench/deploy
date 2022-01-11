@@ -41,6 +41,6 @@ redis:
       home: /data/dataomnis
       reclaimPolicy: Retain
       nodes: # the length of nodes must be equal to replicaCount
-        - worker-s001
-        - worker-s002
-        - worker-s003
+        - worker-1
+        - worker-2
+        - worker-3
