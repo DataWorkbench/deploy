@@ -2,10 +2,10 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Repo:=dockerhub.databench.io/dataomnis
+TARG.Repo:=dockerhub.qingcloud.com/dataomnis
 TRAG.Gopkg:=DataWorkbench
 
-TAG:=dev
+TAG:=enfi-0.1.0
 FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
 ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0
 FLINK_IMAGE:=$(TARG.Repo)/flinkutile:1.12.3-scala_2.11
