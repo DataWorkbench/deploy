@@ -14,26 +14,26 @@ namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
   nodes:
-    - "worker-s001"
-    - "worker-s002"
+    - worker-s001
+    - worker-s002
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
 
 datanode:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - worker-s001
+    - worker-s002
+    - worker-s003
   storage:
     capacity: 50Gi
     reclaimPolicy: Retain
 
 journalnode:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - worker-s001
+    - worker-s002
+    - worker-s003
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
@@ -42,9 +42,9 @@ zookeeper:
   image: fastop/zookeeper:3.4.10
   quorum:
   nodes:
-    - "worker-s001"
-    - "worker-s002"
-    - "worker-s003"
+    - worker-s001
+    - worker-s002
+    - worker-s003
   storage:
     capacity: 1Gi
     reclaimPolicy: Retain
