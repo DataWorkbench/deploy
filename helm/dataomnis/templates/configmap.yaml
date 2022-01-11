@@ -1,0 +1,64 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dataomnis-config
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+data:
+  config.yaml: |
+    log_level: {{ .Values.common.logLevel }}
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    grpc_server:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metrics_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+
+    mysql:
+      hosts: {{ include "mysql.hostPort" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    tracer:
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    redis:
+      sentinel_addr: {{ include "service.redis" . | quote }}
+      database: {{ .Values.redis.database }}
+      master_name: {{ .Values.redis.masterName }}
+      mode: "sentinel"
+
+    etcd:
+      endpoints: {{ include "etcd.endpoints" . | quote }}
+      dial_timeout: 5s
+
+    # iaas api configuration
+    iaas:
+      zone: {{ .Values.iaas.zone }}
+      protocol: {{ .Values.iaas.protocol }}
+      host: {{ .Values.iaas.host }}
+      port: {{ .Values.iaas.port }}
+      uri: {{ .Values.iaas.uri }}
+      timeout: {{ .Values.iaas.timeout }}
+
+    # region info for apiglobal
+    regions:
+    {{- range $regionId, $region := .Values.apiglobal.regions }}
+      {{ $regionId }}:
+        hosts: {{ $region.hosts }}
+        names:
+          zh_cn: {{ $region.names.zh_cn | quote }}
+          en_us: {{ $region.names.en_us | quote }}
+    {{- end }}
+

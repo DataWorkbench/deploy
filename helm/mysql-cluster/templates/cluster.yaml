@@ -51,8 +51,8 @@ spec:
   {{- end }}
   {{- $pxc := .Values.pxc }}
   pxc:
-    {{- if .Values.pxc.persistence.localpv.nodes }}
-    size: {{ len .Values.pxc.persistence.localpv.nodes }}
+    {{- if .Values.pxc.persistence.localPv.nodes }}
+    size: {{ len .Values.pxc.persistence.localPv.nodes }}
     {{- else }}
     size: {{ $pxc.size }}
     {{- end }}
@@ -115,7 +115,7 @@ spec:
         type: Directory
     {{- else }}
       persistentVolumeClaim:
-        {{- if .Values.pxc.persistence.localpv.enable }}
+        {{- if $pxc.persistence.localPv.enabled }}
         storageClassName: {{ include "pxc-database.fullname" . }}-sc
         {{- end }}
         accessModes: [{{ $pxc.persistence.accessMode | quote }}]

@@ -1,4 +1,4 @@
-FROM dataworkbench/builder:zeppelin as builder
+FROM dockerhub.qingcloud.com/dataomnis/builder:zeppelin as builder
 
 
 FROM apache/zeppelin:0.9.0

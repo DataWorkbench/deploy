@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-jobmanager
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: jobmanager-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: {{ .Values.ports.jobmanager }}
+      targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.metricsPorts.jobmanager }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: jobmanager

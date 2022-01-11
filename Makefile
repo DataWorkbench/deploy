@@ -1,10 +1,9 @@
-# Copyright 2020 The Databench Authors. All rights reserved.
+# Copyright 2020 The Dataomnis Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
 TARG.Repo:=dockerhub.dataomnis.io/dataomnis
 TRAG.Gopkg:=DataWorkbench
-#TRAG.Version:=$(TRAG.Gopkg)/pkg/version
 
 TAG:=v0.8-alpha
 FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
@@ -26,14 +25,14 @@ space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
 service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,resourcemanager,notifier,account,enginemanager
 SERVICE_ARRAY=$(subst ${comma},${space},$(service))
-COMPOSE_DB_CTRL=databench-db-ctrl
+COMPOSE_DB_CTRL=dataomnis-db-ctrl
 
 .PHONY: help
 help: ## This help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_%-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
 .PHONY: update-builder
-update-builder: ## Pull databench-builder image
+update-builder: ## Pull dataomnis-builder image
 	docker pull $(BUILDER_IMAGE)
 	docker pull $(BUILDER_IMAGE_ZEPPELIN)
 	@echo "update-builder done"
@@ -55,8 +54,8 @@ build-flink-utile:
 	cd ./build/flink_utile/ && docker build -t $(FLINK_IMAGE) . && cd ../..
 
 .PHONY: build-dev
-build-dev: compile  ## Build databench image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(TARG.Repo)/$(S):$(TAG) -f ./deploy/Dockerfile.dev .;)
+build-dev: compile  ## Build dataomnis image
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(TARG.Repo)/$(S):$(TAG) -f ./deploy/Dockerfile .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
@@ -77,12 +76,12 @@ pull-images: ## Pull images for docker-compose
 
 .PHONY: compose-migrate-db
 compose-migrate-db: ## Migrate db in docker compose
-	until docker-compose exec databench-db bash -c "echo 'SELECT VERSION();' | mysql -uroot -ppassword"; do echo "waiting for mysql"; sleep 2; done;
+	until docker-compose exec dataomnis-db bash -c "echo 'SELECT VERSION();' | mysql -uroot -ppassword"; do echo "waiting for mysql"; sleep 2; done;
 	docker-compose up $(COMPOSE_DB_CTRL)
 
 .PHONY: compose-up
-compose-up: ## Launch databench in docker compose
-	docker-compose up -d databench-db
+compose-up: ## Launch dataomnis in docker compose
+	docker-compose up -d dataomnis-db
 	make compose-migrate-db
 	docker-compose up --remove-orphans -d
 	@echo "compose-up done"
@@ -101,8 +100,8 @@ update: build-dev ## Update some service
 	docker-compose up --no-deps -d $(SERVICE_ARRAY)
 	@echo "update service $(service) done"
 
-update-service: build-dev push-images ## Update databench service in k8s, eg: make update-k8s service=s1,s2
-	@$(foreach s,$(SERVICE_ARRAY),kubectl -n databench rollout restart deployment databench-$(s);)
+update-service: build-dev push-images ## Update dataomnis service in k8s, eg: make update-k8s service=s1,s2
+	@$(foreach s,$(SERVICE_ARRAY),kubectl -n dataomnis rollout restart deployment dataomnis-$(s);)
 	@echo "update service $(service) done"
 
 .PHONY: clean
@@ -110,7 +109,7 @@ clean:
 	rm -r ./tmp
 
 .PHONY: test
-test: ## Launch databench in docker compose
+test: ## Launch dataomnis in docker compose
 	@bash ./tests/run.
 
 .DEFAULT_GOAL = help

@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-jaeger
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: jaeger-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: {{ .Values.ports.jaeger }}
+      targetPort: service
+      protocol: TCP
+    - name: web
+      port: {{ .Values.ports.jaegerweb }}
+      targetPort: web
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: jaeger

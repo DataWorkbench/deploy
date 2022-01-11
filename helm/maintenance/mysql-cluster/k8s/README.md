@@ -1,10 +1,10 @@
 全量备份：
-    先执行kubectl get pxc-backup -n databench 命令查询pxc集群的名称
+    先执行kubectl get pxc-backup -n dataomnis 命令查询pxc集群的名称
     如：
     NAME                                           CLUSTER           STORAGE   DESTINATION                                           STATUS      COMPLETED   AGE
-    cron-databench-mysql-fs-pvc-2021126000-372f8   databench-mysql   fs-pvc    pvc/xb-cron-databench-mysql-fs-pvc-2021126000-372f8   Succeeded   24h         32h
-    cron-databench-mysql-fs-pvc-2021127000-372f8   databench-mysql                                                                                           8h
-    那么集群的名称就是 databench-mysql，然后修改backup.yaml里 pxcCluster 的值，再执行kubectl apply -f backup.yaml，就可以全量备份数据了
+    cron-dataomnis-mysql-fs-pvc-2021126000-372f8   dataomnis-mysql   fs-pvc    pvc/xb-cron-dataomnis-mysql-fs-pvc-2021126000-372f8   Succeeded   24h         32h
+    cron-dataomnis-mysql-fs-pvc-2021127000-372f8   dataomnis-mysql                                                                                           8h
+    那么集群的名称就是 dataomnis-mysql，然后修改backup.yaml里 pxcCluster 的值，再执行kubectl apply -f backup.yaml，就可以全量备份数据了
     
 全量恢复：
    修改restore.yaml里 pxcCluster 跟 backupName， pxcCluster 是pxc集群的名称，backupName是备份的名称

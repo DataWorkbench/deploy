@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-resourcemanager
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: resourcemanager
+spec:
+  replicas: {{ coalesce .Values.resourcemanager.replicas .Values.common.replicas }}
+  strategy:
+    type: {{ coalesce .Values.resourcemanager.strategy .Values.common.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: resourcemanager
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: resourcemanager
+      annotations:
+      {{- range $key, $value := .Values.resourcemanager.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      initContainers:
+      - name: wait-mysql
+        image: {{ .Values.image.busybox }}
+        imagePullPolicy: IfNotPresent
+        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+      containers:
+      - name: resourcemanager
+        image: {{ .Values.image.repo }}/resourcemanager:{{- .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: ["sh", "-c", "resourcemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+        ports:
+          - name: service
+            containerPort: {{ .Values.ports.resourcemanager }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.resourcemanager }}
+        env:
+          - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
+          - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
+            value: "0.0.0.0:{{- .Values.metricsPorts.resourcemanager }}"
+          - name: RESOURCE_MANAGER_MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.mysql.secretName }}
+                key: root
+          {{- range $ename, $evalue := .Values.resourcemanager.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
+          {{- if .Values.resourcemanager.readinessProbe }}
+          periodSeconds: {{ .Values.resourcemanager.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.resourcemanager.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          exec:
+            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
+          {{- if .Values.resourcemanager.livenessProbe }}
+          periodSeconds: {{ .Values.resourcemanager.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.resourcemanager.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}
+        volumeMounts:
+          - name: config
+            mountPath: /etc/dataomnis
+            readOnly: true
+          - name: hdfs-config
+            mountPath: {{ .Values.resourcemanager.envs.RESOURCE_MANAGER_HADOOP_CONF_DIR }}
+            readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: dataomnis-config
+            items:
+              - key: config.yaml
+                path: common-config.yaml
+        - name: hdfs-config
+          configMap:
+            name: {{ .Values.hdfs.configmapName }}
+            items:
+              - key: core-site.xml
+                path: core-site.xml
+              - key: hdfs-site.xml
+                path: hdfs-site.xml
