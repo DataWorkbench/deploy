@@ -30,6 +30,10 @@ spec:
       {{- end }}
     spec:
       serviceAccountName: {{ .Release.Name }}-engine-manager
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       initContainers:
       - name: wait-mysql
         image: {{ .Values.image.busybox }}

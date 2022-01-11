@@ -16,6 +16,10 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         component: db-ctrl-job
     spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       initContainers:
         - name: wait-mysql
           image: {{ .Values.image.busybox }}
