@@ -18,6 +18,8 @@ spec:
               name: {{ include "dataomnis.fullname" . }}-apiserver
               port:
                 number: {{ .Values.ports.apiserver }}
+
+{{- if .Values.apiglobal.enable }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -39,6 +41,8 @@ spec:
               name: {{ include "dataomnis.fullname" . }}-apiglobal
               port:
                 number: {{ .Values.ports.apiglobal }}
+{{- end }}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
