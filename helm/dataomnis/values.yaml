@@ -115,7 +115,7 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
-    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.databench.io/dataomnis/flink"
+    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.dataomnis.io/dataomnis/flink"
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
