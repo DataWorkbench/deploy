@@ -76,7 +76,7 @@ apiglobal:
   # region settings
   regions:
     testing:
-      hosts: "http://api.dataomnis.192.168.27.90.nip.io" # apiserver export service
+      hosts: "http://api.dataomnis.10.10.7.51.nip.io" # apiserver export service
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
