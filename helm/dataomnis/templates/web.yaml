@@ -26,6 +26,10 @@ spec:
         {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       containers:
         - name: web
           image: {{ .Values.image.web }}

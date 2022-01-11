@@ -30,6 +30,10 @@ spec:
         {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       containers:
         - name: apiglobal
           image: {{ .Values.image.repo }}/apiglobal:{{- .Values.image.tag }}
