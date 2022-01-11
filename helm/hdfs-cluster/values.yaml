@@ -46,7 +46,7 @@ zookeeper:
     - worker-2
     - worker-3
   storage:
-    capacity: 1Gi
+    capacity: 5Gi
     reclaimPolicy: Retain
 
 yarn:

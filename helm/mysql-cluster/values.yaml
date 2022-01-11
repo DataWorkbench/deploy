@@ -73,7 +73,7 @@ pxc:
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
-    size: 10Gi
+    size: 30Gi
     localPv:
       enabled: true
       reclaimPolicy: Retain

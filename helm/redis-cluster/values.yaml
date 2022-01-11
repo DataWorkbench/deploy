@@ -34,7 +34,7 @@ redis:
     - "client-output-buffer-limit pubsub 33554432 8388608 60"
   persistent:
     enable: true
-    size: 10Gi
+    size: 30Gi
     accessModes: ["ReadWriteOnce"]
     localPv:
       enable: true # if use local pv with hostPath

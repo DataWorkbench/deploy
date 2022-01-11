@@ -15,7 +15,7 @@ resources:
      memory: 128Mi
 
 persistent:
-  size: 10Gi
+  size: 30Gi
   accessModes: ["ReadWriteOnce"]
   localPv:
     enable: true
