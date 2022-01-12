@@ -115,7 +115,7 @@ spec:
   volumes:
   - name: hdfs-conf
     configMap:
-      name: hdfs-common-config
+      name: hdfs-cluster-common-config
       items:
         - key: core-site.xml
           path: core-site.xml
