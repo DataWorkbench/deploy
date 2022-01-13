@@ -122,6 +122,7 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+    ENGINE_MANAGER_FLINK_ENABLE_MULTUS: false
 
 # flowmanager configuration
 flowmanager:
@@ -280,4 +281,4 @@ serviceMonitor:
   interval: 30s
 
 web:
-  enabled: true
+  enabled: false
