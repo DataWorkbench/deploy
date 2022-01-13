@@ -119,6 +119,7 @@ enginemanager:
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
+    ENGINE_MANAGER_FLINK_ENABLE_MULTUS: true
 
 # flowmanager configuration
 flowmanager:
@@ -215,14 +216,14 @@ jaeger:
 
 # iaas configuration
 iaas:
-  zone: "testing"
+  zone: "gd2a"
   protocol: "http"
-  host: "api.testing.com"
-  port: "7777"
+  host: "api.ks.qingcloud.com"
+  port: "80"
   uri: "/iaas/"
   timeout: 600
-  access_key_id: "LTMJGBXPHSEZRNVKKPHU"
-  secret_access_key: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+  access_key_id: "CCTQIXBORYPVSOTDLRPI"
+  secret_access_key: "ziRKDQmecJHpoXzITNF7rSaazOA2Hey90uDgx56r"
 
 # serviceName: port
 ports:
