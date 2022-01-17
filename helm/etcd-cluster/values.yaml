@@ -3,7 +3,8 @@
 replicaCount: 3
 
 image:
-  etcd: quay.io/coreos/etcd  # tag is same as appVersion in Chart.yaml
+  etcd: quay.io/coreos/etcd
+  tag: 3.2.25
   busyBox: busybox:1.28.0-glibc
 
 resources:
