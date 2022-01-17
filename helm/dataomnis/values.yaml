@@ -216,7 +216,7 @@ jaeger:
 
 # iaas configuration
 iaas:
-  zone: "gd2a"
+  zone: "gd2"
   protocol: "http"
   host: "api.ks.qingcloud.com"
   port: "80"
