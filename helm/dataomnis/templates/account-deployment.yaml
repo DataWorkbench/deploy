@@ -35,6 +35,10 @@ spec:
           hostnames:
             - {{ .Values.iaas.host }}
       {{- end }}
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       initContainers:
       - name: wait-mysql
         image: {{ .Values.image.busybox }}

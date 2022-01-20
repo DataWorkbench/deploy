@@ -5,23 +5,14 @@
 # home dir for hdfs / mysql / etcd volume
 VolumeHome=/data/dataomnis
 
-
-###############################################################################################
-# Release name in volume
-HdfsReleaseName=hdfs-cluster
-MysqlReleaseName=mysql-cluster
-EtcdReleaseName=etcd-cluster
-RedisReleaseName=redis-cluster
-
-
 ###############################################################################################
 AllNodes=(worker-s001 worker-s002 worker-s003)
 
 # hdfsDatadir format: ${VolumeHome}/${HdfsReleaseName}/datanode ..
 # hdfs role-node map
-HdfsDatanodeNodes=(worker-s001 worker-s002 worker-s003)
-HdfsNamenodeNodes=(worker-s001 worker-s002)
-HdfsJournalnodeNodes=(worker-s001 worker-s002 worker-s003)
+HdfsNamenodes=(worker-s001 worker-s002)
+HdfsDatanodes=(worker-s001 worker-s002 worker-s003)
+HdfsJournalnodes=(worker-s001 worker-s002 worker-s003)
 HdfsZookeeperNodes=(worker-s001 worker-s002 worker-s003)
 
 # MysqlDatadir format: ${VolumeHome}/${MysqlReleaseName}
@@ -38,6 +29,14 @@ RedisNodes=(worker-s001 worker-s002 worker-s003)
 
 
 ###############################################################################################
+# Release name in volume
+HdfsReleaseName=hdfs-cluster
+MysqlReleaseName=mysql-cluster
+EtcdReleaseName=etcd-cluster
+RedisReleaseName=redis-cluster
+
+
+###############################################################################################
 # HelmRepodir: /root/.cache/helm/repository
 # create it on all node
 for node in ${AllNodes[@]}
@@ -46,15 +45,15 @@ do
 done
 
 # create hdfs dir
-for node in ${HdfsDatanodeNodes[@]}
+for node in ${HdfsDatanodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/datanode"
 done
-for node in ${HdfsNamenodeNodes[@]}
+for node in ${HdfsNamenodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/namenode"
 done
-for node in ${HdfsJournalnodeNodes[@]}
+for node in ${HdfsJournalnodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/journalnode"
 done

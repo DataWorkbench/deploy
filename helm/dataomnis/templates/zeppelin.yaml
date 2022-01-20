@@ -17,6 +17,10 @@ spec:
         app.kubernetes.io/name: zeppelin-server
     spec:
       serviceAccountName: zeppelin-server
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       containers:
         - name: zeppelin-server
           image: {{ .Values.image.repo }}/zeppelin:{{- .Values.image.zeppelinTag }}

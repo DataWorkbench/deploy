@@ -11,8 +11,11 @@ dns:
   qingcloudApiIP: 
 
 image:
-#  pullPolicy: IfNotPresent
-  pullPolicy: Always
+  # kubectl -n dataomnis create secret docker-registry docker-registry-secret --docker-server=dockerhub.qingcloud.com --docker-username=push-dataomnis --docker-password=<your-pword>
+  # if need, first create docker-registry secret named "docker-registry-secret" by above cmd in namespace dataomnis and set secret to "docker-registry-secret"
+  pullSecret:
+  pullPolicy: Always  # pullPolicy: IfNotPresent
+
   repo: dockerhub.dataomnis.io/dataomnis
   tag: v0.8-alpha
   flywayTag: v0.8-alpha

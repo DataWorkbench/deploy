@@ -3,8 +3,9 @@
 replicaCount: 3
 
 image:
-  etcd: dockerhub.dataomnis.io/coreos/etcd  # tag is same as appVersion in Chart.yaml
-  busyBox: dockerhub.dataomnis.io/library/busybox:1.28.0-glibc
+  etcd: quay.io/coreos/etcd
+  tag: 3.2.13
+  busyBox: busybox:1.28.0-glibc
 
 resources:
    limits:

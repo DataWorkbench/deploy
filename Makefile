@@ -2,15 +2,15 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-TARG.Repo:=dockerhub.dataomnis.io/dataomnis
+repo:=dockerhub.dataomnis.io/dataomnis
 TRAG.Gopkg:=DataWorkbench
 
-TAG:=v0.8-alpha
-FLYWAY_IMAGE:=$(TARG.Repo)/flyway:$(TAG)
-ZEPPELIN_IMAGE:=$(TARG.Repo)/zeppelin:0.9.0
-FLINK_IMAGE:=$(TARG.Repo)/flinkutile:1.12.3-scala_2.11
-BUILDER_IMAGE:=$(TARG.Repo)/builder:latest
-BUILDER_IMAGE_ZEPPELIN:=$(TARG.Repo)/builder:zeppelin
+tag:=v0.8-alpha
+FLYWAY_IMAGE:=$(repo)/flyway:$(tag)
+ZEPPELIN_IMAGE:=$(repo)/zeppelin:0.9.0
+FLINK_IMAGE:=$(repo)/flinkutile:1.12.3-scala_2.11
+BUILDER_IMAGE:=$(repo)/builder:latest
+BUILDER_IMAGE_ZEPPELIN:=$(repo)/builder:zeppelin
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
@@ -46,28 +46,36 @@ build-flyway: ## Build flyway image for database migration
 	cd .. && docker build -t $(FLYWAY_IMAGE) -f ./deploy/build/db/Dockerfile .
 
 .PHONY: build-zeppelin
-build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
+build-zeppelinw: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
 	cd ./build/zeppelin && docker build -t $(ZEPPELIN_IMAGE) . && cd ../..
 
 .PHONY: build-flink-utile
 build-flink-utile:
 	cd ./build/flink_utile/ && docker build -t $(FLINK_IMAGE) . && cd ../..
 
-.PHONY: build-dev
-build-dev: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(TARG.Repo)/$(S):$(TAG) -f ./deploy/Dockerfile .;)
+.PHONY: build-image
+build-image: compile  ## Build dataomnis image
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/$(S):$(tag) -f ./deploy/Dockerfile .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
 .PHONY: build-all  ## Build all images
-build-all: build-flyway build-dev build-zeppelin
+build-all: build-flyway build-zeppelin build-image
 
-.PHONY: push-images  ## push all images
-push-images:
-	#docker push $(ZEPPELIN_IMAGE)
+.PHONY: push-flyway
+push-flyway:
 	docker push $(FLYWAY_IMAGE)
-	@$(foreach S,$(SERVICE_ARRAY),docker push $(TARG.Repo)/$(S):$(TAG);)
-	@echo "push image done"
+	@echo "push flyway image done"
+
+.PHONY: push-zeppelin
+push-zeppelin:
+	docker push $(ZEPPELIN_IMAGE)
+	@echo "push zeppelin image done"
+
+.PHONY: push-image  ## push dataomnis service image
+push-image:
+	@$(foreach S,$(SERVICE_ARRAY),docker push $(repo)/$(S):$(tag);)
+	@echo "push $(service) done"
 
 .PHONY: pull-images
 pull-images: ## Pull images for docker-compose
@@ -95,12 +103,12 @@ compose-down: ## Shutdown service in docker compose
 compose-logs-f: ## Follow service log in docker compose
 	docker-compose logs --tail 10 -f $(SERVICE_ARRAY)
 
-update: build-dev ## Update some service
+update: build-image ## Update some service
 	docker-compose stop $(SERVICE_ARRAY)
 	docker-compose up --no-deps -d $(SERVICE_ARRAY)
 	@echo "update service $(service) done"
 
-update-service: build-dev push-images ## Update dataomnis service in k8s, eg: make update-k8s service=s1,s2
+update-service: build-image push-image ## Update dataomnis service in k8s, eg: make update-k8s service=s1,s2
 	@$(foreach s,$(SERVICE_ARRAY),kubectl -n dataomnis rollout restart deployment dataomnis-$(s);)
 	@echo "update service $(service) done"
 

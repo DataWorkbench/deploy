@@ -29,6 +29,10 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       initContainers:
       - name: wait-mysql
         image: {{ .Values.image.busybox }}
