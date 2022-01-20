@@ -4,7 +4,7 @@ replicaCount: 3
 
 image:
   etcd: quay.io/coreos/etcd
-  tag: 3.2.25
+  tag: 3.2.13
   busyBox: busybox:1.28.0-glibc
 
 resources:
