@@ -40,8 +40,10 @@ spec:
         ports:
           - name: service
             containerPort: {{ .Values.ports.jaeger }}
+            protocol: UDP
           - name: web
             containerPort: {{ .Values.ports.jaegerweb }}
+            protocol: TCP
         env:
           {{- range $ename, $evalue := .Values.jaeger.envs }}
           - name: {{ $ename }}
