@@ -59,7 +59,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "dataomnis.fullname" . }}-jaeger
+                name: {{ include "dataomnis.fullname" . }}-jaeger-web
                 port:
                   number: {{ .Values.ports.jaegerweb }}
 
