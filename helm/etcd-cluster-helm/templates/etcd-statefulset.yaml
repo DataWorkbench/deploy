@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "etcd-cluster.fullname" . }}
+spec:
+  podManagementPolicy: Parallel
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: etcd
+  serviceName: {{ printf "%s-headless" (include "etcd-cluster.fullname" .) }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: etcd
+    spec:
+      containers:
+        {{- $replicaCount := int .Values.replicaCount }}
+        {{- $etcdFullname := include "etcd-cluster.fullname" . }}
+        {{- $etcdHeadlessServiceName := printf "%s-%s" $etcdFullname "headless" }}
+        {{- $releaseNamespace := .Release.Namespace }}
+        - name: etcd
+          image: {{ .Values.image.etcd }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.podIP
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: ETCDCTL_API
+              value: "3"
+            - name: ETCD_ON_K8S
+              value: "yes"
+            - name: ETCD_START_FROM_SNAPSHOT
+              value: "no"
+            - name: ETCD_DISASTER_RECOVERY
+              value: "no"
+            - name: ETCD_NAME
+              value: $(MY_POD_NAME)
+            - name: ETCD_DATA_DIR
+              value: /bitnami/etcd/data
+            - name: ETCD_LOG_LEVEL
+              value: info
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: http://$(MY_POD_NAME).{{ $etcdHeadlessServiceName }}.{{ .Release.Namespace }}.svc.cluster.local:2379,http://{{ $etcdFullname }}.{{ .Release.Namespace }}.svc.cluster.local:2379
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: http://0.0.0.0:2379
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: http://$(MY_POD_NAME).{{ $etcdHeadlessServiceName }}.{{ .Release.Namespace }}.svc.cluster.local:2380
+            - name: ETCD_LISTEN_PEER_URLS
+              value: http://0.0.0.0:2380
+            - name: ETCD_INITIAL_CLUSTER_TOKEN
+              value: etcd-cluster-k8s
+            - name: ETCD_INITIAL_CLUSTER_STATE
+              value: {{ default (ternary "new" "existing" .Release.IsInstall) .Values.initialClusterState | quote }}
+            {{- $initialCluster := list }}
+            {{- range $e, $i := until $replicaCount }}
+            {{- $initialCluster = append $initialCluster (printf "%s-%d=%s://%s-%d.%s.%s.svc.%s:%d" $etcdFullname $i "http" $etcdFullname $i $etcdHeadlessServiceName $releaseNamespace "cluster.local" 2380) }}
+            {{- end }}
+            - name: ETCD_INITIAL_CLUSTER
+              value: {{ join "," $initialCluster | quote }}
+            - name: ETCD_CLUSTER_DOMAIN
+              value: {{ printf "%s.%s.svc.%s" $etcdHeadlessServiceName $releaseNamespace "cluster.local" | quote }}
+          livenessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            failureThreshold: 5
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            successThreshold: 1
+            timeoutSeconds: 5
+          ports:
+            - containerPort: 2379
+              name: client
+              protocol: TCP
+            - containerPort: 2380
+              name: peer
+              protocol: TCP
+          readinessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            failureThreshold: 5
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          resources: {}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /bitnami/etcd
+              name: data
+      restartPolicy: Always
+      securityContext:
+        fsGroup: 1001
+      terminationGracePeriodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ include "etcd-cluster.fullname" . }}-sc
+        resources:
+          requests:
+            storage: {{ .Values.persistent.size }}

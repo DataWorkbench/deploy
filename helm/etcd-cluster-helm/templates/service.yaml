@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: etcd
+  name: {{ include "etcd-cluster.fullname" . }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: client
+      port: 2379
+      protocol: TCP
+      targetPort: client
+    - name: peer
+      port: 2380
+      protocol: TCP
+      targetPort: peer
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: etcd
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: etcd
+  name: {{ printf "%s-headless" (include "etcd-cluster.fullname" .) }}
+spec:
+  clusterIP: None
+  clusterIPs:
+    - None
+  ports:
+    - name: client
+      port: 2379
+      protocol: TCP
+      targetPort: client
+    - name: peer
+      port: 2380
+      protocol: TCP
+      targetPort: peer
+  publishNotReadyAddresses: true
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: etcd
+  sessionAffinity: None
+  type: ClusterIP
