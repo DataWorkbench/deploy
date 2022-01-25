@@ -1,33 +1,28 @@
-# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Copyright 2020 The Dataomnis Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
+FROM dockerhub.qingcloud.com/dataomnis/builder as builder
 
-# NOTICE: run docker build at up-level current directory
-FROM dataworkbench/builder as builder
-ARG BIN_IN_BUILDER=/dataworkbench/bin
-ARG CONF_IN_BUILDER=/dataworkbench/conf
-ARG COMPILE_CMD=./deploy/build/scripts/compile.sh
-ARG SERVICES=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,resourcemanager,notifier,account,enginemanager
-WORKDIR /go/src/DataWorkbench
-ENV GOPROXY=https://goproxy.io,direct
+ARG DATAOMNIS_CONF=/etc/dataomnis
+RUN mkdir -p ${DATAOMNIS_CONF}
 
-COPY . .
-# compile service in databench
-RUN ${COMPILE_CMD} -s ${SERVICES} -o ${BIN_IN_BUILDER} -c ${CONF_IN_BUILDER}
-# compress cmds (do not need to un-compress while run)
-RUN find ${BIN_IN_BUILDER} -type f -exec upx {} \;
+ARG SERVICE
+COPY ./deploy/tmp/conf/${SERVICE}.yaml ${DATAOMNIS_CONF}/
+COPY ./deploy/tmp/bin/${SERVICE} /usr/local/bin/
+RUN upx /usr/local/bin/${SERVICE}
 
 
+###############################################################
 FROM alpine:3.12
 
-ARG BIN_IN_BUILDER=/dataworkbench/bin
-ARG CONF_IN_BUILDER=/dataworkbench/conf
-ENV DATABENCH_CONF=/etc/dataworkbench
-RUN mkdir -p ${DATABENCH_CONF}
-
 RUN apk add -U tzdata && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+ENV DATAOMNIS_CONF=/etc/dataomnis
+RUN mkdir -p ${DATAOMNIS_CONF}
+
+ARG SERVICE
 COPY --from=builder /usr/local/bin/grpc_health_probe /usr/local/bin/
-COPY --from=builder ${BIN_IN_BUILDER}/* /usr/local/bin/
-COPY --from=builder ${CONF_IN_BUILDER}/* ${DATABENCH_CONF}/
+COPY --from=builder ${DATAOMNIS_CONF}/${SERVICE}.yaml ${DATAOMNIS_CONF}/
+COPY --from=builder /usr/local/bin/${SERVICE} /usr/local/bin/
 
 CMD ["sh"]

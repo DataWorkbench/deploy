@@ -1,0 +1,107 @@
+{{- if .Values.apiglobal.enable }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-apiglobal
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: apiglobal
+annotations:
+{{- range $key, $value := .Values.apiglobal.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+{{- end }}
+spec:
+  replicas: {{ coalesce .Values.apiglobal.replicas .Values.common.replicas }}
+  strategy:
+    type: {{ coalesce .Values.apiglobal.strategy .Values.common.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: apiglobal
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: apiglobal
+      annotations:
+      {{- range $key, $value := .Values.apiglobal.podAnnotations }}
+        {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: apiglobal
+          image: {{ .Values.image.repo }}/apiglobal:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/bin/sh", "-c", "apiglobal start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.apiglobal }}
+          env:
+            - name: API_GLOBAL_LOG_LEVEL
+              value: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel | quote }}
+            - name: API_GLOBAL_HTTP_SERVER_ADDRESS
+              value: "0.0.0.0:{{ .Values.ports.apiglobal }}"
+            - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
+              value: '{{ include "service.account" . }}'
+            {{- range $ename, $evalue := .Values.apiglobal.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: service
+            {{- if .Values.apiglobal.readinessProbe }}
+            periodSeconds: {{ .Values.apiglobal.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.apiglobal.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          livenessProbe:
+            tcpSocket:
+              port: service
+            {{- if .Values.apiglobal.livenessProbe }}
+            initialDelaySeconds: {{ .Values.apiglobal.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.apiglobal.livenessProbe.periodSeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          volumeMounts:
+            - name: dataomnis-config
+              mountPath: "/etc/dataomnis"
+              readOnly: true
+      volumes:
+        - name: dataomnis-config
+          configMap:
+            name: dataomnis-config
+            items:
+              - key: "config.yaml"
+                path: "common-config.yaml"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-apiglobal
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: apiglobal-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: {{ .Values.ports.apiglobal }}
+      targetPort: service
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: apiglobal
+
+{{- end -}}

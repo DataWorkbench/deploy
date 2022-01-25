@@ -2,13 +2,9 @@
 
 replicaCount: 3
 
-nodes:    # The length of nodes is equal to etcd-cluster replicaCount
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
-
 image:
-  etcd: quay.io/coreos/etcd  # tag is same as appVersion in Chart.yaml
+  etcd: quay.io/coreos/etcd
+  tag: 3.2.13
   busyBox: busybox:1.28.0-glibc
 
 resources:
@@ -19,10 +15,16 @@ resources:
      cpu: 100m
      memory: 128Mi
 
-persistentVolume:
-  reclaimPolicy: Retain
-  etcdHome: /data/databench
-
 persistent:
-  size: 5Gi
+  size: 10Gi
   accessModes: ["ReadWriteOnce"]
+  localPv:
+    enable: true
+    home: /data/dataomnis
+    reclaimPolicy: Retain
+    nodes: # The length of nodes is equal to etcd-cluster replicaCount
+      - worker-s001
+      - worker-s002
+      - worker-s003
+
+

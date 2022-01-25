@@ -36,12 +36,11 @@ redis:
     enable: true
     size: 10Gi
     accessModes: ["ReadWriteOnce"]
-
-nodes:
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
-
-persistentVolume:
-  reclaimPolicy: Retain
-  redisHome: /data/redis-cluster
+    localPv:
+      enable: true # if use local pv with hostPath
+      home: /data/dataomnis
+      reclaimPolicy: Retain
+      nodes: # the length of nodes must be equal to replicaCount
+        - worker-s001
+        - worker-s002
+        - worker-s003

@@ -1128,8 +1128,8 @@
         "allValue": null,
         "current": {
           "selected": true,
-          "text": "databench",
-          "value": "databench"
+          "text": "dataomnis",
+          "value": "dataomnis"
         },
         "datasource": "Prometheus",
         "definition": "label_values(namespace)",

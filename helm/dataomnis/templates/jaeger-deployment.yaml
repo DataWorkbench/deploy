@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-jaeger
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: jaeger
+annotations:
+  {{- range $key, $value := .Values.jaeger.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.jaeger.replicas .Values.common.replicas }}
+  strategy:
+    type: {{ coalesce .Values.jaeger.strategy .Values.common.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: jaeger
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: jaeger
+      annotations:
+      {{- range $key, $value := .Values.jaeger.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+      - name: jaeger
+        image: {{ .Values.image.jaeger | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: service
+            containerPort: {{ .Values.ports.jaeger }}
+            protocol: UDP
+          - name: web
+            containerPort: {{ .Values.ports.jaegerweb }}
+            protocol: TCP
+        env:
+          {{- range $ename, $evalue := .Values.jaeger.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          tcpSocket:
+            port: web
+          {{- if .Values.jaeger.readinessProbe }}
+          periodSeconds: {{ .Values.jaeger.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jaeger.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          tcpSocket:
+            port: web
+          {{- if .Values.jaeger.livenessProbe }}
+          periodSeconds: {{ .Values.jaeger.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.jaeger.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

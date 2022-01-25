@@ -7,10 +7,10 @@ metadata:
   annotations:
     etcd.database.coreos.com/scope: clusterwide
 spec:
-  version: {{ .Chart.AppVersion | quote }}
+  version: "{{ .Values.image.tag }}"
   repository: "{{ .Values.image.etcd }}"
-  {{- if .Values.nodes }}
-  size: {{ len .Values.nodes }}
+  {{- if .Values.persistent.localPv.nodes }}
+  size: {{ len .Values.persistent.localPv.nodes }}
   {{- else }}
   size: {{ .Values.replicaCount }}
   {{- end }}
@@ -20,7 +20,7 @@ spec:
     busyboxImage: {{ .Values.image.busyBox }}
     persistentVolumeClaimSpec:
       accessModes: {{ .Values.persistent.accessModes }}
-      {{- if .Values.nodes }}
+      {{- if .Values.persistent.localPv.enable }}
       storageClassName: {{ include "etcd-cluster.fullname" . }}-sc
       {{- end }}
       resources:

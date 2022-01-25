@@ -1,0 +1,86 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-api-ingress
+  annotations:
+    # limit the size of uploaded-file
+    nginx.org/client-max-body-size: "100m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: api.{{ .Values.domain }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "dataomnis.fullname" . }}-apiserver
+              port:
+                number: {{ .Values.ports.apiserver }}
+
+{{- if .Values.apiglobal.enable }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-global-ingress
+  annotations:
+    # limit the size of uploaded-file
+    nginx.org/client-max-body-size: "100m"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: global.{{ .Values.domain }}
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: {{ include "dataomnis.fullname" . }}-apiglobal
+              port:
+                number: {{ .Values.ports.apiglobal }}
+{{- end }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-jaeger-ingress
+  annotations:
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: jaeger.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "dataomnis.fullname" . }}-jaeger-web
+                port:
+                  number: {{ .Values.ports.jaegerweb }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-zeppelin-ingress
+  annotations:
+    # support websocket
+    nginx.org/websocket-services: {{ include "dataomnis.fullname" . }}-zeppelin-server
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: zeppelin.{{ .Values.domain }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "dataomnis.fullname" . }}-zeppelin-server
+                port:
+                  number: {{ .Values.ports.zeppelin }}

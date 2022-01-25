@@ -1,4 +1,4 @@
-# Copyright 2020 The DataWorkbench Authors. All rights reserved.
+# Copyright 2020 The Dataomnis Authors. All rights reserved.
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
@@ -8,7 +8,7 @@ WORKDIR /opt
 
 # for zeppelin
 # flink that fixed log4j on anybox
-RUN wget https://api.anybox.qingcloud.com/v1/downloads/RKAC6KedUWRIe8YVttOUoZokBwDx3h1dWU2CiNdCMUHK4GGCR1ujYzoZ0uNEMeKvTudRICgVnHOGGTWkS9dvCDuBmmyt51Z1gjL1DTHByGnZUl4vBBlNq0mByaDvORGA/flink-1.12.3-bin-scala_2.11.tar.gz && \
+RUN wget https://api.anybox.qingcloud.com/v1/downloads/QpSIksdvRTJYY5tA6x5uSV1dPCNRGD6zmRE6jhj94FH9hRXtId1WhJEW4c1YThtRt3eCMxFIgRmUmXbNVAxi0j2ibobtwidz68sNimdCQA7zTp1rRpZsCC3H8fB4zl4r/flink-1.12.3-bin-scala_2.11.tar.gz && \
     tar -zxvf flink-1.12.3-bin-scala_2.11.tar.gz && \
     rm flink-1.12.3-bin-scala_2.11.tar.gz
 
