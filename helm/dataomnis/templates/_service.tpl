@@ -99,6 +99,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.udfmanager" . }}'
 - name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
+- name: JOB_MANAGER_SPACE_MANAGER_ADDRESS
+  value: '{{- include "service.spacemanager" . }}'
 {{- end -}}
 
 
