@@ -13,10 +13,10 @@ image:
 
 persistentVolume:
   reclaimPolicy: Retain
-  etcdHome: /data/databench
+  etcdHome: /data/dataomnis
 
 persistent:
-  size: 5Gi
+  size: 10Gi
   accessModes: ["ReadWriteOnce"]
 
 

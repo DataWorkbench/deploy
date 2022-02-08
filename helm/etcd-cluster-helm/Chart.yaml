@@ -1,6 +1,6 @@
 apiVersion: v2
 name: etcd-cluster
-description: A Helm chart for etcd-cluster managed by etcd-operator
+description: A Helm chart for etcd-cluster
 type: application
-version: 0.11.2
-appVersion: 3.2.13
+version: 1.0.0
+appVersion: 3.5.1
