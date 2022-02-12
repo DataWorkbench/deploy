@@ -45,7 +45,7 @@ common:
     initialDelaySeconds: 20
 
 etcd:
-  endpoint: etcd-cluster-client
+  endpoint: etcd-cluster
 
 # mysql configuration
 mysql:
