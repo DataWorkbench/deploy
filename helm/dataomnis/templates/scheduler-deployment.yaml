@@ -38,10 +38,6 @@ spec:
         image: {{ .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
-      - name: wait-etcd
-        image: {{ .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
       - name: scheduler
         image: {{ .Values.image.repo }}/scheduler:{{- .Values.image.tag }}
