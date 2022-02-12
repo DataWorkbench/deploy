@@ -116,6 +116,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.jobmanager" . }}'
 - name: SPACE_MANAGER_ENGINE_MANAGER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
+- name: SPACE_MANAGER_SCHEDULER_ADDRESS
+  value: '{{- include "service.scheduler" . }}'
 {{- end -}}
 
 
