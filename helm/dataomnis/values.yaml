@@ -124,30 +124,10 @@ enginemanager:
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
     ENGINE_MANAGER_FLINK_ENABLE_MULTUS: false
 
-# flowmanager configuration
-flowmanager:
-  envs:
-    FLOW_MANAGER_TRACER_SERVICE_NAME: flowmanager
-
-# jobdeveloper configuration
-jobdeveloper:
-  envs:
-    JOB_DEVELOPER_TRACER_SERVICE_NAME: "jobdeveloper"
-    JOB_DEVELOPER_ZEPPELIN_FLINK_HOME: "/zeppelin/flink/flink-1.12.3"
-    JOB_DEVELOPER_ZEPPELIN_FLINK_EXECUTE_JARS: "MySQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/mysql-connector-java-8.0.21.jar;PostgreSQL:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/postgresql-42.2.18.jar;Kafka:/zeppelin/flink/1.12_lib/flink-sql-connector-kafka_2.11-1.12.3.jar;ClickHouse:/zeppelin/flink/1.12_lib/flink-connector-jdbc_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-clickhouse-1.0.0.jar;HBase:/zeppelin/flink/1.12_lib/flink-shaded-hadoop-2-uber-2.8.3-10.0.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-hbase-2.2_2.11-1.12.3.jar;Ftp:/zeppelin/flink/1.12_lib/flink-connector-ftp_2.11_1.12.0.jar,/zeppelin/flink/1.12_lib/flink-csv-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-json-1.12.2.jar,/zeppelin/flink/1.12_lib/flink-sql-connector-elasticsearch7_2.11-1.12.3.jar,/zeppelin/flink/1.12_lib/flink-connector-mysql-cdc-1.3.0.jar"
-    JOB_DEVELOPER_ZEPPELIN_HADOOP_CONF: "/zeppelin/hadoop/hadoop-2.7.5/etc/hadoop"
-
 # jobmanager configuration
 jobmanager:
   envs:
     JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
-
-# jobwatcher configuration
-jobwatcher:
-  envs:
-    JOB_WATCHER_JOB_WORKS: 16
-    JOB_WATCHER_PICKUP_ALONE_JOBS: 1
-    JOB_WATCHER_TRACER_SERVICE_NAME: "jobwatcher"
 
 # logmanager configuration
 logmanager:
@@ -186,11 +166,6 @@ scheduler:
     SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
     SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
 
-# sourcemanager configuration
-sourcemanager:
-  envs:
-    SOURCE_MANAGER_TRACER_SERVICE_NAME: "sourcemanager"
-
 # spacemanager configuration
 spacemanager:
   envs:
@@ -199,11 +174,6 @@ spacemanager:
     SPACE_MANAGER_CLUSTER_FLINK_DOMAIN: "192.168.27.90.nip.io"
     SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
     SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-
-# udfmanager configuration
-udfmanager:
-  envs:
-    UDF_MANAGER_TRACER_SERVICE_NAME: "udfmanager"
 
 # zeppelin configuration
 zeppelin:
@@ -244,13 +214,8 @@ ports:
   apiglobal: 8001
   apiserver: 9001
   spacemanager: 9101
-  flowmanager: 9102
   scheduler: 9103
-  sourcemanager: 9104
   jobmanager: 9105
-  udfmanager: 9106
-  jobwatcher: 9108
-  jobdeveloper: 9109
   account: 9110
   resourcemanager: 9111
   observer: 9112
@@ -260,13 +225,8 @@ ports:
 
 metricsPorts: # key must be same as component in deployment
   spacemanager: 9201
-  flowmanager: 9202
   scheduler: 9203
-  sourcemanager: 9204
   jobmanager: 9205
-  udfmanager: 9206
-  jobwatcher: 9208
-  jobdeveloper: 9209
   account: 9210
   resourcemanager: 9211
 #  observer: 9212

@@ -9,28 +9,8 @@ Service Addresses For ApiServer
 {{ include "dataomnis.fullname" . }}-spacemanager:{{ .Values.ports.spacemanager }}
 {{- end -}}
 
-{{- define "service.udfmanager" -}}
-{{ include "dataomnis.fullname" . }}-udfmanager:{{ .Values.ports.udfmanager }}
-{{- end -}}
-
 {{- define "service.scheduler" -}}
 {{ include "dataomnis.fullname" . }}-scheduler:{{ .Values.ports.scheduler }}
-{{- end -}}
-
-{{- define "service.flowmanager" -}}
-{{ include "dataomnis.fullname" . }}-flowmanager:{{ .Values.ports.flowmanager }}
-{{- end -}}
-
-{{- define "service.sourcemanager" -}}
-{{ include "dataomnis.fullname" . }}-sourcemanager:{{ .Values.ports.sourcemanager }}
-{{- end -}}
-
-{{- define "service.jobdeveloper" -}}
-{{ include "dataomnis.fullname" . }}-jobdeveloper:{{ .Values.ports.jobdeveloper }}
-{{- end -}}
-
-{{- define "service.jobwatcher" -}}
-{{ include "dataomnis.fullname" . }}-jobwatcher:{{ .Values.ports.jobwatcher }}
 {{- end -}}
 
 {{- define "service.jobmanager" -}}
@@ -59,16 +39,10 @@ Service Addresses For ApiServer
   value: '{{- include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
   value: '{{- include "service.spacemanager" . }}'
-- name: API_SERVER_FLOW_MANAGER_ADDRESS
-  value: '{{- include "service.flowmanager" . }}'
 - name: API_SERVER_SCHEDULER_ADDRESS
   value: '{{- include "service.scheduler" . }}'
-- name: API_SERVER_SOURCE_MANAGER_ADDRESS
-  value: '{{ include "service.sourcemanager" . }}'
 - name: API_SERVER_JOB_MANAGER_ADDRESS
   value: '{{ include "service.jobmanager" . }}'
-- name: API_SERVER_UDF_MANAGER_ADDRESS
-  value: '{{ include "service.udfmanager" . }}'
 - name: API_SERVER_RESOURCE_MANAGER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
 - name: API_SERVER_ACCOUNT_SERVER_ADDRESS
@@ -77,26 +51,11 @@ Service Addresses For ApiServer
   value: '{{ include "service.enginemanager" . }}'
 {{- end -}}
 
-
-{{- define "jobdeveloper.link.services" -}}
-- name: JOB_DEVELOPER_SOURCEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.sourcemanager" . }}'
-- name: JOB_DEVELOPER_UDFMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.udfmanager" . }}'
-- name: JOB_DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.resourcemanager" . }}'
-- name: JOB_DEVELOPER_ENGINEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.enginemanager" . }}'
-{{- end -}}
-
-
 {{- define "jobmanager.link.services" -}}
 - name: JOB_MANAGER_ZEPPELIN_ADDRESS
   value: '{{ include "service.zeppelin" . }}'
 - name: JOB_MANAGER_RESOURCEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
-- name: JOB_MANAGER_UDFMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.udfmanager" . }}'
 - name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
 - name: JOB_MANAGER_SPACE_MANAGER_ADDRESS
@@ -107,8 +66,6 @@ Service Addresses For ApiServer
 {{- define "scheduler.link.services" -}}
 - name: SCHEDULER_JOB_MANAGER_ADDRESS
   value: '{{ include "service.jobmanager" . }}'
-- name: SCHEDULER_FLOW_MANAGER_ADDRESS
-  value: '{{ include "service.flowmanager" . }}'
 {{- end -}}
 
 {{- define "spacemanager.link.services" -}}
