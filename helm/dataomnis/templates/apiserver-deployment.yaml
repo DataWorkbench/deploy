@@ -35,7 +35,7 @@ spec:
       {{- end }}
       containers:
         - name: apiserver
-          image: {{ .Values.image.repo }}/apiserver:{{- .Values.image.tag }}
+          image: {{ .Values.image.registry }}/dataomnis/apiserver:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiserver start -c ${DATAOMNIS_CONF}/apiserver.yaml"]
           ports:

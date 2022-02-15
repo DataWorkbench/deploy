@@ -23,7 +23,7 @@ spec:
       {{- end }}
       containers:
         - name: zeppelin-server
-          image: {{ .Values.image.repo }}/zeppelin:{{- .Values.image.zeppelinTag }}
+          image: {{ .Values.image.registry }}/dataomnis/zeppelin:{{- .Values.image.zeppelinTag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["sh", "-c", "$(ZEPPELIN_HOME)/bin/zeppelin.sh"]
           lifecycle:
@@ -52,7 +52,7 @@ spec:
             - name: SERVICE_DOMAIN
               value: zeppelin.{{ .Values.domain }}
             - name: ZEPPELIN_K8S_CONTAINER_IMAGE
-              value: {{ .Values.image.zeppelinInterpreter }}
+              value: {{ .Values.image.registry }}/{{ .Values.image.zeppelinInterpreter }}
             - name: ZEPPELIN_ALLOWED_ORIGINS
               value: "*"
             - name: ZEPPELIN_K8S_NAMESPACE

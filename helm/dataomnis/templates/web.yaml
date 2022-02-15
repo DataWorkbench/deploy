@@ -32,7 +32,7 @@ spec:
       {{- end }}
       containers:
         - name: web
-          image: {{ .Values.image.web }}
+          image: {{ .Values.image.registry }}/dataomnis/web:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: service

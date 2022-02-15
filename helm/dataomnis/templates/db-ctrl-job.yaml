@@ -22,14 +22,14 @@ spec:
       {{- end }}
       initContainers:
         - name: wait-mysql
-          image: {{ .Values.image.busybox }}
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command:
             - 'sh'
             - '-c'
             - '{{ include "mysql.waiting.cmd" . }}'
         - name: database-init
-          image: {{ .Values.image.repo }}/flyway:{{- .Values.image.flywayTag }}
+          image: {{ .Values.image.registry }}/dataomnis/flyway:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "/flyway/ddl/ddl_init.sh"
@@ -48,7 +48,7 @@ spec:
                   key: root
       containers:
         - name: db-ctrl-job
-          image: {{ .Values.image.repo }}/flyway:{{- .Values.image.flywayTag }}
+          image: {{ .Values.image.registry }}/dataomnis/flyway:{{- .Values.image.tag }}
           imagePullPolicy: IfNotPresent
           command:
             - "flyway"

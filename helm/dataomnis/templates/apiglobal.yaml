@@ -36,7 +36,7 @@ spec:
       {{- end }}
       containers:
         - name: apiglobal
-          image: {{ .Values.image.repo }}/apiglobal:{{- .Values.image.tag }}
+          image: {{ .Values.image.registry }}/dataomnis/apiglobal:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/sh", "-c", "apiglobal start -c ${DATAOMNIS_CONF}/common-config.yaml"]
           ports:

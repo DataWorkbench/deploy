@@ -36,12 +36,12 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-mysql
-        image: {{ .Values.image.busybox }}
+        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: enginemanager
-        image: {{ .Values.image.repo }}/enginemanager:{{- .Values.image.tag }}
+        image: {{ .Values.image.registry }}/dataomnis/enginemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "enginemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
@@ -75,6 +75,8 @@ spec:
             value: {{ .Values.hdfs.configmapName }}
           - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAMESPACE
             value: {{ .Release.Namespace | quote }}
+          - name: ENGINE_MANAGER_FLINK_IMAGE_REPO
+            value: "{{- .Values.image.registry }}/dataomnis/flink"
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

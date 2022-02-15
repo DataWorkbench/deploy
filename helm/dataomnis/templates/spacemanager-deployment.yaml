@@ -35,12 +35,12 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-mysql
-        image: {{ .Values.image.busybox }}
+        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: spacemanager
-        image: {{ .Values.image.repo }}/spacemanager:{{- .Values.image.tag }}
+        image: {{ .Values.image.registry }}/dataomnis/spacemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "spacemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:

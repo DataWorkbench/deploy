@@ -16,14 +16,12 @@ image:
   pullSecret:
   pullPolicy: Always  # pullPolicy: IfNotPresent
 
-  repo: dockerhub.databench.io/dataomnis
+  registry: dockerhub.databench.io
   tag: dev
-  flywayTag: dev
   zeppelinTag: 0.9.0
 
   busybox: busybox:1.28.4
-  zeppelinInterpreter: dockerhub.databench.io/dataomnis/zeppelin:0.9.0
-  web: dataomnis/web:0.1.0
+  zeppelinInterpreter: dataomnis/zeppelin:0.9.0
   jaeger: jaegertracing/all-in-one:1.22
 
 # common configuration for all service
@@ -51,8 +49,8 @@ etcd:
 mysql:
   internal: false  # if use internal mysql in dependencies
   # common mysql configuration for dataomnis services
-  externalHost: mysql-pxc-db-haproxy
-  secretName: mysql-pxc-db
+  externalHost: mysql-cluster-pxc-db-haproxy
+  secretName: mysql-cluster-pxc-db
   user: "root"
   database: "dataomnis"
   maxIdleConn: 16
@@ -118,7 +116,6 @@ enginemanager:
     ENGINE_MANAGER_HELM_DEBUG: false
     ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
 
-    ENGINE_MANAGER_FLINK_IMAGE_REPO: "dockerhub.databench.io/dataomnis/flink"
     ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
     ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
     ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
