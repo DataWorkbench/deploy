@@ -29,7 +29,7 @@ spec:
             - --logtostderr=true
             - --v=10
           #image: gcr.io/kubebuilder/kube-rbac-proxy:v0.8.0
-          image: kubesphere/kube-rbac-proxy:v0.8.0
+          image: {{ .Values.imageRegistry }}/{{- .Values.rbacImage }}
           imagePullPolicy: IfNotPresent
           name: kube-rbac-proxy
           ports:
@@ -45,7 +45,7 @@ spec:
             - --leader-elect
           command:
             - /manager
-          image: {{ .Values.image }}
+          image: {{ .Values.imageRegistry }}/{{- .Values.image }}
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
