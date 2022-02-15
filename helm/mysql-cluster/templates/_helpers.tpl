@@ -68,34 +68,58 @@ This filters the backup.storages hash for S3 credentials. If we detect them, the
 {{/*
 Functions returns image URI according to parameters set
 */}}
+{{- define "pxc-db.pxc-image" -}}
+{{- if .Values.imageResitry }}
+{{- printf "%s/%s" .Values.imageResitry .Values.pxc.image }}
+{{- else }}
+{{- .Values.pxc.image }}
+{{- end }}
+{{- end -}}
+
 {{- define "pxc-db.haproxy-image" -}}
 {{- if .Values.haproxy.image }}
 {{- .Values.haproxy.image }}
+{{- else if .Values.imageResitry }}
+{{- printf "%s/%s:%s-haproxy" .Values.imageResitry .Values.image .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-haproxy" .Values.operatorImageRepository .Chart.AppVersion }}
+{{- printf "%s:%s-haproxy" .Values.image .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.proxysql-image" -}}
 {{- if .Values.proxysql.image }}
 {{- .Values.proxysql.image }}
+{{- else if .Values.imageResitry }}
+{{- printf "%s/%s:%s-proxysql" .Values.imageResitry .Values.image .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-proxysql" .Values.operatorImageRepository .Chart.AppVersion }}
+{{- printf "%s:%s-proxysql" .Values.image .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.logcollector-image" -}}
 {{- if .Values.logcollector.image }}
 {{- .Values.logcollector.image }}
+{{- else if .Values.imageResitry }}
+{{- printf "%s/%s:%s-logcollector" .Values.imageResitry .Values.image .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-logcollector" .Values.operatorImageRepository .Chart.AppVersion }}
+{{- printf "%s:%s-logcollector" .Values.image .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.backup-image" -}}
 {{- if .Values.backup.image }}
 {{- .Values.backup.image }}
+{{- else if .Values.imageResitry }}
+{{- printf "%s/%s:%s-pxc8.0-backup" .Values.imageResitry .Values.image .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-pxc8.0-backup" .Values.operatorImageRepository .Chart.AppVersion }}
+{{- printf "%s:%s-pxc8.0-backup" .Values.image .Chart.AppVersion }}
+{{- end }}
+{{- end -}}
+
+{{- define "pxc-db.pmm-client-image" -}}
+{{- if .Values.imageResitry }}
+{{- printf "%s/%s" .Values.imageResitry .Values.pmm.image }}
+{{- else }}
+{{- .Values.pmm.image }}
 {{- end }}
 {{- end -}}

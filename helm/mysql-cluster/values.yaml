@@ -12,9 +12,9 @@ finalizers:
 nameOverride: ""
 fullnameOverride: ""
 
-operatorImageRepository: percona/percona-xtradb-cluster-operator
+imageResitry: ""
+image: percona/percona-xtradb-cluster-operator
 
-crVersion: 1.9.0
 pause: false
 allowUnsafeConfigurations: false
 updateStrategy: Never
@@ -25,9 +25,7 @@ upgradeOptions:
 
 pxc:
   size: 3
-  image:
-    repository: percona/percona-xtradb-cluster
-    tag: 8.0.23-14.1
+  image: percona/percona-xtradb-cluster:8.0.23-14.1
   autoRecovery: true
   imagePullSecrets: []
   annotations: {}
@@ -78,11 +76,10 @@ pxc:
       enabled: true
       reclaimPolicy: Retain
       home: /data/dataomnis
-      nodes: # The length of nodes is equal to pxc size
+      nodes:
         - worker-s001
         - worker-s002
         - worker-s003
-
 
   # If you set this to true the cluster will be created without TLS
   disableTLS: true
@@ -206,9 +203,7 @@ logcollector:
 
 pmm:
   enabled: false
-  image:
-    repository: percona/pmm-client
-    tag: 2.18.0
+  image: percona/pmm-client:2.18.0
   serverHost: mysql-monitor-service
   serverUser: admin
   resources:
