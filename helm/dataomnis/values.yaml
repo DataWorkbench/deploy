@@ -159,6 +159,7 @@ observer:
 resourcemanager:
   envs:
     RESOURCE_MANAGER_HADOOP_CONF_DIR: /etc/hadoop
+    RESOURCE_MANAGER_TRACER_SERVICE_NAME: "resourcemanager"
 
 # scheduler configuration
 scheduler:
