@@ -49,7 +49,7 @@ Functions returns image URI according to parameters set
 */}}
 {{- define "pxc-operator.image" -}}
 {{- if .Values.imageRegistry -}}
-{{- printf "%s/%s" .Values.ImageRegistry .Values.image }}
+{{- printf "%s/%s" .Values.imageRegistry .Values.image }}
 {{- else -}}
 {{- .Values.image }}
 {{- end -}}
