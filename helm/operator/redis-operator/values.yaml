@@ -1,4 +1,5 @@
-image: quay.io/spotahome/redis-operator
+imageRegitry: quay.io
+image: spotahome/redis-operator
 tag: v1.0.0
 pullPolicy: IfNotPresent
 podAnnotations: {}

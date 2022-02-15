@@ -1,5 +1,7 @@
 # Default values for redis-cluster.
 
+imageRegistry:
+
 sentinel:
   image: redis
   replicaCount: 3

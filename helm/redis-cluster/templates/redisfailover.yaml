@@ -8,21 +8,17 @@ metadata:
     component: redis
 spec:
   sentinel:
-    image: {{ include "sentinel.image" . }}
+    image: {{ include "sentinel.image" . | quote }}
     imagePullPolicy: IfNotPresent
-    {{- if .Values.redis.persistent.localPv.nodes }}
-    replicas: {{ len .Values.redis.persistent.localPv.nodes }}
-    {{- else }}
-    replicas: {{ .Values.sentinel.replicaCount }}
-    {{- end }}
+    replicas: {{ include "sentinel.replica" . | int }}
     resources:
 {{ toYaml .Values.sentinel.resource | indent 6 }}
     customConfig:
 {{ toYaml .Values.sentinel.config | indent 6 }}
   redis:
-    image: {{ include "sentinel.image" . }}
+    image: {{ include "redis.image" . | quote }}
     imagePullPolicy: IfNotPresent
-    replicas: {{ .Values.redis.replicaCount }}
+    replicas: {{ include "redis.replica" . | int }}
     resources:
 {{ toYaml .Values.redis.resource | indent 6 }}
     customConfig:
