@@ -25,8 +25,8 @@ spec:
         {{- $etcdHeadlessServiceName := printf "%s-%s" $etcdFullname "headless" }}
         {{- $releaseNamespace := .Release.Namespace }}
         - name: etcd
-          image: {{ .Values.image.etcd }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          image: {{ .Values.imageRegistry }}/{{ .Values.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
           env:
             - name: BITNAMI_DEBUG
               value: "false"
