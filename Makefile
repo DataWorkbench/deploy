@@ -2,15 +2,15 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-repo:=dockerhub.databench.io/dataomnis
+repo:=dockerhub.databench.io
 TRAG.Gopkg:=DataWorkbench
 
 tag:=dev
-FLYWAY_IMAGE:=$(repo)/flyway:$(tag)
-ZEPPELIN_IMAGE:=$(repo)/zeppelin:0.9.0
-FLINK_IMAGE:=$(repo)/flinkutile:1.12.3-scala_2.11
-BUILDER_IMAGE:=$(repo)/builder:latest
-BUILDER_IMAGE_ZEPPELIN:=$(repo)/builder:zeppelin
+FLYWAY_IMAGE:=$(repo)/dataomnis/flyway:$(tag)
+ZEPPELIN_IMAGE:=$(repo)/dataomnis/zeppelin:0.9.0
+FLINK_IMAGE:=$(repo)/dataomnis/flinkutile:1.12.3-scala_2.11
+BUILDER_IMAGE:=dockerhub.qingcloud.com/dataomnis/builder:latest
+BUILDER_IMAGE_ZEPPELIN:=dockerhub.qingcloud.com/dataomnis/builder:zeppelin
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
@@ -55,7 +55,7 @@ build-flink-utile:
 
 .PHONY: build-image
 build-image: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/$(S):$(tag) -f ./deploy/Dockerfile .;)
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f ./deploy/Dockerfile .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
@@ -74,7 +74,7 @@ push-zeppelin:
 
 .PHONY: push-image  ## push dataomnis service image
 push-image:
-	@$(foreach S,$(SERVICE_ARRAY),docker push $(repo)/$(S):$(tag);)
+	@$(foreach S,$(SERVICE_ARRAY),docker push $(repo)/dataomnis/$(S):$(tag);)
 	@echo "push $(service) done"
 
 .PHONY: pull-images
