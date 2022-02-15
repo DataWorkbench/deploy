@@ -14,6 +14,7 @@ quay.io/spotahome/redis-operator:v1.0.0
 redis:4.0-alpine
 ##hdfs
 fastop/zookeeper:3.4.10
+kubesphere/kube-rbac-proxy:v0.8.0
 dockerhub.qingcloud.com/dataomnis/hadoop-operator:0.0.1
 dockerhub.qingcloud.com/dataomnis/hadoop:2.9.2
 ##dataomnis
