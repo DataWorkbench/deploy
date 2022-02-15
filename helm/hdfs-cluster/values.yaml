@@ -6,34 +6,30 @@ storageClass: ""
 
 hdfsHome: /data/dataomnis
 
-version: 2.9.2
+imageRegistry: dockerhub.databench.io
+image: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
 
-image: dockerhub.databench.io/dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
+nodes:
+  - worker-s001
+  - worker-s002
+  - worker-s003
 
 namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
-  nodes:
-    - worker-s001
-    - worker-s002
+  nodes: []
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
 
 datanode:
-  nodes:
-    - worker-s001
-    - worker-s002
-    - worker-s003
+  nodes: []
   storage:
     capacity: 50Gi
     reclaimPolicy: Retain
 
 journalnode:
-  nodes:
-    - worker-s001
-    - worker-s002
-    - worker-s003
+  nodes: []
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
@@ -41,10 +37,7 @@ journalnode:
 zookeeper:
   image: fastop/zookeeper:3.4.10
   quorum:
-  nodes:
-    - worker-s001
-    - worker-s002
-    - worker-s003
+  nodes: []
   storage:
     capacity: 1Gi
     reclaimPolicy: Retain

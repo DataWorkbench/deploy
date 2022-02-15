@@ -1,2 +1,2 @@
 
-operatorImage: "dockerhub.qingcloud.com/dataomnis/hadoop-operator:0.0.1"
+image: "dockerhub.qingcloud.com/dataomnis/hadoop-operator:0.0.1"

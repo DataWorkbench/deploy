@@ -45,7 +45,7 @@ spec:
             - --leader-elect
           command:
             - /manager
-          image: {{ .Values.operatorImage }}
+          image: {{ .Values.image }}
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
