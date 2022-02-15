@@ -10,10 +10,7 @@ AllNodes=(worker-s001 worker-s002 worker-s003)
 
 # hdfsDatadir format: ${VolumeHome}/${HdfsReleaseName}/datanode ..
 # hdfs role-node map
-HdfsNamenodes=(worker-s001 worker-s002)
-HdfsDatanodes=(worker-s001 worker-s002 worker-s003)
-HdfsJournalnodes=(worker-s001 worker-s002 worker-s003)
-HdfsZookeeperNodes=(worker-s001 worker-s002 worker-s003)
+HdfsNodes=(worker-s001 worker-s002 worker-s003)
 
 # MysqlDatadir format: ${VolumeHome}/${MysqlReleaseName}
 # mysql role-node map
@@ -45,19 +42,19 @@ do
 done
 
 # create hdfs dir
-for node in ${HdfsDatanodes[@]}
+for node in ${HdfsNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/datanode"
 done
-for node in ${HdfsNamenodes[@]}
+for node in ${HdfsNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/namenode"
 done
-for node in ${HdfsJournalnodes[@]}
+for node in ${HdfsNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/journalnode"
 done
-for node in ${HdfsZookeeperNodes[@]}
+for node in ${HdfsNodes[@]}
 do
   ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/zookeeper"
 done
