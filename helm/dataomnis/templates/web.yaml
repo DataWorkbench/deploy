@@ -39,7 +39,11 @@ spec:
               containerPort: 80
           env:
             - name: APIGLOBAL_HOST
-              value: "global.{{ .Values.domain }}"
+              {{- if .Values.port }}
+              value: {{ printf "global.%s:%v" .Values.domain .Values.port }}
+              {{- else }}
+              value: {{ printf "global.%s" .Values.domain }}
+              {{- end }}
           readinessProbe:
             httpGet:
               port: 80

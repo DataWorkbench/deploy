@@ -53,6 +53,10 @@ spec:
             value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
           - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
+          - name: SPACE_MANAGER_CLUSTER_FLINK_DOMAIN
+            value: "{{ .Values.domain }}"
+          - name: SPACE_MANAGER_CLUSTER_FLINK_WEBUI_PORT
+            value: "{{ .Values.port }}"
           - name: SPACE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:

@@ -4,6 +4,7 @@
 
 # for apiserver and flink web
 domain: dataomnis.192.168.27.90.nip.io
+port:
 
 # the host info for pod
 # qingcloudApiIP: the ip of api.qingcloud.com
@@ -169,7 +170,6 @@ spacemanager:
   envs:
     SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
     SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
-    SPACE_MANAGER_CLUSTER_FLINK_DOMAIN: "192.168.27.90.nip.io"
     SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
     SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
 
