@@ -5,7 +5,8 @@
 repo:=dockerhub.databench.io
 TRAG.Gopkg:=DataWorkbench
 
-tag:=dev
+DEFAULT_TAG=dev
+tag:=$(DEFAULT_TAG)
 FLYWAY_IMAGE:=$(repo)/dataomnis/flyway:$(tag)
 ZEPPELIN_IMAGE:=$(repo)/dataomnis/zeppelin:0.9.0
 FLINK_IMAGE:=$(repo)/dataomnis/flinkutile:1.12.3-scala_2.11
@@ -18,6 +19,10 @@ WORKDIR_IN_DOCKER=/$(TRAG.Gopkg)
 RUN_IN_DOCKER:=docker run -it --rm -v `pwd`/..:$(WORKDIR_IN_DOCKER) -v ${LOCAL_CACHE}:/go/cache -v $(LOCAL_MODCACHE):/go/pkg -w $(WORKDIR_IN_DOCKER) $(BUILDER_IMAGE)
 
 PWD_DIR:=$(shell pwd)
+DOCKERFILE:=./deploy/Dockerfile
+ifeq ($(tag),$(DEFAULT_TAG))
+	DOCKERFILE=./deploy/Dockerfile.dev
+endif
 
 comma:= ,
 empty:=
@@ -55,7 +60,7 @@ build-flink-utile:
 
 .PHONY: build-image
 build-image: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f ./deploy/Dockerfile .;)
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
