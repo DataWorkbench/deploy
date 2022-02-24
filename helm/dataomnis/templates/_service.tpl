@@ -33,6 +33,10 @@ Service Addresses For ApiServer
 {{ include "dataomnis.fullname" . }}-account:{{ .Values.ports.account }}
 {{- end -}}
 
+{{- define "service.developer" -}}
+{{ include "dataomnis.fullname" . }}-developer:{{ .Values.ports.developer }}
+{{- end -}}
+
 
 {{- define "apiserver.link.services" -}}
 - name: API_SERVER_TRACER_LOCAL_AGENT
@@ -66,7 +70,10 @@ Service Addresses For ApiServer
 {{- define "scheduler.link.services" -}}
 - name: SCHEDULER_JOB_MANAGER_ADDRESS
   value: '{{ include "service.jobmanager" . }}'
+- name: SCHEDULER_DEVELOPER_ADDRESS
+  value: '{{ include "service.developer" . }}'
 {{- end -}}
+
 
 {{- define "spacemanager.link.services" -}}
 - name: SPACE_MANAGER_JOB_MANAGER_ADDRESS
@@ -75,6 +82,14 @@ Service Addresses For ApiServer
   value: '{{ include "service.enginemanager" . }}'
 - name: SPACE_MANAGER_SCHEDULER_ADDRESS
   value: '{{- include "service.scheduler" . }}'
+{{- end -}}
+
+
+{{- define "developer.link.services" -}}
+- name: DEVELOPER_SPACE_MANAGER_SERVER_ADDRESS
+  value: 'static://{{ include "service.spacemanager" . }}'
+- name: DEVELOPER_RESOURCEMANAGER_SERVER_ADDRESS
+  value: 'static://{{ include "service.resourcemanager" . }}'
 {{- end -}}
 
 

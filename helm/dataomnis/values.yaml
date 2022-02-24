@@ -183,6 +183,12 @@ zeppelin:
     SPARK_MASTER: k8s://https://kubernetes.default.svc
     SPARK_HOME: /spark
 
+developer:
+  envs:
+    DEVELOPER_SPACE_MANAGER_SERVER_ENABLEKEEPALIVE: true
+    DEVELOPER_SPACE_MANAGER_SERVER_KEEPALIVEWITHOUTCALLS: true
+    DEVELOPER_SPACE_MANAGER_SERVER_NEGOTIATIONTYPE: plaintext
+
 # jaeger configuration
 jaeger:
   envs:
@@ -216,10 +222,9 @@ ports:
   jobmanager: 9105
   account: 9110
   resourcemanager: 9111
-  observer: 9112
   notifier: 9113
   enginemanager: 9114
-  logmanager: 9115
+  developer: 9119
 
 metricsPorts: # key must be same as component in deployment
   spacemanager: 9201
@@ -227,10 +232,9 @@ metricsPorts: # key must be same as component in deployment
   jobmanager: 9205
   account: 9210
   resourcemanager: 9211
-#  observer: 9212
   notifier: 9213
   enginemanager: 9214
-#  logmanager: 9215
+  developer: 9219
 
 serviceMonitor:
   enabled: true

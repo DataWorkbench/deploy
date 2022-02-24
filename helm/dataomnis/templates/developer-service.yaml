@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-developer
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: developer-service
+spec:
+  type: ClusterIP
+  ports:
+    - name: service
+      port: {{ .Values.ports.developer }}
+      targetPort: service
+      protocol: TCP
+    - name: metrics
+      port: {{ .Values.metricsPorts.developer }}
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    component: developer
