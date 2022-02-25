@@ -43,6 +43,8 @@ pxc:
     max_user_connections=9000
     slow_query_log=ON
     long_query_time=10
+    sync_binlog=0
+    max_binlog_size=10M
   resources:
     requests:
       cpu: 1000m
@@ -216,7 +218,7 @@ backup:
   imagePullSecrets: []
   # - name: private-registry-credentials
   pitr:
-    enabled: true
+    enabled: false
     storageName: qingstor
     timeBetweenUploads: 60
   storages:
