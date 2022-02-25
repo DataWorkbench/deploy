@@ -49,7 +49,7 @@ spec:
       containers:
         - name: db-ctrl-job
           image: {{ .Values.image.registry }}/dataomnis/flyway:{{- .Values.image.tag }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "flyway"
             - "-X"
