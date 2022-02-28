@@ -53,6 +53,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.account" . }}'
 - name: API_SERVER_ENGINE_MANAGER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
+- name: API_SERVER_DEVELOPER_ADDRESS
+  value: '{{ include "service.developer" . }}'
 {{- end -}}
 
 {{- define "jobmanager.link.services" -}}
