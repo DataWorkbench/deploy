@@ -127,32 +127,6 @@ jobmanager:
   envs:
     JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
 
-# logmanager configuration
-logmanager:
-  envs:
-    LOG_MANAGER_TRACER_SERVICE_NAME: "logmanager"
-    LOG_MANAGER_HDFS_SERVER_USER_NAME: "root"
-    LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE: 1024
-
-# notifier configuration
-notifier:
-  envs:
-    NOTIFIER_NF_CONFIG_CHANNEL: "SMTPChannel"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_ACCESS_KEY_ID: "IKSMDBWVIECPIVNDYZAB"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_SECRET_ACCESS_KEY: "JnEco2qZ6EvXt89mJpCVdkBoc5AwPA0unrkFkOxq"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_HOST: "api.alphacloud.com"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_PORT: 7777
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_PROTOCOL: "http"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_URI: "/iaas"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_HOST: "smtp.163.com"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PORT: 25
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_USER_NAME: "xiaobai417sos@163.com"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PASSWORD: "82717785"
-
-# observer configuration
-observer:
-  envs: {}
-
 # resourcemanager configuration
 resourcemanager:
   envs:
@@ -225,16 +199,17 @@ ports:
   notifier: 9113
   enginemanager: 9114
   developer: 9119
+  developerHttp: 9219
 
-metricsPorts: # key must be same as component in deployment
+# add serviceMonitor for service(key must be same as component in deployment);
+# the serviceMonitor would be auto created if add the metricsPorts of service below.
+metricsPorts:
   spacemanager: 9201
   scheduler: 9203
   jobmanager: 9205
   account: 9210
   resourcemanager: 9211
-  notifier: 9213
   enginemanager: 9214
-  developer: 9219
 
 serviceMonitor:
   enabled: true
@@ -245,5 +220,5 @@ serviceMonitor:
   port: metrics
   interval: 30s
 
-web:
+webservice:
   enabled: false

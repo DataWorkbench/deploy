@@ -67,12 +67,12 @@ spec:
           - name: ACCOUNT_IAAS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: access_key_id
           - name: ACCOUNT_IAAS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: secret_access_key
           {{- range $ename, $evalue := .Values.account.envs }}
           - name: {{ $ename }}

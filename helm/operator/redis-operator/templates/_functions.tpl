@@ -19,6 +19,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 {{- end }}
 {{- end }}
 
-{{ define "image" -}}
-{{ printf "%s/%s:%s" .Values.imageRegistry .Values.image .Values.tag }}
+{{ define "operator.image" -}}
+{{ printf "%s/%s:%s" .Values.image.registry .Values.image.operator }}
 {{- end }}

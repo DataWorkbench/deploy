@@ -18,10 +18,10 @@ spec:
     storage: {{ $.Values.persistent.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ $.Values.persistentVolume.reclaimPolicy }}
+  persistentVolumeReclaimPolicy: {{ $.Values.persistent.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ $.Values.persistentVolume.etcdHome }}/{{ $.Release.Name }}
+    path: {{ $.Values.persistent.localHome }}/{{ $.Release.Name }}
   nodeAffinity:
     required:
       nodeSelectorTerms:

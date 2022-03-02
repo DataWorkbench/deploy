@@ -34,6 +34,8 @@ metadata:
     nginx.org/client-max-body-size: "100m"
     # for ingress-nginx
     nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    # support websocket
+    nginx.org/websocket-services: {{ include "dataomnis.fullname" . }}-apiglobal
 spec:
   ingressClassName: nginx
   rules:

@@ -12,8 +12,10 @@ finalizers:
 nameOverride: ""
 fullnameOverride: ""
 
-imageResitry: ""
-image: percona/percona-xtradb-cluster-operator
+image:
+  resitry: ""
+  operator: percona/percona-xtradb-cluster-operator
+  pullSecrets: []
 
 pause: false
 allowUnsafeConfigurations: false
@@ -27,7 +29,6 @@ pxc:
   size: 3
   image: percona/percona-xtradb-cluster:8.0.23-14.1
   autoRecovery: true
-  imagePullSecrets: []
   annotations: {}
   labels: {}
   readinessDelaySec: 15
@@ -106,7 +107,6 @@ haproxy:
   enabled: true
   size: 3
   image: ""
-  imagePullSecrets: []
   annotations: {}
   #  iam.amazonaws.com/role: role-arn
   labels: {}
@@ -150,7 +150,6 @@ proxysql:
   enabled: false
   size: 3
   image: ""
-  imagePullSecrets: []
   annotations: {}
   labels: {}
   readinessDelaySec: 15
@@ -213,7 +212,6 @@ pmm:
 backup:
   enabled: true
   image: ""
-  imagePullSecrets: []
   # - name: private-registry-credentials
   pitr:
     enabled: true

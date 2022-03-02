@@ -7,10 +7,11 @@ fullnameOverride: ""
 
 replicaCount: 1
 
-imageRegistry: ""
-image: percona/percona-xtradb-cluster-operator:1.9.0
-imagePullPolicy: IfNotPresent
-imagePullSecrets: []
+image:
+  registry: ""
+  operator: percona/percona-xtradb-cluster-operator:1.9.0
+  pullPolicy: IfNotPresent
+  pullSecrets: []
 
 # set if you want to specify a namespace to watch
 # defaults to `.Release.namespace` if left blank

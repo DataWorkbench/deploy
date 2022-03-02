@@ -7,16 +7,15 @@ nodes:    # The length of nodes is equal to etcd-cluster replicaCount
   - "worker-s002"
   - "worker-s003"
 
-imageRegistry: docker.io
-image: bitnami/etcd:3.5.1-debian-10-r88
-imagePullPolicy: IfNotPresent
-
-persistentVolume:
-  reclaimPolicy: Retain
-  etcdHome: /data/dataomnis
+image:
+  registry: docker.io
+  etcd: bitnami/etcd:3.5.1-debian-10-r88
+  pullPolicy: IfNotPresent
 
 persistent:
   size: 10Gi
+  localHome: /data/dataomnis
+  reclaimPolicy: Retain
   accessModes: ["ReadWriteOnce"]
 
 

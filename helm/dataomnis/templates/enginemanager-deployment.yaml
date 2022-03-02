@@ -62,12 +62,12 @@ spec:
           - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: access_key_id
           - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: secret_access_key
           - name: ENGINE_MANAGER_FLINK_DOMAIN
             value: {{ .Values.domain | quote }}

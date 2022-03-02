@@ -25,10 +25,10 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{- define "sentinel.image" -}}
-{{- if .Values.imageRegistry -}}
-{{- .Values.imageRegistry }}/library/{{- .Values.sentinel.image }}:{{- .Chart.AppVersion }}
+{{- if .Values.image.registry -}}
+{{- .Values.image.registry }}/library/{{- .Values.image.sentinel }}:{{- .Chart.AppVersion }}
 {{- else -}}
-{{- .Values.sentinel.image }}:{{- .Chart.AppVersion }}
+{{- .Values.image.sentinel }}:{{- .Chart.AppVersion }}
 {{- end -}}
 {{- end -}}
 
@@ -41,10 +41,10 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{- define "redis.image" -}}
-{{- if .Values.imageRegistry -}}
-{{- .Values.imageRegistry }}/library/{{- .Values.redis.image }}:{{- .Chart.AppVersion }}
+{{- if .Values.image.registry -}}
+{{- .Values.image.registry }}/library/{{- .Values.image.redis }}:{{- .Chart.AppVersion }}
 {{- else -}}
-{{- .Values.redis.image }}:{{- .Chart.AppVersion }}
+{{- .Values.image.redis }}:{{- .Chart.AppVersion }}
 {{- end -}}
 {{- end -}}
 

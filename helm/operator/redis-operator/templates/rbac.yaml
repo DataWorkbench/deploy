@@ -6,7 +6,7 @@ metadata:
   labels:
 {{ include "common-labels" . | indent 4 }}
 imagePullSecrets:
-{{ toYaml .Values.rbac.imagePullSecrets | indent 2 }}
+{{ toYaml .Values.image.pullSecrets | indent 2 }}
 ---
 apiVersion: rbac.authorization.k8s.io/{{ .Values.rbac.apiVersion }}
 kind: ClusterRole

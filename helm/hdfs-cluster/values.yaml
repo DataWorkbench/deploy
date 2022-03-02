@@ -6,8 +6,10 @@ storageClass: ""
 
 hdfsHome: /data/dataomnis
 
-imageRegistry: dockerhub.databench.io
-image: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
+image:
+  registry: dockerhub.databench.io
+  hadoop: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
+  zookeeper: fastop/zookeeper:3.4.10
 
 nodes:
   - worker-s001
@@ -35,7 +37,6 @@ journalnode:
     reclaimPolicy: Retain
 
 zookeeper:
-  image: fastop/zookeeper:3.4.10
   quorum:
   nodes: []
   storage:

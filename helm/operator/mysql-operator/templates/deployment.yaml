@@ -25,14 +25,14 @@ spec:
         app.kubernetes.io/part-of: {{ include "pxc-operator.name" . }}
     spec:
       serviceAccountName: {{ include "pxc-operator.fullname" . }}
-    {{- with .Values.imagePullSecrets }}
+    {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           image: {{ include "pxc-operator.image" . }}
-          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: 8080
             name: metrics

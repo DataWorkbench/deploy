@@ -1,8 +1,11 @@
-imageRegitry: quay.io
-image: spotahome/redis-operator
-tag: v1.0.0
-pullPolicy: IfNotPresent
 podAnnotations: {}
+
+image:
+  regitry: quay.io
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  operator: spotahome/redis-operator:v1.0.0
+
 resources:
   requests:
     cpu: 10m
@@ -13,7 +16,6 @@ resources:
 rbac:
   install: true
   apiVersion: v1
-  imagePullSecrets: []
 monitoring:
   enabled: false
   serviceMonitor: false

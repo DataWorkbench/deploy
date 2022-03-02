@@ -69,7 +69,7 @@ spec:
       containers:
       - name: kubernetes-zookeeper
         #imagePullPolicy: Always
-        image: {{ .Values.imageRegistry }}/{{ .Values.zookeeper.image }}
+        image: {{ .Values.image.registry }}/{{ .Values.image.zookeeper }}
         resources:
           requests:
             memory: "200Mi"

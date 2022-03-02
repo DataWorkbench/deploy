@@ -1,6 +1,9 @@
 # Default values for redis-cluster.
 
-imageRegistry:
+image:
+  registry: ""
+  sentinel: redis
+  redis: redis
 
 sentinel:
   image: redis

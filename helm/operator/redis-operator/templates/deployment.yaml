@@ -21,13 +21,17 @@ spec:
 {{ toYaml .Values.podAnnotations | indent 8 }}
 {{- end }}
     spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+    {{- end }}
 {{- if .Values.rbac.install }}
       serviceAccountName: {{ include "name" . | quote }}
 {{- end }}
       containers:
       - name: {{ include "name" . | quote }}
-        image: {{ include "image" . | quote }}
-        imagePullPolicy: {{ .Values.pullPolicy }}
+        image: {{ include "operator.image" . | quote }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:

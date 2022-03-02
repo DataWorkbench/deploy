@@ -40,11 +40,11 @@ spec:
         ports:
           - name: service
             containerPort: {{ .Values.ports.developer }}
-          - name: metrics
-            containerPort: {{ .Values.metricsPorts.developer }}
+          - name: httpService
+            containerPort: {{ .Values.ports.developerHttp }}
         env:
           - name: DEVELOPER_HTTP_PORT
-            value: "{{ .Values.metricsPorts.developer }}"
+            value: "{{ .Values.ports.developerHttp }}"
           - name: DEVELOPER_GRPC_PORT
             value: "{{ .Values.ports.developer }}"
 {{ include "developer.link.services" . | indent 10 }}
@@ -55,7 +55,7 @@ spec:
         readinessProbe:
           httpGet:
             path: /actuator/health
-            port: {{ .Values.metricsPorts.developer }}
+            port: {{ .Values.ports.developerHttp }}
           {{- if .Values.developer.readinessProbe }}
           periodSeconds: {{ .Values.developer.readinessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.developer.readinessProbe.initialDelaySeconds }}
@@ -66,7 +66,7 @@ spec:
         livenessProbe:
           httpGet:
             path: /actuator/health
-            port: {{ .Values.metricsPorts.developer }}
+            port: {{ .Values.ports.developerHttp }}
           {{- if .Values.developer.livenessProbe }}
           periodSeconds: {{ .Values.developer.livenessProbe.periodSeconds }}
           initialDelaySeconds: {{ .Values.developer.livenessProbe.initialDelaySeconds }}
