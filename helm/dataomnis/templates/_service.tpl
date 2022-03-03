@@ -74,6 +74,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.jobmanager" . }}'
 - name: SCHEDULER_DEVELOPER_ADDRESS
   value: '{{ include "service.developer" . }}'
+- name: SCHEDULER_SPACE_MANAGER_ADDRESS
+  value: '{{- include "service.spacemanager" . }}'
 {{- end -}}
 
 
