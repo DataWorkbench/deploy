@@ -20,7 +20,7 @@ persistent:
 
 
 ## @param initialClusterState Initial cluster state. Allowed values: 'new' or 'existing'
-## If this values is not set, the default values below are set:
+## If this values is not set,s the default values below are set:
 ## - 'new': when installing the chart ('helm install ...')
 ## - 'existing': when upgrading the chart ('helm upgrade ...')
 ##

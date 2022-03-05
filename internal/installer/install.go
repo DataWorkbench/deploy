@@ -15,43 +15,9 @@ const (
 	DefaultOperatorNamespace = "dataomnis-operator"
 	DefaultSystemNamespace   = "dataomnis-system"
 
-	// operators helm chart name
-	HdfsOperatorChart = "hdfs-operator-0.1.0.tgz"
-	RedisOperatorChart = "redis-operator-3.1.0.tgz"
-	MysqlOperatorChart = "pxc-operator-1.9.1.tgz"
-
-	// operators release name
-	HdfsOperatorName = "hdfs-operator"
-	RedisOperatorName = "redis-operator"
-	MysqlOperatorName = "mysql-operator"
-
-
 	// flink helm chart name
 	FlinkChart = "flink-0.1.6.tgz"
 )
-
-func (c Config) operatorValuesAdaptor() map[string]interface{} {
-	values := map[string]interface{}{
-		"image": c.Image,
-	}
-	return values
-}
-
-func (c Config) etcdValuesAdaptor() (string, error) {
-	values := map[string]interface{}{}
-	if len(c.EtcdCluster.Nodes) > 0 {
-		values["nodes"] = c.EtcdCluster.Nodes
-	} else {
-		values["nodes"] = c.Nodes[:3]
-	}
-
-	image := c.Image
-	image.overwritten(c.EtcdCluster.Image)
-	values["image"] = image
-
-
-
-}
 
 func InitConfiguration() {
 

@@ -4,8 +4,51 @@ import (
 	"github.com/DataWorkbench/common/lib/iaas"
 )
 
-// global config from dataomnis-conf.yaml
-type Dataomnis struct {
+type ServiceConfig struct {
+	LogLevel         int8 `json:"logLevel,omitempty" yaml:"logLevel"`
+	GrpcLogLevel     int8 `json:"grpcLogLevel,omitempty" yaml:"grpcLogLevel"`
+	GrpcLogVerbosity int8 `json:"grpcLogVerbosity,omitempty" yaml:"grpcLogVerbosity"`
+
+	ServiceName    bool `json:"serviceName,omitempty" yaml:"serviceName"`
+	MetricsEnabled bool `json:"metricsEnabled,omitempty" yaml:"metricsEnabled"`
+
+	WorkloadConfig `json:",omitempty,inline" yaml:",inline"`
+
+	Envs []map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
+}
+
+type Webservice struct {
+	Enabled bool `yaml:"enabled"`
+}
+
+type ApiGlobalConfig struct {
+	Enabled       bool     `yaml:"enabled" yaml:"enabled"`
+	Regions       []Region `json:"regions,omitempty" yaml:"regions,flow"`
+	ServiceConfig `json:",,omitemptyinline" yaml:",inline"`
+}
+
+type Region struct {
+	Hosts string `json:"hosts,omitempty" yaml:"hosts"`
+	EnUs  string `json:"en_us,omitempty" yaml:"en_us_name"`
+	ZhCn  string `json:"zh_cn,omitempty" yaml:"zh_cn_name"`
+}
+
+type ServiceMonitorConfig struct {
+	Enabled  bool   `yaml:"enabled"`
+	Interval string `yaml:"interval"`
+}
+
+type MysqlClientConfig struct {
+	LogLevel        int8   `json:"logLevel,omitempty" yaml:"logLevel"`
+	MaxIdleConn     int8   `json:"maxIdleConn,omitempty" yaml:"maxIdleConn"`
+	MaxOpenConn     int8   `json:"maxOpenConn,omitempty" yaml:"maxOpenConn"`
+	ConnMaxLifetime string `json:"connMaxLifetime,omitempty" yaml:"connMaxLifetime"`
+	SlowTshreshold  string `json:"slowTshreshold,omitempty" yaml:"slowTshreshold"`
+}
+
+type DataomnisChart struct {
+	ChartMeta `json:",inline" yaml:",inline"`
+
 	// dataomnis version
 	Version string `json:"version" yaml:"version"`
 
@@ -34,17 +77,4 @@ type Dataomnis struct {
 
 	Jaeger         Workload             `json:"jaeger" yaml:"jaeger"`
 	ServiceMonitor ServiceMonitorConfig `json:"serviceMonitor" yaml:"serviceMonitor"`
-}
-
-// overwritten by global configuration
-func (i ImageConfig) overwritten(source ImageConfig) {
-	if source.Registry != "" {
-		i.Registry = source.Registry
-	}
-	if len(source.PullSecrets) > 0 {
-		i.PullSecrets = source.PullSecrets
-	}
-	if source.PullPolicy != "" {
-		i.PullPolicy = source.PullPolicy
-	}
 }
