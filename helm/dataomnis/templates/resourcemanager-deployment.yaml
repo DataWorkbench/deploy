@@ -55,7 +55,7 @@ spec:
                 name: {{ .Values.mysql.secretName }}
                 key: root
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
-          - name: {{ $ename }}
+          - name: RESOURCE_MANAGER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:

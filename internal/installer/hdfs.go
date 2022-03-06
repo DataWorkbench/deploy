@@ -2,36 +2,27 @@ package installer
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 )
 
 const RoleNameNode = "namenode"
-var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
-
 
 // common config for datanode / journalnode / namenode / zookeeper
 type HdfsNodeConfig struct {
-	Nodes        []string           `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-	LocalStorage LocalStorageConfig `json:"storage,omitempty" yaml:"storage,omitempty"`
+	// alias for Persistent
+	Storage PersistentConfig `json:"storage,omitempty" yaml:"Persistent,omitempty"`
 }
 
-func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsChart, role string) error {
-	if node.LocalStorage.Size != "" {
-		// update storage.capacity from storage.size
-		node.LocalStorage.Capacity = node.LocalStorage.Size
-		node.LocalStorage.Size = ""
-	}
-
-	if len(node.Nodes) < 3 {
-		if len(c.values.Nodes) < 3 {
+func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsValuesConfig, role string) error {
+	if len(node.Storage.LocalPv.Nodes) < 3 {
+		if len(c.Nodes) < 3 {
 			return LeastNodeErr
 		}
 
 		if role == RoleNameNode {
-			node.Nodes = c.values.Nodes
+			node.Storage.LocalPv.Nodes = c.Nodes
 		} else {
-			node.Nodes = c.values.Nodes[:2]
+			node.Storage.LocalPv.Nodes = c.Nodes[:2]
 		}
 	}
 	return nil
@@ -39,7 +30,7 @@ func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsChart, role string) error 
 
 // HdfsValuesConfig for hdfs-cluster
 type HdfsValuesConfig struct {
-	ValuesConfig `json:",inline" yaml:",inline"`
+	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Nodes []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
 
@@ -66,7 +57,7 @@ type HdfsChart struct {
 }
 
 // update each field value from global Config if that is ZERO
-func (h HdfsChart) updateFromConfig(c Config) error {
+func (h HdfsChart) updateConfig(c Config) error {
 	if c.Image != nil {
 		if h.values.Image == nil {
 			h.values.Image = &ImageConfig{}
@@ -79,16 +70,16 @@ func (h HdfsChart) updateFromConfig(c Config) error {
 
 	// update datanode / namenode / journalnode / zookeeper conf
 	var err error
-	if err = h.values.Datanode.updateFromHdfsConfig(h, ""); err != nil {
+	if err = h.values.Datanode.updateFromHdfsConfig(h.values, ""); err != nil {
 		return err
 	}
-	if err = h.values.Journalnode.updateFromHdfsConfig(h, ""); err != nil {
+	if err = h.values.Journalnode.updateFromHdfsConfig(h.values, ""); err != nil {
 		return err
 	}
-	if err = h.values.Namenode.updateFromHdfsConfig(h, RoleNameNode); err != nil {
+	if err = h.values.Namenode.updateFromHdfsConfig(h.values, RoleNameNode); err != nil {
 		return err
 	}
-	err = h.values.Zookeeper.updateFromHdfsConfig(h, "")
+	err = h.values.Zookeeper.updateFromHdfsConfig(h.values, "")
 	return err
 }
 

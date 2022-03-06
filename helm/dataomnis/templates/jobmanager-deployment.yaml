@@ -60,7 +60,7 @@ spec:
                 key: root
 {{ include "jobmanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.jobmanager.envs }}
-          - name: {{ $ename }}
+          - name: JOB_MANAGER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         volumeMounts:

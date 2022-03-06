@@ -49,7 +49,7 @@ spec:
             value: "{{ .Values.ports.developer }}"
 {{ include "developer.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.developer.envs }}
-          - name: {{ $ename }}
+          - name: DEVELOPER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:

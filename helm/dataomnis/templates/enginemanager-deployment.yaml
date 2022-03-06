@@ -78,20 +78,20 @@ spec:
           - name: ENGINE_MANAGER_FLINK_IMAGE_REPO
             value: "{{- .Values.image.registry }}/dataomnis/flink"
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
-          - name: {{ $ename }}
+          - name: ENGINE_MANAGER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         volumeMounts:
           - name: dataomnis-config
             mountPath: "/etc/dataomnis"
             readOnly: true
-         {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+         {{- if .Values.enginemanager.envs.KUBE_CONF_PATH }}
           - name: kube-config-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+            mountPath: {{ .Values.enginemanager.envs.KUBE_CONF_PATH }}
             readOnly: true
         {{- end }}
           - name: helm-repo-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+            mountPath: {{ .Values.enginemanager.envs.HELM_REPOSITORY_CACHE }}
             readOnly: true
         readinessProbe:
           exec:
@@ -120,7 +120,7 @@ spec:
             items:
               - key: "config.yaml"
                 path: "common-config.yaml"
-        {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+        {{- if .Values.enginemanager.envs.KUBE_CONF_PATH }}
         - name: kube-config-volume
           hostPath:
             path: {{ .Values.enginemanager.kubeConfigPath }}

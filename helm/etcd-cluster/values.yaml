@@ -2,11 +2,6 @@
 
 replicaCount: 3
 
-nodes:    # The length of nodes is equal to etcd-cluster replicaCount
-  - "worker-s001"
-  - "worker-s002"
-  - "worker-s003"
-
 image:
   registry: docker.io
   etcd: bitnami/etcd:3.5.1-debian-10-r88
@@ -14,9 +9,13 @@ image:
 
 persistent:
   size: 10Gi
-  localHome: /data/dataomnis
   reclaimPolicy: Retain
-  accessModes: ["ReadWriteOnce"]
+  localPv:
+    home: /data/dataomnis
+    nodes:  # The length of nodes is equal to etcd-cluster replicaCount
+      - "worker-s001"
+      - "worker-s002"
+      - "worker-s003"
 
 
 ## @param initialClusterState Initial cluster state. Allowed values: 'new' or 'existing'

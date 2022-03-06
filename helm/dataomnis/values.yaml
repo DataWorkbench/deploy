@@ -80,27 +80,27 @@ apiglobal:
         zh_cn: "开发测试区"
         en_us: "testing"
   envs:
-    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
-    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
+    HTTP_SERVER_READ_TIMEOUT: 30s
+    HTTP_SERVER_WRITE_TIMEOUT: 30s
+    HTTP_SERVER_DLE_TIMEOUT: 30s
+    HTTP_SERVER_EXIT_TIMEOUT: 5m
+    TRACER_SERVICE_NAME: apiglobal
 
 # apiserver configuration
 apiserver:
   envs:
-    API_SERVER_READ_TIMEOUT: 30s
-    API_SERVER_WRITE_TIMEOUT: 30s
-    API_SERVER_DLE_TIMEOUT: 30s
-    API_SERVER_EXIT_TIMEOUT: 5m
-    API_SERVER_TRACER_SERVICE_NAME: "apiserver"
-    API_SERVER_REGION_ID: "testing"
+    READ_TIMEOUT: 30s
+    WRITE_TIMEOUT: 30s
+    DLE_TIMEOUT: 30s
+    EXIT_TIMEOUT: 5m
+    TRACER_SERVICE_NAME: "apiserver"
+    REGION_ID: "testing"
 
 # account configuration
 account:
   envs:
-    ACCOUNT_TRACER_SERVICE_NAME: "account"
-    ACCOUNT_SOURCE: "qingcloud"
+    TRACER_SERVICE_NAME: "account"
+    SOURCE: "qingcloud"
 
 # enginemanager configuration
 enginemanager:
@@ -108,44 +108,45 @@ enginemanager:
   helmRepoPath: "/root/.cache/helm/repository"
   kubeConfigPath: "/root/.kube/config"
   envs:
-    ENGINE_MANAGER_LOG_LEVEL: 1
-    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
-    ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
-    ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
-    ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
-    ENGINE_MANAGER_HELM_DRIVER: ""
-    ENGINE_MANAGER_HELM_DEBUG: false
-    ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
+    LOG_LEVEL: 1
+    GRPC_LOG_LEVEL: 1
+    TRACER_SERVICE_NAME: "enginemanager"
 
-    ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
-    ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-    ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
-    ENGINE_MANAGER_FLINK_ENABLE_MULTUS: false
+    HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
+    HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
+    HELM_DRIVER: ""
+    HELM_DEBUG: false
+    HELM_QUERY_STATUS_DURATION: 10
+
+    FLINK_REST_SERVICE_PORT: "8081"
+    FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
+    FLINK_INGRESS_CLASS: "nginx"
+    FLINK_ENABLE_MULTUS: false
 
 # jobmanager configuration
 jobmanager:
   envs:
-    JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
+    TRACER_SERVICE_NAME: "jobmanager"
 
 # resourcemanager configuration
 resourcemanager:
   envs:
-    RESOURCE_MANAGER_HADOOP_CONF_DIR: /etc/hadoop
-    RESOURCE_MANAGER_TRACER_SERVICE_NAME: "resourcemanager"
+    HADOOP_CONF_DIR: /etc/hadoop
+    TRACER_SERVICE_NAME: "resourcemanager"
 
 # scheduler configuration
 scheduler:
   envs:
-    SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
-    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
+    TRACER_SERVICE_NAME: "scheduler"
+    ETCD_DIAL_TIMEOUT: 5s
 
 # spacemanager configuration
 spacemanager:
   envs:
-    SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
-    SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
-    SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
-    SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
+     TRACER_SERVICE_NAME: "spacemanager"
+     ETCD_DIAL_TIMEOUT: 5s
+     CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
+     CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
 
 # zeppelin configuration
 zeppelin:

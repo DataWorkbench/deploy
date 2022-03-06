@@ -19,29 +19,33 @@ nodes:
 namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
-  nodes: []
   storage:
-    capacity: 10Gi
+    size: 10Gi
     reclaimPolicy: Retain
+    localPv:
+      nodes: []
 
 datanode:
-  nodes: []
   storage:
-    capacity: 50Gi
+    size: 50Gi
     reclaimPolicy: Retain
+    localPv:
+      nodes: []
 
 journalnode:
-  nodes: []
   storage:
-    capacity: 10Gi
+    size: 10Gi
     reclaimPolicy: Retain
+    localPv:
+      nodes: []
 
 zookeeper:
   quorum:
-  nodes: []
   storage:
-    capacity: 1Gi
+    size: 1Gi
     reclaimPolicy: Retain
+    localPv:
+      nodes: []
 
 yarn:
   nmReplicas: ""  #  fill if you need to deploy yarn

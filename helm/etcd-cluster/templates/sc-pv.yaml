@@ -1,13 +1,13 @@
 {{ $fullname := include "etcd-cluster.fullname" . }}
 
-{{- if .Values.nodes }}
+{{- if .Values.persistent.localPv.nodes }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: {{ $fullname }}-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- range $node := .Values.nodes }}
+{{- range $node := .Values.persistent.localPv.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -21,7 +21,7 @@ spec:
   persistentVolumeReclaimPolicy: {{ $.Values.persistent.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ $.Values.persistent.localHome }}/{{ $.Release.Name }}
+    path: {{ $.Values.persistent.localPv.home }}/{{ $.Release.Name }}
   nodeAffinity:
     required:
       nodeSelectorTerms:

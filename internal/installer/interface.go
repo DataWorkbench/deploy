@@ -2,6 +2,7 @@ package installer
 
 import v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+// Chart is the proxy of helm chart that with the Values Configuration.
 // helm chart interface
 type Chart interface {
 	// update each field value from global Config if that is ZERO

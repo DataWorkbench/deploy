@@ -64,7 +64,7 @@ spec:
                 key: root
 {{ include "spacemanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
-          - name: {{ $ename }}
+          - name: SPACE_MANAGER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:

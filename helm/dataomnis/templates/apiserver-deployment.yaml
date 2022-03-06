@@ -52,7 +52,7 @@ spec:
               value: "0.0.0.0:{{ .Values.ports.apiserver }}"
 {{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
-            - name: {{ $ename }}
+            - name: API_SERVER_{{ $ename }}
               value: {{ $evalue | quote }}
             {{- end }}
           readinessProbe:

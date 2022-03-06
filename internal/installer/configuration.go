@@ -1,48 +1,68 @@
 package installer
 
 import (
+	"errors"
+	"fmt"
 	v1 "k8s.io/api/core/v1"
 )
+
+var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
 
 // ***************************************************************
 // K8s Configuration Zone
 // ***************************************************************
-
-type ValuesConfig struct {
-	Image          *ImageConfig `json:"image,inline" yaml:"image,inline"`
-	WorkloadConfig `json:",inline" yaml:",inline"`
-}
 
 type ImageConfig struct {
 	// TODO: check pull secrets
 	Registry    string   `json:"registry,omitempty" yaml:"registry"`
 	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecret"`
 	PullPolicy  string   `json:"pullPolicy,omitempty" yaml:"pullPolicy"`
+
+	Tag string `json:",omitempty" yaml:"-"`
 }
 
 // update echo field-value from Config
-func (i ImageConfig) updateFromConfig(source *ImageConfig) {
+func (i *ImageConfig) updateFromConfig(source *ImageConfig) {
 	if source == nil {
 		return
 	}
-	if source.Registry != "" {
+	if i.Registry == "" && source.Registry != "" {
 		i.Registry = source.Registry
 	}
-	if len(source.PullSecrets) > 0 {
+	if len(i.PullSecrets) == 0 && len(source.PullSecrets) > 0 {
 		i.PullSecrets = source.PullSecrets
 	}
-	if source.PullPolicy != "" {
+	if i.PullPolicy == "" && source.PullPolicy != "" {
 		i.PullPolicy = source.PullPolicy
 	}
 }
 
-type StorageConfig struct {
-	Size string `json:"size,omitempty" yaml:"size,omitempty"`
+type LocalPvConfig struct {
+	Nodes []string `json:"nodes" yaml:"-"`
+	Home  string   `json:"home" yaml:"-"`
 }
 
-// k8s workload configurations
+type PersistentConfig struct {
+	// for local pv, eg: 10Gi
+	Size    string         `json:"size,omitempty" yaml:"size,omitempty"`
+	LocalPv *LocalPvConfig `json:"localPv,omitempty" yaml:"-"`
+}
+
+func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) error {
+	// TODO: check if localPv exist and start with localPvHome
+	p.LocalPv.Home = fmt.Sprintf(LocalHomeFmt, localPvHome)
+	if len(p.LocalPv.Nodes) == 0 {
+		if len(nodes) < 3 {
+			return LeastNodeErr
+		}
+		p.LocalPv.Nodes = nodes
+	}
+	return nil
+}
+
+// k8s workload(a deployment / statefulset / .. in a Chart) configurations
 type WorkloadConfig struct {
-	ReplicaCount   int8 `json:"replicaCount,omitempty" yaml:"replicaCount"`
+	Replicas       int8 `json:"replicas,omitempty" yaml:"replicas,"`
 	UpdateStrategy int8 `json:"updateStrategy,omitempty" yaml:"updateStrategy"`
 
 	ReadinessProbe v1.Probe `json:"readinessProbe,omitempty" yaml:"readinessProbe"`
@@ -50,22 +70,7 @@ type WorkloadConfig struct {
 
 	Resources v1.ResourceRequirements `json:"resources,omitempty" yaml:"resources"`
 
-	// for local pv, eg: 10Gi
-	Storage StorageConfig `json:"storage,omitempty" yaml:"storage"`
-}
-
-// ***************************************************************
-// Dependence-Service Configuration Zone
-// ***************************************************************
-
-type LocalStorageConfig struct {
-	StorageConfig `json:",inline,omitempty" yaml:",inline,omitempty"`
-
-	// for etcd-cluster
-	LocalHome string `json:"localHome,omitempty" yaml:"-"`
-
-	// for hdfs
-	Capacity string `json:"capacity,omitempty" yaml:"-"`
+	Persistent PersistentConfig `json:"persistent,omitempty" yaml:"persistent"`
 }
 
 // ***************************************************************
@@ -86,8 +91,8 @@ type Config struct {
 	Dataomnis DataomnisChart `yaml:"dataomnis"`
 
 	// dependent service
-	Etcd  EtcdValuesConfig  `yaml:"etcdCluster"`
-	Hdfs  HdfsValuesConfig  `yaml:"hdfsCluster"`
-	Mysql MysqlChart `yaml:"mysqlCluster"`
-	Redis RedisChart `yaml:"redisCluster"`
+	Etcd  EtcdValuesConfig `yaml:"etcdCluster"`
+	Hdfs  HdfsValuesConfig `yaml:"hdfsCluster"`
+	Mysql MysqlChart       `yaml:"mysqlCluster"`
+	Redis RedisChart       `yaml:"redisCluster"`
 }

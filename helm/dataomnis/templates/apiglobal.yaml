@@ -50,7 +50,7 @@ spec:
             - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
               value: '{{ include "service.account" . }}'
             {{- range $ename, $evalue := .Values.apiglobal.envs }}
-            - name: {{ $ename }}
+            - name: API_GLOBAL_{{ $ename }}
               value: {{ $evalue | quote }}
             {{- end }}
           readinessProbe:

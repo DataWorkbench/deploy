@@ -31,8 +31,10 @@ pxc:
   autoRecovery: true
   annotations: {}
   labels: {}
-  readinessDelaySec: 15
-  livenessDelaySec: 300
+  readinessProbe:
+    initialDelaySeconds: 15
+  livenessProbe:
+    initialDelaySeconds: 300
   forceUnsafeBootstrap: false
 #    innodb_log_file_size=2G
 #    innodb_buffer_pool_size=8G

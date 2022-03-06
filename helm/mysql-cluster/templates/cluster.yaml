@@ -59,8 +59,8 @@ spec:
     image: {{ include "pxc-db.pxc-image" . }}
     imagePullPolicy: IfNotPresent
     autoRecovery: {{ $pxc.autoRecovery }}
-    readinessDelaySec: {{ $pxc.readinessDelaySec }}
-    livenessDelaySec: {{ $pxc.livenessDelaySec }}
+    readinessDelaySec: {{ $pxc.readinessProbe.initialDelaySeconds }}
+    livenessDelaySec: {{ $pxc.livenessProbe.initialDelaySeconds }}
     forceUnsafeBootstrap: {{ $pxc.forceUnsafeBootstrap }}
     {{- if $pxc.configuration }}
     configuration: |

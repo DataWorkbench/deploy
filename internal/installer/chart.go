@@ -12,7 +12,7 @@ type ChartMeta struct {
 
 	WaitingReady bool
 
-	values ValuesConfig
+	Image *ImageConfig `json:",omitempty"`
 }
 
 func NewChartMeta(chartName, releaseName string, waittingReady bool) *ChartMeta {
@@ -29,13 +29,17 @@ func (m *ChartMeta) setMeta(chartName, releaseName string, waittingReady bool) {
 	m.WaitingReady = waittingReady
 }
 
-func (m ChartMeta) updateFromConfig(config Config) error {
+func (m ChartMeta) updateFromConfig(c Config) error {
 	return nil
 }
 
 func (m ChartMeta) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
-	bytes, err := json.Marshal(m.values)
+	if m.Image == nil {
+		return v, nil
+	}
+
+	bytes, err := json.Marshal(m.Image)
 	if err != nil {
 		return v, err
 	}

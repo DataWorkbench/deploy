@@ -2,21 +2,19 @@ package installer
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 )
 
 type EtcdValuesConfig struct {
-	ValuesConfig `json:",inline" yaml:",inline"`
+	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Nodes      []string           `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-	Persistent LocalStorageConfig `json:"persistent" yaml:"storage"`
+	Nodes      []string         `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
+	Persistent PersistentConfig `json:"persistent" yaml:"persistent"`
 }
 
 // EtcdChart for etcd-cluster, implement Chart
 type EtcdChart struct {
 	ChartMeta `json:",inline" yaml:",inline"`
-	values EtcdValuesConfig `json:"config,omitempty" yaml:"config,omitempty"`
+	values    *EtcdValuesConfig `json:"config,omitempty" yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO
@@ -28,17 +26,7 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 		e.values.Image.updateFromConfig(c.Image)
 	}
 
-	// TODO: check if localPv exist and start with c.LocalPVHome
-	e.values.Persistent.LocalHome = fmt.Sprintf(LocalHomeFmt, c.LocalPVHome)
-
-	if e.values.Nodes == nil {
-		if len(c.Nodes) < 3 {
-			return errors.New("at least 3 nodes are required for etcd-cluster")
-		}
-		// Default: select pre-three nodes to install etcd-cluster
-		e.values.Nodes = c.Nodes[:3]
-	}
-	return nil
+	return e.values.Persistent.updateLocalPv(c.LocalPVHome, e.values.Nodes)
 }
 
 func (e *EtcdChart) parseValues() (Values, error) {

@@ -7,7 +7,7 @@ metadata:
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
 
-{{- range $node := .Values.namenode.nodes }}
+{{- range $node := .Values.namenode.storage.localPv.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -15,7 +15,7 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-namenode-pv
 spec:
   capacity:
-    storage: {{ $.Values.namenode.storage.capacity }}
+    storage: {{ $.Values.namenode.storage.size }}
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: {{ $.Values.namenode.storage.reclaimPolicy }}
@@ -40,7 +40,7 @@ metadata:
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
 
-{{- $datanodes := coalesce .Values.datanode.nodes .Values.nodes }}
+{{- $datanodes := coalesce .Values.datanode.storage.localPv.nodes .Values.nodes }}
 {{- range $node := $datanodes }}
 ---
 apiVersion: v1
@@ -49,7 +49,7 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-datanode-pv
 spec:
   capacity:
-    storage: {{ $.Values.datanode.storage.capacity }}
+    storage: {{ $.Values.datanode.storage.size }}
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: {{ $.Values.datanode.storage.reclaimPolicy }}
@@ -74,7 +74,7 @@ metadata:
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
 
-{{- $journalnodes := coalesce .Values.journalnode.nodes .Values.nodes }}
+{{- $journalnodes := coalesce .Values.journalnode.storage.localPv.nodes .Values.nodes }}
 {{- range $node := $journalnodes }}
 ---
 apiVersion: v1
@@ -83,7 +83,7 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-journalnode-pv
 spec:
   capacity:
-    storage: {{ $.Values.journalnode.storage.capacity }}
+    storage: {{ $.Values.journalnode.storage.size }}
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: {{ $.Values.journalnode.storage.reclaimPolicy }}
@@ -118,7 +118,7 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-zookeeper-pv
 spec:
   capacity:
-    storage: {{ $.Values.zookeeper.storage.capacity }}
+    storage: {{ $.Values.zookeeper.storage.size }}
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: {{ $.Values.zookeeper.storage.reclaimPolicy }}

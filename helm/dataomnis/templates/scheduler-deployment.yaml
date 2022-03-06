@@ -60,7 +60,7 @@ spec:
                 key: root
 {{ include "scheduler.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.scheduler.envs }}
-          - name: {{ $ename }}
+          - name: SCHEDULER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
         readinessProbe:
