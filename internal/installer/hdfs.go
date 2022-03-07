@@ -13,7 +13,7 @@ type HdfsNodeConfig struct {
 	Storage PersistentConfig `json:"storage,omitempty" yaml:"Persistent,omitempty"`
 }
 
-func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsValuesConfig, role string) error {
+func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsConfig, role string) error {
 	if len(node.Storage.LocalPv.Nodes) < 3 {
 		if len(c.Nodes) < 3 {
 			return LeastNodeErr
@@ -28,8 +28,8 @@ func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsValuesConfig, role string)
 	return nil
 }
 
-// HdfsValuesConfig for hdfs-cluster
-type HdfsValuesConfig struct {
+// HdfsConfig for hdfs-cluster
+type HdfsConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Nodes []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
@@ -44,7 +44,7 @@ type HdfsValuesConfig struct {
 }
 
 // TODO: validate the yaml and nodes == 2 of namenode
-func (v HdfsValuesConfig) validate() error {
+func (v HdfsConfig) validate() error {
 	return nil
 }
 
@@ -53,7 +53,7 @@ func (v HdfsValuesConfig) validate() error {
 type HdfsChart struct {
 	ChartMeta
 
-	values HdfsValuesConfig
+	values HdfsConfig
 }
 
 // update each field value from global Config if that is ZERO

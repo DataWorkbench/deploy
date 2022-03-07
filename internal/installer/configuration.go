@@ -87,12 +87,12 @@ type Config struct {
 
 	Image *ImageConfig `yaml:"image"`
 
-	// dataomnis version
-	Dataomnis DataomnisChart `yaml:"dataomnis"`
-
 	// dependent service
-	Etcd  EtcdValuesConfig `yaml:"etcdCluster"`
-	Hdfs  HdfsValuesConfig `yaml:"hdfsCluster"`
-	Mysql MysqlChart       `yaml:"mysqlCluster"`
-	Redis RedisChart       `yaml:"redisCluster"`
+	Etcd  *EtcdConfig  `yaml:"etcdCluster"`
+	Hdfs  *HdfsConfig  `yaml:"hdfsCluster"`
+	Mysql *MysqlConfig `yaml:"mysqlCluster"`
+	Redis *RedisConfig `yaml:"redisCluster"`
+
+	// dataomnis version
+	Dataomnis DataomnisConfig `yaml:"dataomnis"`
 }

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 )
 
-// RedisValuesConfig for hdfs-cluster
-type RedisValuesConfig struct {
+// RedisConfig for hdfs-cluster
+type RedisConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Nodes []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
@@ -14,7 +14,7 @@ type RedisValuesConfig struct {
 }
 
 // TODO: validate the yaml and nodes == 3 by default
-func (v RedisValuesConfig) validate() error {
+func (v RedisConfig) validate() error {
 	return nil
 }
 
@@ -23,7 +23,7 @@ func (v RedisValuesConfig) validate() error {
 type RedisChart struct {
 	ChartMeta
 
-	values RedisValuesConfig
+	values RedisConfig
 }
 
 // update each field value from global Config if that is ZERO

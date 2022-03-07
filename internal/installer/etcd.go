@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-type EtcdValuesConfig struct {
+type EtcdConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Nodes      []string         `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
@@ -14,7 +14,7 @@ type EtcdValuesConfig struct {
 // EtcdChart for etcd-cluster, implement Chart
 type EtcdChart struct {
 	ChartMeta `json:",inline" yaml:",inline"`
-	values    *EtcdValuesConfig `json:"config,omitempty" yaml:"config,omitempty"`
+	values    *EtcdConfig `json:"config,omitempty" yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO

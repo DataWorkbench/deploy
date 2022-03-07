@@ -1,6 +1,8 @@
 package installer
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/DataWorkbench/common/lib/iaas"
 )
 
@@ -29,16 +31,49 @@ type Webservice struct {
 }
 
 type ApiGlobalConfig struct {
-	Enabled       bool     `yaml:"enabled" yaml:"enabled"`
-	Regions       []Region `json:"regions,omitempty" yaml:"regions,flow"`
-	ServiceConfig `json:",,omitemptyinline" yaml:",inline"`
+	Enabled bool     `yaml:"enabled" yaml:"enabled"`
+	Regions []Region `json:"-" yaml:"regions,flow,omitempty"`
+
+	RegionValues []map[string]RegionValue `json:"regions" yaml:"-"`
+
+	ServiceConfig `json:",omitempty,inline" yaml:",inline"`
 }
 
-type Region struct {
-	Hosts string `json:"hosts,omitempty" yaml:"hosts"`
-	EnUs  string `json:"en_us,omitempty" yaml:"en_us_name"`
-	ZhCn  string `json:"zh_cn,omitempty" yaml:"zh_cn_name"`
+func (a ApiGlobalConfig) updateRegion() {
+	for _, r := range a.Regions {
+		rv := RegionValue{
+			Host: r.Host,
+			Name: Names{
+				ZhCn: r.ZhCn,
+				EnUs: r.EnUs,
+			},
+		}
+		a.RegionValues = append(a.RegionValues, map[string]RegionValue{
+			r.EnUs: rv,
+		})
+	}
 }
+
+// Region for configurations, parse to RegionValue.
+type Region struct {
+	Host string `json:"host,omitempty" yaml:"host"`
+	EnUs  string `json:"en_us,omitempty" yaml:"enUsName"`
+	ZhCn  string `json:"zh_cn,omitempty" yaml:"zhCnName"`
+}
+// ***********************************************************
+
+// ***********************************************************
+// RegionValue for apiglobal values.yaml, updated from Region.
+type Names struct {
+	ZhCn string `json:"zh_cn" yaml:"-"`
+	EnUs string `json:"en_us" yaml:"-"`
+}
+
+type RegionValue struct {
+	Host string `json:"hosts" yaml:"-"`
+	Name Names  `json:"names"`
+}
+// ***********************************************************
 
 type ServiceMonitorConfig struct {
 	Enabled  bool   `yaml:"enabled"`
@@ -56,6 +91,18 @@ type MysqlClientConfig struct {
 	SlowTshreshold  string `json:"slowTshreshold,omitempty" yaml:"slowTshreshold,omitempty"`
 }
 
+type EtcdClientConfig struct {
+	Endpoint string `json:"endpoint" yaml:"-"`
+}
+
+type HdfsClientConfig struct {
+	ConfigmapName string `json:"configmapName" yaml:"-"`
+}
+
+type RedisClientConfig struct {
+	Address string `json:"address" yaml:"-"`
+}
+
 type DataomnisConfig struct {
 	// dataomnis version
 	Version string `json:"version" yaml:"version"`
@@ -64,10 +111,13 @@ type DataomnisConfig struct {
 	Port   string `json:"port"    yaml:"port,omitempty"`
 
 	// global configurations for all service as default
-	Image  ImageConfig   `json:"image,omitempty" yaml:"image,omitempty"`
+	Image  *ImageConfig  `json:"image,omitempty" yaml:"image,omitempty"`
 	Common ServiceConfig `json:"common,inline" yaml:",inline"`
 
 	MysqlClient MysqlClientConfig `json:"mysql"   yaml:"mysqlCluster"`
+	EtcdClient  EtcdClientConfig  `json:"etcd" yaml:"-"`
+	HdfsClient  HdfsClientConfig  `json:"hdfs" yaml:"-"`
+	RedisClient RedisClientConfig `json:"redis" yaml:"-"`
 
 	Iaas iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty"`
 
@@ -87,34 +137,35 @@ type DataomnisConfig struct {
 }
 
 type DataomnisChart struct {
-	ChartMeta `json:",inline" yaml:",inline"`
+	ChartMeta
 
-	// dataomnis version
-	Version string `json:"version" yaml:"version"`
+	values DataomnisConfig
+}
 
-	Domain string `json:"domain"  yaml:"domain"`
-	Port   string `json:"port"    yaml:"port"`
+// update each field value from global Config if that is ZERO
+func (d *DataomnisChart) updateFromConfig(c Config) {
+	if c.Image != nil {
+		if d.values.Image == nil {
+			d.values.Image = &ImageConfig{}
+		}
+		d.values.Image.updateFromConfig(c.Image)
+	}
+	d.values.Image.Tag = d.values.Version
 
-	// global configurations for all service as default
-	Image         ImageConfig `json:"image" yaml:"image"`
-	Workload      `json:",inline" yaml:",inline"`
-	ServiceConfig `json:",inline" yaml:",inline"`
+	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
+	d.values.EtcdClient.Endpoint = EtcdClusterName
+	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)
+	d.values.RedisClient.Address = fmt.Sprintf(RedisAddressFmt, RedisClusterName)
 
-	MysqlClient MysqlClientConfig `json:"mysql"   yaml:"mysqlCluster"`
+	d.values.Apiglobal.updateRegion()
+}
 
-	Iaas iaas.Config `json:"iaas" yaml:"iaas"`
-
-	WebService      Webservice      `json:"webservice" yaml:"webservice"`
-	Apiglobal       ApiGlobalConfig `json:"apiglobal" yaml:"apiGlobal"`
-	Apiserver       ServiceConfig   `json:"apiserver" yaml:"apiserver"`
-	Account         ServiceConfig   `json:"account" yaml:"account"`
-	Developer       ServiceConfig   `json:"developer" yaml:"developer"`
-	Enginemanager   ServiceConfig   `json:"enginemanager" yaml:"enginemanager"`
-	Jobmanager      ServiceConfig   `json:"jobmanager" yaml:"jobmanager"`
-	Resourcemanager ServiceConfig   `json:"resourcemanager" yaml:"resourcemanager"`
-	Scheduler       ServiceConfig   `json:"scheduler" yaml:"scheduler"`
-	Spacemanager    ServiceConfig   `json:"spacemanager" yaml:"spacemanager"`
-
-	Jaeger         Workload             `json:"jaeger" yaml:"jaeger"`
-	ServiceMonitor ServiceMonitorConfig `json:"serviceMonitor" yaml:"serviceMonitor"`
+func (d *DataomnisChart) parseValues() (Values, error) {
+	var v Values = map[string]interface{}{}
+	bytes, err := json.Marshal(d.values)
+	if err != nil {
+		return v, err
+	}
+	err = json.Unmarshal(bytes, &v)
+	return v, err
 }

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-type MysqlValuesConfig struct {
+type MysqlConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Nodes []string `json:"-" yaml:"nodes,omitempty"`
@@ -16,7 +16,7 @@ type MysqlValuesConfig struct {
 type MysqlChart struct {
 	ChartMeta `json:",inline" yaml:",inline"`
 
-	values *MysqlValuesConfig `json:"config,omitempty" yaml:"config,omitempty"`
+	values *MysqlConfig `json:"config,omitempty" yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO

@@ -26,3 +26,11 @@ const (
 	RedisClusterName = "redis-cluster"
 	MysqlClusterName = "mysql-cluster"
 )
+
+const (
+	MysqlExternalHostFmt = "%s-pxc-db-haproxy"
+    MysqlSecretNameFmt = "%s-pxc-db"
+    HdfsConfigMapFmt = "%s-common-config"
+    RedisAddressFmt = "rfs-%s"
+)
+
