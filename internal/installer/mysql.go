@@ -7,8 +7,6 @@ import (
 type MysqlConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Nodes []string `json:"-" yaml:"nodes,omitempty"`
-
 	Pxc *WorkloadConfig `json:"pxc" yaml:"pxc"`
 }
 
@@ -28,7 +26,7 @@ func (m *MysqlChart) updateFromConfig(c Config) error {
 		m.values.Image.updateFromConfig(c.Image)
 	}
 
-	return m.values.Pxc.Persistent.updateLocalPv(c.LocalPVHome, m.values.Nodes)
+	return m.values.Pxc.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
 func (m *MysqlChart) parseValues() (Values, error) {

@@ -12,13 +12,14 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
 	"time"
 )
 
 const (
-	DefaultKubeConfPath = "~/.kube/config"
+	DefaultKubeConfFmt = "%s/.kube/config"
 
-	DefaultRepositoryConfig = "~/.config/helm/repositories.yaml"
+	DefaultRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
 	DefaultRepositoryCache  = "./helm"
 
 	DefaultWaitTimeoutSec = 60 * 20
@@ -64,16 +65,18 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug 
 			logger.Debug().Msg(fmt.Sprintf(format, v)).Fire()
 		}
 	}
+	kubeConfPath := fmt.Sprintf(DefaultKubeConfFmt, os.Getenv("HOME"))
+	HelmRepoConf := fmt.Sprintf(DefaultRepositoryConfigFmt, os.Getenv("HOME"))
 	opts := &hc.Options{
 		Namespace:        namespace, // Change this to the namespace you wish to install the chart in.
 		RepositoryCache:  DefaultRepositoryCache,
-		RepositoryConfig: DefaultRepositoryConfig,
+		RepositoryConfig: HelmRepoConf,
 		Debug:            debug,
 		Linting:          true, // Change this to false if you don't want linting.
 		DebugLog:         debugLog,
 	}
 
-	kubeConf, err := clientcmd.BuildConfigFromFlags("", DefaultKubeConfPath)
+	kubeConf, err := clientcmd.BuildConfigFromFlags("", kubeConfPath)
 	if err != nil {
 		return nil, err
 	}
@@ -204,7 +207,8 @@ type KClient struct {
 }
 
 func NewKClient() (*KClient, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", DefaultKubeConfPath)
+	kubeConfPath := fmt.Sprintf(DefaultKubeConfFmt, os.Getenv("HOME"))
+	config, err := clientcmd.BuildConfigFromFlags("", kubeConfPath)
 	if err != nil {
 		return nil, err
 	}

@@ -8,8 +8,6 @@ import (
 type RedisConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Nodes []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-
 	Redis WorkloadConfig `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
@@ -34,7 +32,7 @@ func (h RedisChart) updateConfig(c Config) error {
 		}
 		h.values.Image.updateFromConfig(c.Image)
 	}
-	return h.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, h.values.Nodes)
+	return h.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
 func (h RedisChart) parseValues() (Values, error) {

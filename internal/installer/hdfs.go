@@ -9,8 +9,8 @@ const RoleNameNode = "namenode"
 
 // common config for datanode / journalnode / namenode / zookeeper
 type HdfsNodeConfig struct {
-	// alias for Persistent
-	Storage PersistentConfig `json:"storage,omitempty" yaml:"Persistent,omitempty"`
+	// alias for Persistent, updated from configuration
+	Storage PersistentConfig `json:"storage,omitempty" yaml:"persistent,omitempty"`
 }
 
 func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsConfig, role string) error {

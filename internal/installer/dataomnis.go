@@ -16,10 +16,9 @@ type GrpcLogConfig struct {
 }
 
 type ServiceConfig struct {
-	LogLevel    int8          `json:"logLevel,omitempty" yaml:"logLevel"`
-	GrpcLog     GrpcLogConfig `json:"grpcLog,omitempty" yaml:"grpcLog,omitempty"`
-	ServiceName bool          `json:"serviceName,omitempty" yaml:"serviceName"`
-	Metrics     MetricsConfig `json:"metrics,omitempty" yaml:"metrics,omitempty"`
+	LogLevel    int8           `json:"logLevel,omitempty" yaml:"logLevel"`
+	GrpcLog     *GrpcLogConfig `json:"grpcLog,omitempty" yaml:"grpcLog,omitempty"`
+	Metrics     *MetricsConfig `json:"metrics,omitempty" yaml:"metrics,omitempty"`
 
 	WorkloadConfig `json:",omitempty,inline" yaml:",omitempty,inline"`
 
@@ -27,11 +26,13 @@ type ServiceConfig struct {
 }
 
 type Webservice struct {
-	Enabled bool `yaml:"enabled"`
+	Enabled bool `json:"enabled" yaml:"enabled"`
 }
 
+// TODO: update from webservice enable
+// TODO: generate default region
 type ApiGlobalConfig struct {
-	Enabled bool     `yaml:"enabled" yaml:"enabled"`
+	Enabled bool     `json:"enabled" yaml:"enabled" yaml:"enabled"`
 	Regions []Region `json:"-" yaml:"regions,flow,omitempty"`
 
 	RegionValues []map[string]RegionValue `json:"regions" yaml:"-"`
@@ -56,10 +57,11 @@ func (a ApiGlobalConfig) updateRegion() {
 
 // Region for configurations, parse to RegionValue.
 type Region struct {
-	Host string `json:"host,omitempty" yaml:"host"`
-	EnUs  string `json:"en_us,omitempty" yaml:"enUsName"`
-	ZhCn  string `json:"zh_cn,omitempty" yaml:"zhCnName"`
+	Host string `json:"-" yaml:"host"`
+	EnUs string `json:"-" yaml:"enUsName"`
+	ZhCn string `json:"-" yaml:"zhCnName"`
 }
+
 // ***********************************************************
 
 // ***********************************************************
@@ -73,6 +75,7 @@ type RegionValue struct {
 	Host string `json:"hosts" yaml:"-"`
 	Name Names  `json:"names"`
 }
+
 // ***********************************************************
 
 type ServiceMonitorConfig struct {
@@ -85,8 +88,8 @@ type MysqlClientConfig struct {
 	SecretName   string `json:"secretName" yaml:"-"`
 
 	LogLevel        int8   `json:"logLevel,omitempty" yaml:"logLevel,omitempty"`
-	MaxIdleConn     int8   `json:"maxIdleConn,omitempty" yaml:"maxIdleConn,omitempty"`
-	MaxOpenConn     int8   `json:"maxOpenConn,omitempty" yaml:"maxOpenConn,omitempty"`
+	MaxIdleConn     int32  `json:"maxIdleConn,omitempty" yaml:"maxIdleConn,omitempty"`
+	MaxOpenConn     int32  `json:"maxOpenConn,omitempty" yaml:"maxOpenConn,omitempty"`
 	ConnMaxLifetime string `json:"connMaxLifetime,omitempty" yaml:"connMaxLifetime,omitempty"`
 	SlowTshreshold  string `json:"slowTshreshold,omitempty" yaml:"slowTshreshold,omitempty"`
 }
@@ -111,29 +114,30 @@ type DataomnisConfig struct {
 	Port   string `json:"port"    yaml:"port,omitempty"`
 
 	// global configurations for all service as default
-	Image  *ImageConfig  `json:"image,omitempty" yaml:"image,omitempty"`
-	Common ServiceConfig `json:"common,inline" yaml:",inline"`
+	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	MysqlClient MysqlClientConfig `json:"mysql"   yaml:"mysqlCluster"`
-	EtcdClient  EtcdClientConfig  `json:"etcd" yaml:"-"`
-	HdfsClient  HdfsClientConfig  `json:"hdfs" yaml:"-"`
-	RedisClient RedisClientConfig `json:"redis" yaml:"-"`
+	MysqlClient *MysqlClientConfig `json:"mysql"   yaml:"mysql"`
+	EtcdClient  *EtcdClientConfig  `json:"etcd" yaml:"-"`
+	HdfsClient  *HdfsClientConfig  `json:"hdfs" yaml:"-"`
+	RedisClient *RedisClientConfig `json:"redis" yaml:"-"`
 
-	Iaas iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty"`
+	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
-	WebService      Webservice      `json:"webservice" yaml:"webservice"`
-	Apiglobal       ApiGlobalConfig `json:"apiglobal" yaml:"apiGlobal"`
-	Apiserver       ServiceConfig   `json:"apiserver" yaml:"apiserver"`
-	Account         ServiceConfig   `json:"account" yaml:"account"`
-	Developer       ServiceConfig   `json:"developer" yaml:"developer"`
-	Enginemanager   ServiceConfig   `json:"enginemanager" yaml:"enginemanager"`
-	Jobmanager      ServiceConfig   `json:"jobmanager" yaml:"jobmanager"`
-	Resourcemanager ServiceConfig   `json:"resourcemanager" yaml:"resourcemanager"`
-	Scheduler       ServiceConfig   `json:"scheduler" yaml:"scheduler"`
-	Spacemanager    ServiceConfig   `json:"spacemanager" yaml:"spacemanager"`
+	Common *ServiceConfig `json:"common,inline" yaml:",inline"`
 
-	Jaeger         ServiceConfig        `json:"jaeger" yaml:"jaeger"`
-	ServiceMonitor ServiceMonitorConfig `json:"serviceMonitor" yaml:"serviceMonitor"`
+	WebService      *Webservice      `json:"webservice" yaml:"webservice"`
+	Apiglobal       *ApiGlobalConfig `json:"apiglobal" yaml:"apiGlobal"`
+	Apiserver       *ServiceConfig   `json:"apiserver" yaml:"apiserver"`
+	Account         *ServiceConfig   `json:"account" yaml:"account"`
+	Developer       *ServiceConfig   `json:"developer" yaml:"developer"`
+	Enginemanager   *ServiceConfig   `json:"enginemanager" yaml:"enginemanager"`
+	Jobmanager      *ServiceConfig   `json:"jobmanager" yaml:"jobmanager"`
+	Resourcemanager *ServiceConfig   `json:"resourcemanager" yaml:"resourcemanager"`
+	Scheduler       *ServiceConfig   `json:"scheduler" yaml:"scheduler"`
+	Spacemanager    *ServiceConfig   `json:"spacemanager" yaml:"spacemanager"`
+
+	Jaeger         *ServiceConfig        `json:"jaeger" yaml:"jaeger"`
+	ServiceMonitor *ServiceMonitorConfig `json:"serviceMonitor" yaml:"serviceMonitor"`
 }
 
 type DataomnisChart struct {

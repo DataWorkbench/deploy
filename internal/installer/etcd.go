@@ -7,8 +7,8 @@ import (
 type EtcdConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Nodes      []string         `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-	Persistent PersistentConfig `json:"persistent" yaml:"persistent"`
+	// TODO: support resource configurations
+	WorkloadConfig `json:",inline" yaml:",inline"`
 }
 
 // EtcdChart for etcd-cluster, implement Chart
@@ -26,7 +26,7 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 		e.values.Image.updateFromConfig(c.Image)
 	}
 
-	return e.values.Persistent.updateLocalPv(c.LocalPVHome, e.values.Nodes)
+	return e.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
 func (e *EtcdChart) parseValues() (Values, error) {

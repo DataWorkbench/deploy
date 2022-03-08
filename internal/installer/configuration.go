@@ -3,7 +3,6 @@ package installer
 import (
 	"errors"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
 )
 
 var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
@@ -37,20 +36,41 @@ func (i *ImageConfig) updateFromConfig(source *ImageConfig) {
 	}
 }
 
+type Resource struct {
+	Cpu    string `json:"cpu,omitempty" yaml:"cpu,omitempty"`
+	Memory string `json:"memory,omitempty" yaml:"memory,omitempty"`
+}
+
+type ResourceConfig struct {
+	Limits   Resource `json:"limits,omitempty" yaml:"limits,omitempty"`
+	Requests Resource `json:"requests,omitempty" yaml:"requests,omitempty"`
+}
+
+// k8s workload(a deployment / statefulset / .. in a Chart) configurations
+type WorkloadConfig struct {
+	Replicas       int8 `json:"replicas,omitempty" yaml:"replicas,omitempty"`
+	UpdateStrategy string `json:"updateStrategy,omitempty" yaml:"updateStrategy,omitempty"`
+
+	Resource *ResourceConfig `json:"resources,omitempty" yaml:"resources,omitempty"`
+
+	Persistent *PersistentConfig `json:"persistent,omitempty" yaml:"persistent,omitempty"`
+}
+
 type LocalPvConfig struct {
-	Nodes []string `json:"nodes" yaml:"-"`
+	Nodes []string `json:"nodes" yaml:"nodes"`
 	Home  string   `json:"home" yaml:"-"`
 }
 
 type PersistentConfig struct {
 	// for local pv, eg: 10Gi
-	Size    string         `json:"size,omitempty" yaml:"size,omitempty"`
-	LocalPv *LocalPvConfig `json:"localPv,omitempty" yaml:"-"`
+	Size    string         `json:"size,omitempty" yaml:"size"`
+	LocalPv *LocalPvConfig `json:"localPv,omitempty" yaml:"localPv"`
 }
 
 func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) error {
 	// TODO: check if localPv exist and start with localPvHome
 	p.LocalPv.Home = fmt.Sprintf(LocalHomeFmt, localPvHome)
+
 	if len(p.LocalPv.Nodes) == 0 {
 		if len(nodes) < 3 {
 			return LeastNodeErr
@@ -58,19 +78,6 @@ func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) err
 		p.LocalPv.Nodes = nodes
 	}
 	return nil
-}
-
-// k8s workload(a deployment / statefulset / .. in a Chart) configurations
-type WorkloadConfig struct {
-	Replicas       int8 `json:"replicas,omitempty" yaml:"replicas,"`
-	UpdateStrategy int8 `json:"updateStrategy,omitempty" yaml:"updateStrategy"`
-
-	ReadinessProbe v1.Probe `json:"readinessProbe,omitempty" yaml:"readinessProbe"`
-	LivenessProbe  v1.Probe `json:"livenessProbe,omitempty" yaml:"livenessProbe"`
-
-	Resources v1.ResourceRequirements `json:"resources,omitempty" yaml:"resources"`
-
-	Persistent PersistentConfig `json:"persistent,omitempty" yaml:"persistent"`
 }
 
 // ***************************************************************
@@ -83,7 +90,7 @@ type Config struct {
 	Nodes []string `yaml:"-"`
 
 	// Local PV home
-	LocalPVHome string `yaml:"localPVHome" validate:"required"`
+	LocalPVHome string `yaml:"localPvHome" validate:"required"`
 
 	Image *ImageConfig `yaml:"image"`
 

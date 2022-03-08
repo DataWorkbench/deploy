@@ -3,8 +3,9 @@ package installer
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/DataWorkbench/glog"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/fmt"
+	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -25,13 +26,16 @@ func InitConfiguration() {
 func Install(configFile string, debug bool) error {
 	ctx := context.Background()
 	logger := glog.NewDefault()
+	if debug {
+		logger = logger.WithLevel(glog.DebugLevel)
+	}
 
 	var err error
 	// check configuration file
 	_, err = os.Stat(configFile)
 	if err != nil {
 		if os.IsNotExist(err) {
-			msg := fmt.Printf("The configuration file: %s not exist!", configFile)
+			msg := fmt.Sprintf("the configuration file: %s not exist!", configFile)
 			logger.Error().Msg(msg).Fire()
 			err = errors.New(msg)
 			return err
@@ -42,12 +46,18 @@ func Install(configFile string, debug bool) error {
 	conf := &Config{}
 	bytes, err := ioutil.ReadFile(configFile)
 	if err != nil {
-		logger.Error().String("Failed to read configuration file", configFile).Error("error", err).Fire()
+		logger.Error().String("failed to read configuration file", configFile).Error("error", err).Fire()
 		logger.Error().Msg("please make sure the file is YAML format.").Fire()
 		return err
 	}
 	if err = yaml.Unmarshal(bytes, conf); err != nil {
-		logger.Error().Msg("Failed to parse bytes from the configuration to yaml!").Fire()
+		logger.Error().Error("parse bytes from the configuration to yaml error", err).Fire()
+		return err
+	}
+	logger.Debug().Any("Configuration", conf).Fire()
+	// validate
+	if err = validator.New().Struct(conf); err != nil {
+		logger.Error().Error("validate configuration error", err).Fire()
 		return err
 	}
 

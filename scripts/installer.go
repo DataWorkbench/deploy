@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/DataWorkbench/enginemanager/internal/installer"
+	"github.com/DataWorkbench/deploy/internal/installer"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
@@ -22,7 +22,6 @@ func main() {
 
 	app.HelpFlag.Short('h')
 
-	println("install..")
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case initCmd.FullCommand():
 		installer.InitConfiguration()
