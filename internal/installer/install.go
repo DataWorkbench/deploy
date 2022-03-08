@@ -52,39 +52,65 @@ func Install(configFile string, debug bool) error {
 	}
 
 	// install operators
-	if err = installOperators(ctx, logger, debug); err != nil {
+	if err = installOperators(ctx, logger, debug, *conf); err != nil {
 		return err
 	}
 
 
 	// install etcd-cluster
-
+	if err = installDatabases(ctx, logger, debug, *conf); err != nil {
+		return err
+	}
 	return nil
 }
 
-func installOperators(ctx context.Context, logger *glog.Logger, debug bool) error {
+func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
 	var helm *Proxy
 	var err error
-	if helm, err = NewProxy(ctx, DefaultOperatorNamespace, debug, *logger); err != nil {
+	if helm, err = NewProxy(ctx, DefaultOperatorNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
 
 	hdfsOperator := NewChartMeta(HdfsOperatorChart, HdfsOperatorName, true)
+	hdfsOperator.updateFromConfig(c)
 	if err = helm.install(hdfsOperator); err != nil {
 		logger.Error().Error("install hdfs-operator error", err).Fire()
 		return err
 	}
 
 	mysqlOperator := NewChartMeta(MysqlOperatorChart, MysqlOperatorName, true)
+	mysqlOperator.updateFromConfig(c)
 	if err = helm.install(mysqlOperator); err != nil {
 		logger.Error().Error("install mysql-operator error", err).Fire()
 		return err
 	}
 
 	redisOperator := NewChartMeta(RedisOperatorChart, RedisOperatorName, true)
+	redisOperator.updateFromConfig(c)
 	if err = helm.install(redisOperator); err != nil {
 		logger.Error().Error("install redis-operator error", err).Fire()
+		return err
+	}
+	return nil
+}
+
+func installDatabases(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
+	var helm *Proxy
+	var err error
+	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
+		logger.Error().Error("create helm proxy to install operators error", err).Fire()
+		return err
+	}
+
+	hdfs := &HdfsChart{}
+	hdfs.setMeta(HdfsClusterChart, HdfsClusterName, debug)
+	if err = hdfs.updateFromConfig(c); err != nil {
+		logger.Error().Error("update hdfs values from Config error", err).Fire()
+		return err
+	}
+	if err = helm.install(hdfs); err != nil {
+		logger.Error().Error("helm install hdfs-cluster error", err).Fire()
 		return err
 	}
 	return nil

@@ -50,11 +50,11 @@ type Proxy struct {
 	namespace       string
 	repositoryCache string
 	client          hc.Client // helm client
-	logger          glog.Logger
-	kubeClient      *kubernetes.Clientset
+	logger          *glog.Logger
+	kclient         *KClient
 }
 
-func NewProxy(ctx context.Context, namespace string, debug bool, logger glog.Logger) (*Proxy, error) {
+func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug bool) (*Proxy, error) {
 
 	debugLog := func(format string, v ...interface{}) {
 		// Change this to your own logger. Default is 'log.Printf(format, v...)'.
@@ -114,12 +114,12 @@ func (p *Proxy) install(chart Chart) error {
 
 	p.logger.Info().String("Helm install release", name).String("with chart", chartName).Fire()
 	chartSpec := &hc.ChartSpec{
-		ReleaseName:     name,
-		ChartName:       fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
-		Namespace:       p.namespace,
-		ValuesYaml:      valuesStr,
-		CreateNamespace: true,
-		Recreate:        true,
+		ReleaseName: name,
+		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
+		Namespace:   p.namespace,
+		ValuesYaml:  valuesStr,
+		Recreate:    true,
+		DryRun:      true,
 	}
 	_, err = p.client.InstallOrUpgradeChart(p.ctx, chartSpec)
 	if err != nil {
@@ -145,7 +145,7 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 	ready := false
 	var err error
 	duration := time.Duration(durationSec) * time.Second
-	p.kubeClient, err = NewKubeClient()
+	p.kclient, err = NewKClient()
 	if err != nil {
 		p.logger.Error().Error("new kube client error", err).Fire()
 		return err
@@ -170,7 +170,7 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 // Note: need to init p.kubeClient before
 func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 	// 获取指定 namespace 中的 Pod 列表信息
-	pods, err := p.kubeClient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
+	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
 	if err != nil {
 		p.logger.Error().Error("List pod error", err).Fire()
 		return false, err
@@ -199,21 +199,25 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 // **************************************************************
 // kube client to access k8s resource
 // **************************************************************
-func NewKubeClient() (*kubernetes.Clientset, error) {
+type KClient struct {
+	*kubernetes.Clientset
+}
+
+func NewKClient() (*KClient, error) {
 	config, err := clientcmd.BuildConfigFromFlags("", DefaultKubeConfPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return kubernetes.NewForConfig(config)
-}
-
-func GetKubeNodes(ctx context.Context) ([]string, error) {
-	client, err := NewKubeClient()
+	kc, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
-	nodeList, err := client.CoreV1().Nodes().List(ctx, v1.ListOptions{})
+	return &KClient{kc}, nil
+}
+
+func (c *KClient) GetKubeNodes(ctx context.Context) ([]string, error) {
+	nodeList, err := c.CoreV1().Nodes().List(ctx, v1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -222,4 +226,11 @@ func GetKubeNodes(ctx context.Context) ([]string, error) {
 		nodeSlice = append(nodeSlice, node.Name)
 	}
 	return nodeSlice, nil
+}
+
+func (c *KClient) CreateNamespace(ctx context.Context, namespace string) error {
+	ns := &corev1.Namespace{}
+	ns.Name = namespace
+	_, err := c.CoreV1().Namespaces().Create(ctx, ns, v1.CreateOptions{})
+	return err
 }

@@ -30,6 +30,7 @@ func (m *ChartMeta) setMeta(chartName, releaseName string, waittingReady bool) {
 }
 
 func (m ChartMeta) updateFromConfig(c Config) error {
+	m.Image = c.Image
 	return nil
 }
 

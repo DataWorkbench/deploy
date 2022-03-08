@@ -57,7 +57,7 @@ type HdfsChart struct {
 }
 
 // update each field value from global Config if that is ZERO
-func (h HdfsChart) updateConfig(c Config) error {
+func (h HdfsChart) updateFromConfig(c Config) error {
 	if c.Image != nil {
 		if h.values.Image == nil {
 			h.values.Image = &ImageConfig{}
