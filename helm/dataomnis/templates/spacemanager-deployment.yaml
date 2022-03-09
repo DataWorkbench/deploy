@@ -62,6 +62,16 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
+          - name: SPACE_MANAGER_IAAS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-secret
+                key: access_key_id
+          - name: SPACE_MANAGER_IAAS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-secret
+                key: secret_access_key
 {{ include "spacemanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
           - name: {{ $ename }}
