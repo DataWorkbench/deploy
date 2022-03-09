@@ -44,24 +44,28 @@ func Install(configFile string, debug bool) error {
 	}
 
 	conf := &Config{}
+	logger.Info().String("read configuration file", configFile).Fire()
 	bytes, err := ioutil.ReadFile(configFile)
 	if err != nil {
 		logger.Error().String("failed to read configuration file", configFile).Error("error", err).Fire()
 		logger.Error().Msg("please make sure the file is YAML format.").Fire()
 		return err
 	}
+	logger.Info().Msg("parse content from configuration file to Config..").Fire()
 	if err = yaml.Unmarshal(bytes, conf); err != nil {
 		logger.Error().Error("parse bytes from the configuration to yaml error", err).Fire()
 		return err
 	}
 	logger.Debug().Any("Configuration", conf).Fire()
 	// validate
+	logger.Info().Msg("validate Config..").Fire()
 	if err = validator.New().Struct(conf); err != nil {
 		logger.Error().Error("validate configuration error", err).Fire()
 		return err
 	}
 
 	// install operators
+	logger.Info().Msg("install operators..").Fire()
 	if err = installOperators(ctx, logger, debug, *conf); err != nil {
 		return err
 	}
@@ -77,11 +81,13 @@ func Install(configFile string, debug bool) error {
 func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
 	var helm *Proxy
 	var err error
+	logger.Info().String("new helm proxy with namespace", DefaultOperatorNamespace).Fire()
 	if helm, err = NewProxy(ctx, DefaultOperatorNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
 
+	logger.Info().String("install hdfs operator with name", HdfsOperatorName).Fire()
 	hdfsOperator := NewChartMeta(HdfsOperatorChart, HdfsOperatorName, true)
 	hdfsOperator.updateFromConfig(c)
 	if err = helm.install(hdfsOperator); err != nil {
@@ -89,6 +95,7 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 		return err
 	}
 
+	logger.Info().String("install mysql operator with name", MysqlOperatorName).Fire()
 	mysqlOperator := NewChartMeta(MysqlOperatorChart, MysqlOperatorName, true)
 	mysqlOperator.updateFromConfig(c)
 	if err = helm.install(mysqlOperator); err != nil {
@@ -96,6 +103,7 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 		return err
 	}
 
+	logger.Info().String("install redis operator with name", RedisOperatorName).Fire()
 	redisOperator := NewChartMeta(RedisOperatorChart, RedisOperatorName, true)
 	redisOperator.updateFromConfig(c)
 	if err = helm.install(redisOperator); err != nil {

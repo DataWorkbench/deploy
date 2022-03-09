@@ -19,8 +19,8 @@ import (
 const (
 	DefaultKubeConfFmt = "%s/.kube/config"
 
-	DefaultRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
-	DefaultRepositoryCache  = "./helm"
+	DefaultHelmRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
+	DefaultHelmRepositoryCacheFmt  = "%s/.cache/helm/repository"
 
 	DefaultWaitTimeoutSec = 60 * 20
 	DefaultDurationSec    = 10
@@ -66,10 +66,11 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug 
 		}
 	}
 	kubeConfPath := fmt.Sprintf(DefaultKubeConfFmt, os.Getenv("HOME"))
-	HelmRepoConf := fmt.Sprintf(DefaultRepositoryConfigFmt, os.Getenv("HOME"))
+	HelmRepoConf := fmt.Sprintf(DefaultHelmRepositoryConfigFmt, os.Getenv("HOME"))
+	HelmRepoCache := fmt.Sprintf(DefaultHelmRepositoryCacheFmt, os.Getenv("HOME"))
 	opts := &hc.Options{
 		Namespace:        namespace, // Change this to the namespace you wish to install the chart in.
-		RepositoryCache:  DefaultRepositoryCache,
+		RepositoryCache:  HelmRepoCache,
 		RepositoryConfig: HelmRepoConf,
 		Debug:            debug,
 		Linting:          true, // Change this to false if you don't want linting.
@@ -89,7 +90,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug 
 		return &Proxy{
 			ctx:             ctx,
 			namespace:       namespace,
-			repositoryCache: DefaultRepositoryCache,
+			repositoryCache: HelmRepoCache,
 			client:          c,
 			logger:          logger,
 		}, nil
@@ -99,7 +100,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug 
 
 func (p *Proxy) install(chart Chart) error {
 	var name = chart.getReleaseName()
-	var chartName = chart.getReleaseName()
+	var chartName = chart.getChartName()
 
 	values, err := chart.parseValues()
 	if err != nil {
@@ -115,14 +116,19 @@ func (p *Proxy) install(chart Chart) error {
 		}
 	}
 
-	p.logger.Info().String("Helm install release", name).String("with chart", chartName).Fire()
+	p.logger.Info().String("create namespace", p.namespace).Fire()
+	if err = p.kclient.CreateNamespace(p.ctx, p.namespace); err != nil {
+		p.logger.Error().Error("create namespace error", err).Fire()
+		return err
+	}
+
+	p.logger.Info().String("helm install release", name).String("with chart", chartName).Fire()
 	chartSpec := &hc.ChartSpec{
 		ReleaseName: name,
 		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
 		Namespace:   p.namespace,
 		ValuesYaml:  valuesStr,
 		Recreate:    true,
-		DryRun:      true,
 	}
 	_, err = p.client.InstallOrUpgradeChart(p.ctx, chartSpec)
 	if err != nil {
@@ -137,7 +143,7 @@ func (p *Proxy) install(chart Chart) error {
 }
 
 func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error {
-	p.logger.Info().String("Waiting operator", name).String("in namespace", p.namespace).Msg("ready..").Fire()
+	p.logger.Info().String("waiting operator", name).String("in namespace", p.namespace).Msg("ready..").Fire()
 	nameField := map[string]string{
 		"meta.helm.sh/release-name": name,
 	}
@@ -157,11 +163,11 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 	for timeoutSec > 0 {
 		ready, err = p.isReady(ops)
 		if err != nil {
-			p.logger.Error().Error("Check status ready error", err).Fire()
+			p.logger.Error().Error("check status ready error", err).Fire()
 			return err
 		}
 		if ready {
-			p.logger.Info().String("All pods ready of operator", name).String(" in namespace", p.namespace).Fire()
+			p.logger.Info().String("all pods ready of operator", name).String(" in namespace", p.namespace).Fire()
 			return nil
 		}
 		time.Sleep(duration)
@@ -175,7 +181,7 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 	// 获取指定 namespace 中的 Pod 列表信息
 	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
 	if err != nil {
-		p.logger.Error().Error("List pod error", err).Fire()
+		p.logger.Error().Error("list pod error", err).Fire()
 		return false, err
 	}
 	for _, pod := range pods.Items {

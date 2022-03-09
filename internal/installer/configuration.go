@@ -13,9 +13,9 @@ var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
 
 type ImageConfig struct {
 	// TODO: check pull secrets
-	Registry    string   `json:"registry,omitempty" yaml:"registry"`
-	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecret"`
-	PullPolicy  string   `json:"pullPolicy,omitempty" yaml:"pullPolicy"`
+	Registry    string   `json:"registry,omitempty" yaml:"registry,omitempty"`
+	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecret,omitempty"`
+	PullPolicy  string   `json:"pullPolicy,omitempty" yaml:"pullPolicy,omitempty"`
 
 	Tag string `json:",omitempty" yaml:"-"`
 }

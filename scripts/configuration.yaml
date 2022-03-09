@@ -42,7 +42,6 @@ dataomnis:
     envs:
 
   iaas:
-    zone: "testing"
 
 mysqlCluster:
   pxc:

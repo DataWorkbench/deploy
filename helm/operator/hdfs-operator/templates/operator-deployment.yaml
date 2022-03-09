@@ -22,10 +22,10 @@ spec:
       labels:
         control-plane: controller-manager
     spec:
-      {{ - with .Values.image.pullSecrets }}
+      {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{ - toYaml . | nindent 8 }}
-      {{ - end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       containers:
         - args:
             - --secure-listen-address=0.0.0.0:8443
