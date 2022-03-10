@@ -117,6 +117,10 @@ func (p *Proxy) install(chart Chart) error {
 	}
 
 	p.logger.Info().String("create namespace", p.namespace).Fire()
+	if p.kclient, err = NewKClient(); err != nil {
+		p.logger.Error().Error("new kube client error", err).Fire()
+		return err
+	}
 	if err = p.kclient.CreateNamespace(p.ctx, p.namespace); err != nil {
 		p.logger.Error().Error("create namespace error", err).Fire()
 		return err
