@@ -7,26 +7,13 @@ import "encoding/json"
 // ***************************************************************
 // implement Chart interface
 type ChartMeta struct {
+	// for pod label
 	ChartName   string
 	ReleaseName string
 
 	WaitingReady bool
 
 	Image *ImageConfig `json:",omitempty"`
-}
-
-func NewChartMeta(chartName, releaseName string, waittingReady bool) *ChartMeta {
-	return &ChartMeta{
-		ChartName:    chartName,
-		ReleaseName:  releaseName,
-		WaitingReady: waittingReady,
-	}
-}
-
-func (m *ChartMeta) setMeta(chartName, releaseName string, waittingReady bool) {
-	m.ChartName = chartName
-	m.ReleaseName = releaseName
-	m.WaitingReady = waittingReady
 }
 
 func (m ChartMeta) updateFromConfig(c Config) error {

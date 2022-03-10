@@ -87,25 +87,22 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 		return err
 	}
 
-	logger.Info().String("install hdfs operator with name", HdfsOperatorName).Fire()
-	hdfsOperator := NewChartMeta(HdfsOperatorChart, HdfsOperatorName, true)
-	hdfsOperator.updateFromConfig(c)
-	if err = helm.install(hdfsOperator); err != nil {
+	logger.Info().String("install hdfs operator with name", HdfsOptName).Fire()
+	hdfsOperator := NewHdfsOperatorChart(HdfsOptName, c)
+	if err = helm.install(*hdfsOperator); err != nil {
 		logger.Error().Error("install hdfs-operator error", err).Fire()
 		return err
 	}
 
-	logger.Info().String("install mysql operator with name", MysqlOperatorName).Fire()
-	mysqlOperator := NewChartMeta(MysqlOperatorChart, MysqlOperatorName, true)
-	mysqlOperator.updateFromConfig(c)
+	logger.Info().String("install mysql operator with name", MysqlOptName).Fire()
+	mysqlOperator := NewMysqlOperatorChart(MysqlOptName, c)
 	if err = helm.install(mysqlOperator); err != nil {
 		logger.Error().Error("install mysql-operator error", err).Fire()
 		return err
 	}
 
-	logger.Info().String("install redis operator with name", RedisOperatorName).Fire()
-	redisOperator := NewChartMeta(RedisOperatorChart, RedisOperatorName, true)
-	redisOperator.updateFromConfig(c)
+	logger.Info().String("install redis operator with name", RedisOptName).Fire()
+	redisOperator := NewRedisOperatorChart(RedisOptName, c)
 	if err = helm.install(redisOperator); err != nil {
 		logger.Error().Error("install redis-operator error", err).Fire()
 		return err
@@ -114,15 +111,16 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 }
 
 func installDatabases(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
-	var helm *Proxy
-	var err error
+	var (
+	 	helm *Proxy
+		err error
+	)
 	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
 
-	hdfs := &HdfsChart{}
-	hdfs.setMeta(HdfsClusterChart, HdfsClusterName, debug)
+	hdfs := NewHdfsChart(HdfsClusterName)
 	if err = hdfs.updateFromConfig(c); err != nil {
 		logger.Error().Error("update hdfs values from Config error", err).Fire()
 		return err

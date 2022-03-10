@@ -2,14 +2,15 @@ package installer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/DataWorkbench/glog"
 	hc "github.com/mittwald/go-helm-client"
-	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
+	k8serrs "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
@@ -147,12 +148,12 @@ func (p *Proxy) install(chart Chart) error {
 }
 
 func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error {
-	p.logger.Info().String("waiting operator", name).String("in namespace", p.namespace).Msg("ready..").Fire()
-	nameField := map[string]string{
-		"meta.helm.sh/release-name": name,
+	p.logger.Info().String("waiting release", name).Msg("ready..").Fire()
+	labelMap := map[string]string{
+		"app.kubernetes.io/instance": name,
 	}
 	ops := v1.ListOptions{
-		FieldSelector: fields.SelectorFromSet(nameField).String(),
+		LabelSelector: labels.SelectorFromSet(labelMap).String(),
 	}
 
 	ready := false
@@ -245,6 +246,11 @@ func (c *KClient) GetKubeNodes(ctx context.Context) ([]string, error) {
 func (c *KClient) CreateNamespace(ctx context.Context, namespace string) error {
 	ns := &corev1.Namespace{}
 	ns.Name = namespace
-	_, err := c.CoreV1().Namespaces().Create(ctx, ns, v1.CreateOptions{})
+	_, err := c.CoreV1().Namespaces().Get(ctx, namespace, v1.GetOptions{})
+	if err != nil {
+		if k8serrs.IsNotFound(err) {
+			_, err = c.CoreV1().Namespaces().Create(ctx, ns, v1.CreateOptions{})
+		}
+	}
 	return err
 }

@@ -56,6 +56,14 @@ type HdfsChart struct {
 	values HdfsConfig
 }
 
+func NewHdfsChart(release string) *HdfsChart {
+	h := &HdfsChart{}
+	h.ChartName = HdfsClusterChart
+	h.ReleaseName = release
+	h.WaitingReady = true
+	return h
+}
+
 // update each field value from global Config if that is ZERO
 func (h HdfsChart) updateFromConfig(c Config) error {
 	if c.Image != nil {
