@@ -43,6 +43,7 @@ pxc:
     max_user_connections=9000
     slow_query_log=ON
     long_query_time=10
+    log_error=/var/lib/mysql/mysql-error.log
     sync_binlog=0
     max_binlog_size=10M
   resources:
