@@ -1,7 +1,7 @@
 podAnnotations: {}
 
 image:
-  regitry: quay.io
+  registry: quay.io
   pullPolicy: IfNotPresent
   pullSecrets: []
   operator: spotahome/redis-operator:v1.0.0

@@ -1,7 +1,7 @@
 
 image:
-  registry: "dockerhub.qingcloud.com"
+  registry: dockerhub.qingcloud.com
   pullPolicy: IfNotPresent
   pullSecrets: []
-  operator: "dataomnis/hadoop-operator:0.0.1"
-  rbac: "kubesphere/kube-rbac-proxy:v0.8.0"
+  operator: dataomnis/hadoop-operator:0.0.1
+  rbac: dataomnis/kube-rbac-proxy:v0.8.0
