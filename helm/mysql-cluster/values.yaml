@@ -38,15 +38,12 @@ pxc:
 #    innodb_log_buffer_size=8M
   configuration: |
     [mysqld]
-    datadir=/var/lib/mysql/data
+    datadir=/var/lib/mysql
     max_connections=10000
     max_user_connections=9000
     slow_query_log=ON
     long_query_time=10
-    slow_query_log_file=/var/lib/mysql/log/mysql-slow.log
-    log_error=/var/lib/mysql/log/mysql-error.log
-    log_bin=/var/lib/mysql/mysql-bin/mysql-bin
-    log_bin_index=/var/lib/mysql/mysql-bin/mysql-bin.index
+    log_error=/var/lib/mysql/mysql-error.log
     sync_binlog=0
     max_binlog_size=10M
   resources:
