@@ -12,7 +12,7 @@ finalizers:
 nameOverride: ""
 fullnameOverride: ""
 
-imageResitry: ""
+imageRegistry: ""
 image: percona/percona-xtradb-cluster-operator
 
 pause: false
