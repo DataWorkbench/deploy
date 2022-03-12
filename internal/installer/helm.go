@@ -166,6 +166,8 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 	}
 
 	for timeoutSec > 0 {
+		time.Sleep(duration)
+
 		ready, err = p.isReady(ops)
 		if err != nil {
 			p.logger.Error().Error("check status ready error", err).Fire()
@@ -175,7 +177,7 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 			p.logger.Info().String("all pods ready of operator", name).String(" in namespace", p.namespace).Fire()
 			return nil
 		}
-		time.Sleep(duration)
+
 		timeoutSec -= durationSec
 	}
 	return errors.New(fmt.Sprintf("waiting operator ready, timeout=%d", timeoutSec))

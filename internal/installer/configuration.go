@@ -3,6 +3,12 @@ package installer
 import (
 	"errors"
 	"fmt"
+	"github.com/DataWorkbench/glog"
+	"github.com/go-playground/validator/v10"
+	"github.com/yunify/qingcloud-sdk-go/logger"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
+	"os"
 )
 
 var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
@@ -102,4 +108,51 @@ type Config struct {
 
 	// dataomnis version
 	Dataomnis DataomnisConfig `yaml:"dataomnis"`
+}
+
+func (c *Config) Read(file string, logger glog.Logger) error {
+	var err error
+	// check configuration file
+	_, err = os.Stat(file)
+	if err != nil {
+		if os.IsNotExist(err) {
+			msg := fmt.Sprintf("the configuration file: %s not exist!", file)
+			logger.Error().Msg(msg).Fire()
+			err = errors.New(msg)
+			return err
+		}
+		err = nil
+	}
+
+	logger.Info().String("read configuration file", file).Fire()
+	bytes, err := ioutil.ReadFile(file)
+	if err != nil {
+		logger.Error().String("failed to read configuration file", file).Error("error", err).Fire()
+		logger.Error().Msg("please make sure the file is YAML format.").Fire()
+		return err
+	}
+	logger.Info().Msg("parse content from configuration file to Config..").Fire()
+	if err = yaml.Unmarshal(bytes, c); err != nil {
+		logger.Error().Error("parse bytes from the configuration to yaml error", err).Fire()
+		return err
+	}
+
+	logger.Debug().Any("Configuration", c).Fire()
+	// validate
+	logger.Info().Msg("validate Config..").Fire()
+	if err = validator.New().Struct(c); err != nil {
+		logger.Error().Error("validate configuration error", err).Fire()
+		return err
+	}
+	return nil
+}
+
+// create image pull secret:
+// kubectl create docker-registry
+//         NAME
+//         --docker-username=[user]
+//         --docker-password=[password]
+//         --docker-email=email [--docker-server=string] [--from-file=[key=]source] [--dry-run=server|client|none]
+func (c Config) checkImage() error {
+	if c.Image.PullSecrets
 }

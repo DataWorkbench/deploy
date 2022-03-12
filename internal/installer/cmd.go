@@ -30,37 +30,9 @@ func Install(configFile string, debug bool) error {
 		logger = logger.WithLevel(glog.DebugLevel)
 	}
 
-	var err error
-	// check configuration file
-	_, err = os.Stat(configFile)
-	if err != nil {
-		if os.IsNotExist(err) {
-			msg := fmt.Sprintf("the configuration file: %s not exist!", configFile)
-			logger.Error().Msg(msg).Fire()
-			err = errors.New(msg)
-			return err
-		}
-		err = nil
-	}
-
 	conf := &Config{}
-	logger.Info().String("read configuration file", configFile).Fire()
-	bytes, err := ioutil.ReadFile(configFile)
+	err := conf.Read(configFile, *logger)
 	if err != nil {
-		logger.Error().String("failed to read configuration file", configFile).Error("error", err).Fire()
-		logger.Error().Msg("please make sure the file is YAML format.").Fire()
-		return err
-	}
-	logger.Info().Msg("parse content from configuration file to Config..").Fire()
-	if err = yaml.Unmarshal(bytes, conf); err != nil {
-		logger.Error().Error("parse bytes from the configuration to yaml error", err).Fire()
-		return err
-	}
-	logger.Debug().Any("Configuration", conf).Fire()
-	// validate
-	logger.Info().Msg("validate Config..").Fire()
-	if err = validator.New().Struct(conf); err != nil {
-		logger.Error().Error("validate configuration error", err).Fire()
 		return err
 	}
 
@@ -70,11 +42,10 @@ func Install(configFile string, debug bool) error {
 		return err
 	}
 
-
 	// install etcd-cluster
-	if err = installDatabases(ctx, logger, debug, *conf); err != nil {
-		return err
-	}
+	//if err = installDatabases(ctx, logger, debug, *conf); err != nil {
+	//	return err
+	//}
 	return nil
 }
 
@@ -94,19 +65,19 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 		return err
 	}
 
-	logger.Info().String("install mysql operator with name", MysqlOptName).Fire()
-	mysqlOperator := NewMysqlOperatorChart(MysqlOptName, c)
-	if err = helm.install(mysqlOperator); err != nil {
-		logger.Error().Error("install mysql-operator error", err).Fire()
-		return err
-	}
-
-	logger.Info().String("install redis operator with name", RedisOptName).Fire()
-	redisOperator := NewRedisOperatorChart(RedisOptName, c)
-	if err = helm.install(redisOperator); err != nil {
-		logger.Error().Error("install redis-operator error", err).Fire()
-		return err
-	}
+	//logger.Info().String("install mysql operator with name", MysqlOptName).Fire()
+	//mysqlOperator := NewMysqlOperatorChart(MysqlOptName, c)
+	//if err = helm.install(mysqlOperator); err != nil {
+	//	logger.Error().Error("install mysql-operator error", err).Fire()
+	//	return err
+	//}
+	//
+	//logger.Info().String("install redis operator with name", RedisOptName).Fire()
+	//redisOperator := NewRedisOperatorChart(RedisOptName, c)
+	//if err = helm.install(redisOperator); err != nil {
+	//	logger.Error().Error("install redis-operator error", err).Fire()
+	//	return err
+	//}
 	return nil
 }
 
