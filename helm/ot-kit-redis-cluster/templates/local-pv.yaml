@@ -1,0 +1,56 @@
+{{ $fullname := include "redis-cluster.fullname" . }}
+
+{{- if .Values.storageSpec.enable }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ $fullname }}-sc
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+{{- range $node := .Values.storageSpec.localPv.nodes }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $fullname }}-{{ $node }}-pv01
+spec:
+  capacity:
+    storage: {{ $.Values.storageSpec.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: {{ $.Values.storageSpec.localPv.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-sc
+  local:
+    path: {{ $.Values.storageSpec.localPv.home }}/{{ $.Release.Name }}/01
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $node }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ $fullname }}-{{ $node }}-pv02
+spec:
+  capacity:
+    storage: {{ $.Values.storageSpec.size }}
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: {{ $.Values.storageSpec.localPv.reclaimPolicy }}
+  storageClassName: {{ $fullname }}-sc
+  local:
+    path: {{ $.Values.storageSpec.localPv.home }}/{{ $.Release.Name }}/02
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ $node }}
+{{- end }}
+{{- end }}
