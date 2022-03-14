@@ -25,9 +25,11 @@ spec:
         app.kubernetes.io/part-of: {{ include "pxc-operator.name" . }}
     spec:
       serviceAccountName: {{ include "pxc-operator.fullname" . }}
-    {{- with .Values.image.pullSecrets }}
+    {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end }}
     {{- end }}
       containers:
         - name: {{ .Chart.Name }}

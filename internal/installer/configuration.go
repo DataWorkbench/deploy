@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/DataWorkbench/glog"
 	"github.com/go-playground/validator/v10"
-	"github.com/yunify/qingcloud-sdk-go/logger"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
@@ -17,10 +16,16 @@ var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
 // K8s Configuration Zone
 // ***************************************************************
 
+// firstAtAll, create docker registry secret by kubectl:
+// kubectl create secret docker-registry my-docker-registry-secret
+//                                       --docker-server=<your-registry-server>
+//                                       --docker-username=<your-name>
+//                                       --docker-password=<your-pword>
+//                                       --docker-email=<your-email>
 type ImageConfig struct {
 	// TODO: check pull secrets
 	Registry    string   `json:"registry,omitempty" yaml:"registry,omitempty"`
-	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecret,omitempty"`
+	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecrets,omitempty"`
 	PullPolicy  string   `json:"pullPolicy,omitempty" yaml:"pullPolicy,omitempty"`
 
 	Tag string `json:",omitempty" yaml:"-"`
@@ -54,7 +59,7 @@ type ResourceConfig struct {
 
 // k8s workload(a deployment / statefulset / .. in a Chart) configurations
 type WorkloadConfig struct {
-	Replicas       int8 `json:"replicas,omitempty" yaml:"replicas,omitempty"`
+	Replicas       int8   `json:"replicas,omitempty" yaml:"replicas,omitempty"`
 	UpdateStrategy string `json:"updateStrategy,omitempty" yaml:"updateStrategy,omitempty"`
 
 	Resource *ResourceConfig `json:"resources,omitempty" yaml:"resources,omitempty"`
@@ -147,12 +152,6 @@ func (c *Config) Read(file string, logger glog.Logger) error {
 	return nil
 }
 
-// create image pull secret:
-// kubectl create docker-registry
-//         NAME
-//         --docker-username=[user]
-//         --docker-password=[password]
-//         --docker-email=email [--docker-server=string] [--from-file=[key=]source] [--dry-run=server|client|none]
 func (c Config) checkImage() error {
-	if c.Image.PullSecrets
+	return nil
 }

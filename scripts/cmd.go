@@ -26,6 +26,6 @@ func main() {
 	case initCmd.FullCommand():
 		installer.InitConfiguration()
 	case installCmd.FullCommand():
-		installer.Install(*configFile, *debug)
+		_ = installer.Install(*configFile, *debug)
 	}
 }

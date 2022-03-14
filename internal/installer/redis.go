@@ -29,8 +29,8 @@ func (h RedisChart) updateConfig(c Config) error {
 	if c.Image != nil {
 		if h.values.Image == nil {
 			h.values.Image = &ImageConfig{}
+			h.values.Image.updateFromConfig(c.Image)
 		}
-		h.values.Image.updateFromConfig(c.Image)
 	}
 	return h.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }

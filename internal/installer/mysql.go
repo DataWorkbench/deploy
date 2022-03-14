@@ -19,11 +19,15 @@ type MysqlChart struct {
 
 // update each field value from global Config if that is ZERO
 func (m *MysqlChart) updateFromConfig(c Config) error {
+	if c.Mysql != nil {
+		m.values = c.Mysql
+	}
+
 	if c.Image != nil {
 		if m.values.Image == nil {
 			m.values.Image = &ImageConfig{}
+			m.values.Image.updateFromConfig(c.Image)
 		}
-		m.values.Image.updateFromConfig(c.Image)
 	}
 
 	return m.values.Pxc.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
@@ -37,4 +41,13 @@ func (m *MysqlChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func NewMysqlChart(release string) *MysqlChart {
+	m := &MysqlChart{}
+	m.ChartName = MysqlClusterChart
+	m.ReleaseName = release
+	m.WaitingReady = true
+	m.values = &MysqlConfig{}
+	return m
 }

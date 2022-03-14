@@ -8,18 +8,14 @@ import (
 	hc "github.com/mittwald/go-helm-client"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
-	k8serrs "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
 	"time"
 )
 
 const (
-	DefaultKubeConfFmt = "%s/.kube/config"
-
 	DefaultHelmRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
 	DefaultHelmRepositoryCacheFmt  = "%s/.cache/helm/repository"
 
@@ -128,6 +124,7 @@ func (p *Proxy) install(chart Chart) error {
 	}
 
 	p.logger.Info().String("helm install release", name).String("with chart", chartName).Fire()
+	p.logger.Debug().Any("values", values).Fire()
 	chartSpec := &hc.ChartSpec{
 		ReleaseName: name,
 		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
@@ -174,18 +171,18 @@ func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error 
 			return err
 		}
 		if ready {
-			p.logger.Info().String("all pods ready of operator", name).String(" in namespace", p.namespace).Fire()
+			p.logger.Info().String("all pods ready of release", name).String("in namespace", p.namespace).Fire()
 			return nil
 		}
 
 		timeoutSec -= durationSec
 	}
-	return errors.New(fmt.Sprintf("waiting operator ready, timeout=%d", timeoutSec))
+	return errors.New(fmt.Sprintf("install release=%s failed, timeout.", name))
 }
 
 // Note: need to init p.kubeClient before
 func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
-	// 获取指定 namespace 中的 Pod 列表信息
+	// get PodLists
 	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
 	if err != nil {
 		p.logger.Error().Error("list pod error", err).Fire()
@@ -210,49 +207,4 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-// **************************************************************
-// kube client to access k8s resource
-// **************************************************************
-type KClient struct {
-	*kubernetes.Clientset
-}
-
-func NewKClient() (*KClient, error) {
-	kubeConfPath := fmt.Sprintf(DefaultKubeConfFmt, os.Getenv("HOME"))
-	config, err := clientcmd.BuildConfigFromFlags("", kubeConfPath)
-	if err != nil {
-		return nil, err
-	}
-
-	kc, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return &KClient{kc}, nil
-}
-
-func (c *KClient) GetKubeNodes(ctx context.Context) ([]string, error) {
-	nodeList, err := c.CoreV1().Nodes().List(ctx, v1.ListOptions{})
-	if err != nil {
-		return nil, err
-	}
-	var nodeSlice []string
-	for _, node := range nodeList.Items {
-		nodeSlice = append(nodeSlice, node.Name)
-	}
-	return nodeSlice, nil
-}
-
-func (c *KClient) CreateNamespace(ctx context.Context, namespace string) error {
-	ns := &corev1.Namespace{}
-	ns.Name = namespace
-	_, err := c.CoreV1().Namespaces().Get(ctx, namespace, v1.GetOptions{})
-	if err != nil {
-		if k8serrs.IsNotFound(err) {
-			_, err = c.CoreV1().Namespaces().Create(ctx, ns, v1.CreateOptions{})
-		}
-	}
-	return err
 }

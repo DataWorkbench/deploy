@@ -13,21 +13,31 @@ type ChartMeta struct {
 
 	WaitingReady bool
 
-	Image *ImageConfig `json:",omitempty"`
+	values *MetaConfig `json:",omitempty"`
 }
 
-func (m ChartMeta) updateFromConfig(c Config) error {
-	m.Image = c.Image
+func (m *ChartMeta) updateFromConfig(c Config) error {
+	if c.Image == nil {
+		return nil
+	}
+
+	if m.values == nil {
+		m.values = &MetaConfig{}
+	}
+	if m.values.Image == nil {
+		m.values.Image = &ImageConfig{}
+	}
+	m.values.Image.updateFromConfig(c.Image)
 	return nil
 }
 
 func (m ChartMeta) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
-	if m.Image == nil {
+	if m.values == nil || m.values.Image == nil {
 		return v, nil
 	}
 
-	bytes, err := json.Marshal(m.Image)
+	bytes, err := json.Marshal(m.values)
 	if err != nil {
 		return v, err
 	}
@@ -45,4 +55,8 @@ func (m ChartMeta) getReleaseName() string {
 
 func (m ChartMeta) waitingReady() bool {
 	return m.WaitingReady
+}
+
+type MetaConfig struct {
+	Image *ImageConfig `json:"image,omitempty"`
 }

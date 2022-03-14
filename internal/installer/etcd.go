@@ -19,11 +19,15 @@ type EtcdChart struct {
 
 // update each field value from global Config if that is ZERO
 func (e *EtcdChart) updateFromConfig(c Config) error {
+	if c.Etcd != nil {
+		e.values = c.Etcd
+	}
+
 	if c.Image != nil {
 		if e.values.Image == nil {
 			e.values.Image = &ImageConfig{}
+			e.values.Image.updateFromConfig(c.Image)
 		}
-		e.values.Image.updateFromConfig(c.Image)
 	}
 
 	return e.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
@@ -37,4 +41,13 @@ func (e *EtcdChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func NewEtcdChart(release string) *EtcdChart {
+	e := &EtcdChart{}
+	e.ChartName = EtcdClusterChart
+	e.ReleaseName = release
+	e.WaitingReady = true
+	e.values = &EtcdConfig{}
+	return e
 }

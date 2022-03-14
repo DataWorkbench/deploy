@@ -12,9 +12,8 @@ localPvHome: /data
 # pullSecrets:
 #   - my-docker-registry-secret
 image:
-  registry: dockerhub.qingcloud.com
+  registry:
   pullSecrets:
-    - qingcloud-docker-regisrty-secret
   pullPolicy:
 
 dataomnis:

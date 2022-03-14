@@ -13,7 +13,7 @@ type HdfsNodeConfig struct {
 	Storage PersistentConfig `json:"storage,omitempty" yaml:"persistent,omitempty"`
 }
 
-func (node HdfsNodeConfig) updateFromHdfsConfig(c HdfsConfig, role string) error {
+func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) error {
 	if len(node.Storage.LocalPv.Nodes) < 3 {
 		if len(c.Nodes) < 3 {
 			return LeastNodeErr
@@ -36,11 +36,11 @@ type HdfsConfig struct {
 
 	HdfsHome string `json:"hdfsHome" yaml:"-"`
 
-	Namenode    HdfsNodeConfig `json:"namenode,omitempty" yaml:"namenode" validate:"eq=0|eq=2"`
-	Datanode    HdfsNodeConfig `json:"datanode,omitempty" yaml:"datanode" validate:"eq=0|min=3"`
-	Journalnode HdfsNodeConfig `json:"journalnode,omitempty" yaml:"journalnode" validate:"eq=0|min=3"`
+	Namenode    *HdfsNodeConfig `json:"namenode,omitempty" yaml:"namenode" validate:"eq=0|eq=2"`
+	Datanode    *HdfsNodeConfig `json:"datanode,omitempty" yaml:"datanode" validate:"eq=0|min=3"`
+	Journalnode *HdfsNodeConfig `json:"journalnode,omitempty" yaml:"journalnode" validate:"eq=0|min=3"`
 
-	Zookeeper HdfsNodeConfig `json:"zookeeper,omitempty" yaml:"zookeeper" validate:"eq=0|min=3"`
+	Zookeeper *HdfsNodeConfig `json:"zookeeper,omitempty" yaml:"zookeeper" validate:"eq=0|min=3"`
 }
 
 // TODO: validate the yaml and nodes == 2 of namenode
@@ -53,24 +53,20 @@ func (v HdfsConfig) validate() error {
 type HdfsChart struct {
 	ChartMeta
 
-	values HdfsConfig
-}
-
-func NewHdfsChart(release string) *HdfsChart {
-	h := &HdfsChart{}
-	h.ChartName = HdfsClusterChart
-	h.ReleaseName = release
-	h.WaitingReady = true
-	return h
+	values *HdfsConfig
 }
 
 // update each field value from global Config if that is ZERO
 func (h HdfsChart) updateFromConfig(c Config) error {
+	if c.Hdfs != nil {
+		h.values = c.Hdfs
+	}
+
 	if c.Image != nil {
 		if h.values.Image == nil {
 			h.values.Image = &ImageConfig{}
+			h.values.Image.updateFromConfig(c.Image)
 		}
-		h.values.Image.updateFromConfig(c.Image)
 	}
 
 	// TODO: check if localPv exist and start with c.LocalPVHome
@@ -99,4 +95,13 @@ func (h HdfsChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func NewHdfsChart(release string) *HdfsChart {
+	h := &HdfsChart{}
+	h.ChartName = HdfsClusterChart
+	h.ReleaseName = release
+	h.WaitingReady = true
+	h.values = &HdfsConfig{}
+	return h
 }
