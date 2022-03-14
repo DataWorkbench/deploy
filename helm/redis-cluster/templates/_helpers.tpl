@@ -25,9 +25,33 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{- define "sentinel.image" -}}
-{{ .Values.sentinel.image }}:{{- .Chart.AppVersion }}
+{{- if .Values.imageRegistry -}}
+{{- .Values.imageRegistry }}/library/{{- .Values.sentinel.image }}:{{- .Chart.AppVersion }}
+{{- else -}}
+{{- .Values.sentinel.image }}:{{- .Chart.AppVersion }}
+{{- end -}}
+{{- end -}}
+
+{{- define "sentinel.replica" -}}
+{{- if .Values.redis.persistent.localPv.nodes }}
+{{ len .Values.redis.persistent.localPv.nodes }}
+{{- else }}
+{{ .Values.sentinel.replicaCount }}
+{{- end }}
 {{- end }}
 
 {{- define "redis.image" -}}
-{{ .Values.redis.image }}:{{- .Chart.AppVersion }}
+{{- if .Values.imageRegistry -}}
+{{- .Values.imageRegistry }}/library/{{- .Values.redis.image }}:{{- .Chart.AppVersion }}
+{{- else -}}
+{{- .Values.redis.image }}:{{- .Chart.AppVersion }}
+{{- end -}}
+{{- end -}}
+
+{{- define "redis.replica" -}}
+{{- if .Values.redis.persistent.localPv.nodes }}
+{{ len .Values.redis.persistent.localPv.nodes }}
+{{- else }}
+{{ .Values.redis.replicaCount }}
+{{- end }}
 {{- end }}

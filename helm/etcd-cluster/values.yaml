@@ -2,29 +2,27 @@
 
 replicaCount: 3
 
-image:
-  etcd: quay.io/coreos/etcd
-  tag: 3.2.13
-  busyBox: busybox:1.28.0-glibc
+nodes:    # The length of nodes is equal to etcd-cluster replicaCount
+  - "worker-s001"
+  - "worker-s002"
+  - "worker-s003"
 
-resources:
-   limits:
-     cpu: 1000m
-     memory: 2048Mi
-   requests:
-     cpu: 100m
-     memory: 128Mi
+imageRegistry: docker.io
+image: bitnami/etcd:3.5.1-debian-10-r88
+imagePullPolicy: IfNotPresent
+
+persistentVolume:
+  reclaimPolicy: Retain
+  etcdHome: /data/dataomnis
 
 persistent:
   size: 10Gi
   accessModes: ["ReadWriteOnce"]
-  localPv:
-    enable: true
-    home: /data/dataomnis
-    reclaimPolicy: Retain
-    nodes: # The length of nodes is equal to etcd-cluster replicaCount
-      - worker-s001
-      - worker-s002
-      - worker-s003
 
 
+## @param initialClusterState Initial cluster state. Allowed values: 'new' or 'existing'
+## If this values is not set, the default values below are set:
+## - 'new': when installing the chart ('helm install ...')
+## - 'existing': when upgrading the chart ('helm upgrade ...')
+##
+initialClusterState: ""

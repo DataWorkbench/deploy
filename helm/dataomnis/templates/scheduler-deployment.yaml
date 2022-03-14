@@ -35,16 +35,12 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-mysql
-        image: {{ .Values.image.busybox }}
+        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
-      - name: wait-etcd
-        image: {{ .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "etcd.waiting.cmd" . }}']
       containers:
       - name: scheduler
-        image: {{ .Values.image.repo }}/scheduler:{{- .Values.image.tag }}
+        image: {{ .Values.image.registry }}/dataomnis/scheduler:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "scheduler start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:

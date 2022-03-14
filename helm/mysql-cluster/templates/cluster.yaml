@@ -56,7 +56,7 @@ spec:
     {{- else }}
     size: {{ $pxc.size }}
     {{- end }}
-    image: "{{ $pxc.image.repository }}:{{ $pxc.image.tag }}"
+    image: {{ include "pxc-db.pxc-image" . }}
     imagePullPolicy: IfNotPresent
     autoRecovery: {{ $pxc.autoRecovery }}
     readinessDelaySec: {{ $pxc.readinessDelaySec }}
@@ -303,7 +303,7 @@ spec:
   {{- else }}
     {{- $pmm := .Values.pmm }}
     enabled: true
-    image: {{ $pmm.image.repository }}:{{ $pmm.image.tag }}
+    image: {{ include "pxc-db.pmm-client-image" . }}
     imagePullPolicy: IfNotPresent
     serverHost: {{ $pmm.serverHost }}
     serverUser: {{ $pmm.serverUser }}

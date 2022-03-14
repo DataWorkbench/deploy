@@ -81,9 +81,12 @@ _compile(){
 
 
 # handle param
-mkdir -p "${BIN_DIR}"
+mkdir -p ${BIN_DIR}
+echo "clean ${BIN_DIR}/* .."
+rm -rf ${BIN_DIR}/*
+
 if [ -n "${CONF_DIR}" ]; then
-  mkdir -p "${CONF_DIR}"
+  mkdir -p ${CONF_DIR}
 fi
 
 if [ -z "${SERVICE_PARAM}" ]; then

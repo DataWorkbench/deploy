@@ -35,7 +35,7 @@ spec:
       {{- end }}
       containers:
       - name: jaeger
-        image: {{ .Values.image.jaeger | quote }}
+        image: {{ .Values.image.registry }}/{{- .Values.image.jaeger }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
           - name: service

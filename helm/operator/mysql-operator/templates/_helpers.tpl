@@ -48,9 +48,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Functions returns image URI according to parameters set
 */}}
 {{- define "pxc-operator.image" -}}
-{{- if .Values.image }}
+{{- if .Values.imageRegistry -}}
+{{- printf "%s/%s" .Values.imageRegistry .Values.image }}
+{{- else -}}
 {{- .Values.image }}
-{{- else }}
-{{- printf "%s:%s" .Values.operatorImageRepository .Chart.AppVersion }}
-{{- end }}
+{{- end -}}
 {{- end -}}

@@ -23,7 +23,6 @@ spec:
     component: etcd
 
 ---
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -34,8 +33,6 @@ metadata:
   name: {{ printf "%s-headless" (include "etcd-cluster.fullname" .) }}
 spec:
   clusterIP: None
-  clusterIPs:
-    - None
   ports:
     - name: client
       port: 2379

@@ -35,12 +35,12 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-mysql
-        image: {{ .Values.image.busybox }}
+        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
       - name: spacemanager
-        image: {{ .Values.image.repo }}/spacemanager:{{- .Values.image.tag }}
+        image: {{ .Values.image.registry }}/dataomnis/spacemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         command: ["sh", "-c", "spacemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
         ports:
@@ -53,11 +53,25 @@ spec:
             value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
           - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
             value: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
+          - name: SPACE_MANAGER_CLUSTER_FLINK_DOMAIN
+            value: "{{ .Values.domain }}"
+          - name: SPACE_MANAGER_CLUSTER_FLINK_WEBUI_PORT
+            value: "{{ .Values.port }}"
           - name: SPACE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
+          - name: SPACE_MANAGER_IAAS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-secret
+                key: access_key_id
+          - name: SPACE_MANAGER_IAAS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-secret
+                key: secret_access_key
 {{ include "spacemanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
           - name: {{ $ename }}

@@ -20,5 +20,5 @@ app.kubernetes.io/managed-by: {{ .Release.Service | quote }}
 {{- end }}
 
 {{ define "image" -}}
-{{ printf "%s:%s" .Values.image .Values.tag }}
+{{ printf "%s/%s:%s" .Values.imageRegistry .Values.image .Values.tag }}
 {{- end }}

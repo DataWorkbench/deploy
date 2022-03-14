@@ -11,6 +11,30 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{- define "datanode.length" -}}
+{{- if .Values.datanode.nodes }}
+{{- len .Values.datanode.nodes }}
+{{- else }}
+{{- len .Values.nodes }}
+{{- end }}
+{{- end }}
+
+{{- define "journalnode.length" -}}
+{{- if .Values.journalnode.nodes }}
+{{- len .Values.journalnode.nodes }}
+{{- else }}
+{{- len .Values.nodes }}
+{{- end }}
+{{- end }}
+
+{{- define "zookeeper.length" -}}
+{{- if .Values.zookeeper.nodes }}
+{{- len .Values.zookeeper.nodes }}
+{{- else }}
+{{- len .Values.nodes }}
+{{- end }}
+{{- end }}
+
 {{- define "zookeeper.quorum" -}}
 {{- if .Values.zookeeper.quorum }}
 {{- .Values.zookeeper.quorum }}

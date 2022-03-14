@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-developer
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: developer
+annotations:
+  {{- range $key, $value := .Values.developer.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.developer.replicas .Values.common.replicas }}
+  strategy:
+    type: {{ coalesce .Values.developer.strategy .Values.common.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: developer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: developer
+      annotations:
+      {{- range $key, $value := .Values.developer.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      {{- if .Values.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecret }}
+      {{- end }}
+      containers:
+      - name: developer
+        image: {{ .Values.image.registry }}/dataomnis/developer:{{- .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - name: service
+            containerPort: {{ .Values.ports.developer }}
+          - name: metrics
+            containerPort: {{ .Values.metricsPorts.developer }}
+        env:
+          - name: DEVELOPER_HTTP_PORT
+            value: "{{ .Values.metricsPorts.developer }}"
+          - name: DEVELOPER_GRPC_PORT
+            value: "{{ .Values.ports.developer }}"
+{{ include "developer.link.services" . | indent 10 }}
+          {{- range $ename, $evalue := .Values.developer.envs }}
+          - name: {{ $ename }}
+            value: {{ $evalue | quote }}
+          {{- end }}
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: {{ .Values.metricsPorts.developer }}
+          {{- if .Values.developer.readinessProbe }}
+          periodSeconds: {{ .Values.developer.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.developer.readinessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+          {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: {{ .Values.metricsPorts.developer }}
+          {{- if .Values.developer.livenessProbe }}
+          periodSeconds: {{ .Values.developer.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.developer.livenessProbe.initialDelaySeconds }}
+          {{- else }}
+          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+          {{- end }}

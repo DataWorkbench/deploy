@@ -1,2 +1,4 @@
 
-operatorImage: "dockerhub.qingcloud.com/dataomnis/hadoop-operator:0.0.1"
+imageRegistry: "dockerhub.qingcloud.com"
+image: "dataomnis/hadoop-operator:0.0.1"
+rbacImage: "kubesphere/kube-rbac-proxy:v0.8.0"

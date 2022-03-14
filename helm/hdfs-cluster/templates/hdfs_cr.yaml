@@ -3,18 +3,18 @@ kind: HDFS
 metadata:
   name: {{ .Release.Name }}
 spec:
-  version: {{ .Values.version }}  # hadoop version
-  image: {{ .Values.image }}
+  version: {{ .Chart.AppVersion }}  # hadoop version
+  image: {{ .Values.imageRegistry }}/{{ .Values.image }}
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc
     capacity: 10Gi
-    replicas: {{ len .Values.namenode.nodes }}
+    replicas: 2
   journalnode:
     name: journalnode
     storageClass: {{ include "hdfs.fullname" . }}-journalnode-sc
     capacity: 10Gi
-    replicas: {{ len .Values.journalnode.nodes }}
+    replicas: {{ include "journalnode.length" . }}
   datanode:
     name: datanode
     storageClass: {{ include "hdfs.fullname" . }}-datanode-sc
@@ -22,7 +22,7 @@ spec:
     datadirs:
       - dn1    #  k8s节点多目录
       - dn2
-    replicas: {{ len .Values.datanode.nodes }}
+    replicas: {{ include "datanode.length" . }}
   zkQuorum: {{ include "zookeeper.quorum" . }}
   hdfsSite:
     - property: "dfs.namenode.handler.count"

@@ -2,15 +2,16 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-repo:=dockerhub.databench.io/dataomnis
+repo:=dockerhub.dataomnis.io
 TRAG.Gopkg:=DataWorkbench
 
-tag:=dev
-FLYWAY_IMAGE:=$(repo)/flyway:$(tag)
-ZEPPELIN_IMAGE:=$(repo)/zeppelin:0.9.0
-FLINK_IMAGE:=$(repo)/flinkutile:1.12.3-scala_2.11
-BUILDER_IMAGE:=$(repo)/builder:latest
-BUILDER_IMAGE_ZEPPELIN:=$(repo)/builder:zeppelin
+DEFAULT_TAG=dev
+tag:=$(DEFAULT_TAG)
+FLYWAY_IMAGE:=$(repo)/dataomnis/flyway:$(tag)
+ZEPPELIN_IMAGE:=$(repo)/dataomnis/zeppelin:0.9.0
+FLINK_IMAGE:=$(repo)/dataomnis/flinkutile:1.12.3-scala_2.11
+BUILDER_IMAGE:=dockerhub.qingcloud.com/dataomnis/builder:latest
+BUILDER_IMAGE_ZEPPELIN:=dockerhub.qingcloud.com/dataomnis/builder:zeppelin
 
 LOCAL_CACHE:=`go env GOCACHE`
 LOCAL_MODCACHE:=`go env GOPATH`/pkg
@@ -18,12 +19,16 @@ WORKDIR_IN_DOCKER=/$(TRAG.Gopkg)
 RUN_IN_DOCKER:=docker run -it --rm -v `pwd`/..:$(WORKDIR_IN_DOCKER) -v ${LOCAL_CACHE}:/go/cache -v $(LOCAL_MODCACHE):/go/pkg -w $(WORKDIR_IN_DOCKER) $(BUILDER_IMAGE)
 
 PWD_DIR:=$(shell pwd)
+DOCKERFILE:=./deploy/Dockerfile
+ifeq ($(tag),$(DEFAULT_TAG))
+	DOCKERFILE=./deploy/Dockerfile.dev
+endif
 
 comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,flowmanager,jobmanager,jobdeveloper,jobwatcher,scheduler,sourcemanager,udfmanager,resourcemanager,notifier,account,enginemanager
+service=apiglobal,apiserver,spacemanager,jobmanager,scheduler,resourcemanager,notifier,account,enginemanager
 SERVICE_ARRAY=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=dataomnis-db-ctrl
 
@@ -55,7 +60,7 @@ build-flink-utile:
 
 .PHONY: build-image
 build-image: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/$(S):$(tag) -f ./deploy/Dockerfile .;)
+	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
@@ -74,7 +79,7 @@ push-zeppelin:
 
 .PHONY: push-image  ## push dataomnis service image
 push-image:
-	@$(foreach S,$(SERVICE_ARRAY),docker push $(repo)/$(S):$(tag);)
+	@$(foreach S,$(SERVICE_ARRAY),docker push $(repo)/dataomnis/$(S):$(tag);)
 	@echo "push $(service) done"
 
 .PHONY: pull-images

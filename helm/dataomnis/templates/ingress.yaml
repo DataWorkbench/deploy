@@ -4,7 +4,10 @@ metadata:
   name: {{ include "dataomnis.fullname" . }}-api-ingress
   annotations:
     # limit the size of uploaded-file
+    # for nginx-ingress
     nginx.org/client-max-body-size: "100m"
+    # for ingress-nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
 spec:
   ingressClassName: nginx
   rules:
@@ -27,7 +30,10 @@ metadata:
   name: {{ include "dataomnis.fullname" . }}-global-ingress
   annotations:
     # limit the size of uploaded-file
+    # for nginx-ingress
     nginx.org/client-max-body-size: "100m"
+    # for ingress-nginx
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
 spec:
   ingressClassName: nginx
   rules:
