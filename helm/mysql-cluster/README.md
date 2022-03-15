@@ -72,11 +72,11 @@ The chart can be customized using the following configurable parameters:
 | `pxc.tolerations`                           | List of node taints to tolerate for PXC Pods                                                                             | `[]`                             |
 | `pxc.gracePeriod`                           | Allowed time for graceful shutdown                                                                                       | `600`                            |
 | `pxc.podDisruptionBudget.maxUnavailable`    | Instruct Kubernetes about the failed pods allowed quantity                                                               | `1`                              |
-| `pxc.persistence.enabled`                   | Requests a persistent storage (`hostPath` or `storageClass`) from K8S for PXC Pods datadir                               | `true`                           |
-| `pxc.persistence.hostPath`                  | Sets datadir path on K8S node for all PXC Pods. Available only when `pxc.persistence.enabled: true`                      |                                  |
-| `pxc.persistence.storageClass`              | Sets K8S storageClass name for all PXC Pods PVC. Available only when `pxc.persistence.enabled: true`                     | `-`                              |
-| `pxc.persistence.accessMode`                | Sets K8S persistent storage access policy for all PXC Pods                                                               | `ReadWriteOnce`                  |
-| `pxc.persistence.size`                      | Sets K8S persistent storage size for all PXC Pods                                                                        | `8Gi`                            |
+| `pxc.persistent.enabled`                   | Requests a persistent storage (`hostPath` or `storageClass`) from K8S for PXC Pods datadir                               | `true`                           |
+| `pxc.persistent.hostPath`                  | Sets datadir path on K8S node for all PXC Pods. Available only when `pxc.persistent.enabled: true`                      |                                  |
+| `pxc.persistent.storageClass`              | Sets K8S storageClass name for all PXC Pods PVC. Available only when `pxc.persistent.enabled: true`                     | `-`                              |
+| `pxc.persistent.accessMode`                | Sets K8S persistent storage access policy for all PXC Pods                                                               | `ReadWriteOnce`                  |
+| `pxc.persistent.size`                      | Sets K8S persistent storage size for all PXC Pods                                                                        | `8Gi`                            |
 | `pxc.disableTLS`                            | Disable PXC Pod communication with TLS                                                                                   | `false`                          |
 | `pxc.certManager`                           | Enable this option if you want the operator to request certificates from `cert-manager`                                  | `false`                          |
 | `pxc.readinessProbes.failureThreshold`      | When a probe fails, Kubernetes will try failureThreshold times before giving up                                          | `5`                              |
@@ -153,11 +153,11 @@ The chart can be customized using the following configurable parameters:
 | `proxysql.tolerations`                   | List of node taints to tolerate for ProxySQL Pods                       | `[]`                                      |
 | `proxysql.gracePeriod`                   | Allowed time for graceful shutdown                       | `600`                                      |
 | `proxysql.podDisruptionBudget.maxUnavailable` | Instruct Kubernetes about the failed pods allowed quantity           | `1`                                      |
-| `proxysql.persistence.enabled` | Requests a persistent storage (`hostPath` or `storageClass`) from K8S for ProxySQL Pods  | `true`                                      |
-| `proxysql.persistence.hostPath` | Sets datadir path on K8S node for all ProxySQL Pods. Available only when `proxysql.persistence.enabled: true` |                             |
-| `proxysql.persistence.storageClass` | Sets K8S storageClass name for all ProxySQL Pods PVC. Available only when `proxysql.persistence.enabled: true` | `-`                      |
-| `proxysql.persistence.accessMode` | Sets K8S persistent storage access policy for all ProxySQL Pods | `ReadWriteOnce`                      |
-| `proxysql.persistence.size` | Sets K8S persistent storage size for all ProxySQL Pods | `8Gi`                      |
+| `proxysql.persistent.enabled` | Requests a persistent storage (`hostPath` or `storageClass`) from K8S for ProxySQL Pods  | `true`                                      |
+| `proxysql.persistent.hostPath` | Sets datadir path on K8S node for all ProxySQL Pods. Available only when `proxysql.persistent.enabled: true` |                             |
+| `proxysql.persistent.storageClass` | Sets K8S storageClass name for all ProxySQL Pods PVC. Available only when `proxysql.persistent.enabled: true` | `-`                      |
+| `proxysql.persistent.accessMode` | Sets K8S persistent storage access policy for all ProxySQL Pods | `ReadWriteOnce`                      |
+| `proxysql.persistent.size` | Sets K8S persistent storage size for all ProxySQL Pods | `8Gi`                      |
 | |
 | `logcollector.enabled`            | Enable log collector container                                           | `true` |
 | `logcollector.image`              | Log collector image repository                                           | `percona/percona-xtradb-cluster-operator:1.9.0-logcollector` |
@@ -212,7 +212,7 @@ This is great for a dev cluster as it doesn't require a persistent disk and does
 ```bash
 $ helm install dev  --namespace pxc . \
     --set proxysql.enabled=false --set pxc.disableTLS=true \
-    --set pxc.persistence.enabled=false --set backup-enabled=false
+    --set pxc.persistent.enabled=false --set backup-enabled=false
 ```
 
 ### Deploy a cluster with certificates provided by Cert Manager

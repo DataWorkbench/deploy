@@ -14,8 +14,8 @@ fullnameOverride: ""
 
 image:
   resitry: ""
-  operator: percona/percona-xtradb-cluster-operator
   pullSecrets: []
+  operator: percona/percona-xtradb-cluster-operator
 
 pause: false
 allowUnsafeConfigurations: false
@@ -71,7 +71,7 @@ pxc:
     # only one of maxUnavailable or minAvaliable can be set
     maxUnavailable: 1
     # minAvailable: 0
-  persistence:
+  persistent:
     enabled: true
     accessMode: ReadWriteOnce
     size: 10Gi
@@ -181,7 +181,7 @@ proxysql:
   podDisruptionBudget:
     maxUnavailable: 1
     # minAvailable: 0
-  persistence:
+  persistent:
     enabled: true
     storageClass: "local"
     accessMode: ReadWriteOnce

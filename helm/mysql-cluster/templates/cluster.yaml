@@ -51,8 +51,8 @@ spec:
   {{- end }}
   {{- $pxc := .Values.pxc }}
   pxc:
-    {{- if .Values.pxc.persistence.localPv.nodes }}
-    size: {{ len .Values.pxc.persistence.localPv.nodes }}
+    {{- if .Values.pxc.persistent.localPv.nodes }}
+    size: {{ len .Values.pxc.persistent.localPv.nodes }}
     {{- else }}
     size: {{ $pxc.size }}
     {{- end }}
@@ -108,22 +108,22 @@ spec:
     podDisruptionBudget:
 {{ $pxc.podDisruptionBudget | toYaml | indent 6 }}
     volumeSpec:
-    {{- if not $pxc.persistence.enabled }}
+    {{- if not $pxc.persistent.enabled }}
       emptyDir: {}
     {{- else }}
-    {{- if hasKey $pxc.persistence "hostPath" }}
+    {{- if hasKey $pxc.persistent "hostPath" }}
       hostPath:
-        path: {{ $pxc.persistence.hostPath }}
+        path: {{ $pxc.persistent.hostPath }}
         type: Directory
     {{- else }}
       persistentVolumeClaim:
-        {{- if $pxc.persistence.localPv.enabled }}
+        {{- if $pxc.persistent.localPv.enabled }}
         storageClassName: {{ include "pxc-database.fullname" . }}-sc
         {{- end }}
-        accessModes: [{{ $pxc.persistence.accessMode | quote }}]
+        accessModes: [{{ $pxc.persistent.accessMode | quote }}]
         resources:
           requests:
-            storage: {{ $pxc.persistence.size | quote }}
+            storage: {{ $pxc.persistent.size | quote }}
     {{- end }}
     {{- end }}
     gracePeriod: {{ $pxc.gracePeriod }}
@@ -261,26 +261,26 @@ spec:
     podDisruptionBudget:
 {{ $proxysql.podDisruptionBudget | toYaml | indent 6 }}
     volumeSpec:
-    {{- if not $proxysql.persistence.enabled }}
+    {{- if not $proxysql.persistent.enabled }}
       emptyDir: {}
     {{- else }}
-    {{- if hasKey $proxysql.persistence "hostPath" }}
+    {{- if hasKey $proxysql.persistent "hostPath" }}
       hostPath:
-        path: {{ $proxysql.persistence.hostPath }}
+        path: {{ $proxysql.persistent.hostPath }}
         type: Directory
     {{- else }}
       persistentVolumeClaim:
-        {{- if $proxysql.persistence.storageClass }}
-        {{- if (eq "-" $proxysql.persistence.storageClass) }}
+        {{- if $proxysql.persistent.storageClass }}
+        {{- if (eq "-" $proxysql.persistent.storageClass) }}
         storageClassName: ""
         {{- else }}
-        storageClassName: "{{ $proxysql.persistence.storageClass }}"
+        storageClassName: "{{ $proxysql.persistent.storageClass }}"
         {{- end }}
         {{- end }}
-        accessModes: [{{ $proxysql.persistence.accessMode | quote }}]
+        accessModes: [{{ $proxysql.persistent.accessMode | quote }}]
         resources:
           requests:
-            storage: {{ $proxysql.persistence.size | quote }}
+            storage: {{ $proxysql.persistent.size | quote }}
     {{- end }}
     {{- end }}
     gracePeriod: {{ $proxysql.gracePeriod }}

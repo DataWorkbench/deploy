@@ -97,7 +97,7 @@ pxc:
     # With only 3 nodes, don't let Kubernetes disrupt more than one at a time.
     maxUnavailable: 1
     # minAvailable: 0
-  persistence:
+  persistent:
     enabled: true
     ## set storage class if you need something fancy for your cloud.
     # storageClass: "-"
@@ -326,7 +326,7 @@ proxysql:
   podDisruptionBudget:
     maxUnavailable: 1
     # minAvailable: 0
-  persistence:
+  persistent:
     enabled: true
     # storageClass: "-"
     accessMode: ReadWriteOnce

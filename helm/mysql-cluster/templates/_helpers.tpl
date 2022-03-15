@@ -70,7 +70,7 @@ Functions returns image URI according to parameters set
 */}}
 {{- define "pxc-db.pxc-image" -}}
 {{- if .Values.imageRegistry }}
-{{- printf "%s/%s" .Values.imageRegistry .Values.pxc.image }}
+{{- printf "%s/%s" .Values.image.registry .Values.pxc.image }}
 {{- else }}
 {{- .Values.pxc.image }}
 {{- end }}
@@ -79,46 +79,46 @@ Functions returns image URI according to parameters set
 {{- define "pxc-db.haproxy-image" -}}
 {{- if .Values.haproxy.image }}
 {{- .Values.haproxy.image }}
-{{- else if .Values.imageRegistry }}
-{{- printf "%s/%s:%s-haproxy" .Values.imageRegistry .Values.image .Chart.AppVersion }}
+{{- else if .Values.image.registry }}
+{{- printf "%s/%s:%s-haproxy" .Values.image.registry .Values.image.operator .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-haproxy" .Values.image .Chart.AppVersion }}
+{{- printf "%s:%s-haproxy" .Values.image.operator .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.proxysql-image" -}}
 {{- if .Values.proxysql.image }}
 {{- .Values.proxysql.image }}
-{{- else if .Values.imageRegistry }}
-{{- printf "%s/%s:%s-proxysql" .Values.imageRegistry .Values.image .Chart.AppVersion }}
+{{- else if .Values.image.registry }}
+{{- printf "%s/%s:%s-proxysql" .Values.image.registry .Values.image.operator .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-proxysql" .Values.image .Chart.AppVersion }}
+{{- printf "%s:%s-proxysql" .Values.image.operator .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.logcollector-image" -}}
 {{- if .Values.logcollector.image }}
 {{- .Values.logcollector.image }}
-{{- else if .Values.imageRegistry }}
-{{- printf "%s/%s:%s-logcollector" .Values.imageRegistry .Values.image .Chart.AppVersion }}
+{{- else if .Values.image.registry }}
+{{- printf "%s/%s:%s-logcollector" .Values.image.registry .Values.image.operator .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-logcollector" .Values.image .Chart.AppVersion }}
+{{- printf "%s:%s-logcollector" .Values.image.operator .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.backup-image" -}}
 {{- if .Values.backup.image }}
 {{- .Values.backup.image }}
-{{- else if .Values.imageRegistry }}
-{{- printf "%s/%s:%s-pxc8.0-backup" .Values.imageRegistry .Values.image .Chart.AppVersion }}
+{{- else if .Values.image.registry }}
+{{- printf "%s/%s:%s-pxc8.0-backup" .Values.image.registry .Values.image.operator .Chart.AppVersion }}
 {{- else }}
-{{- printf "%s:%s-pxc8.0-backup" .Values.image .Chart.AppVersion }}
+{{- printf "%s:%s-pxc8.0-backup" .Values.image.operator .Chart.AppVersion }}
 {{- end }}
 {{- end -}}
 
 {{- define "pxc-db.pmm-client-image" -}}
-{{- if .Values.imageRegistry }}
-{{- printf "%s/%s" .Values.imageRegistry .Values.pmm.image }}
+{{- if .Values.image.registry }}
+{{- printf "%s/%s" .Values.image.registry .Values.pmm.image }}
 {{- else }}
 {{- .Values.pmm.image }}
 {{- end }}
