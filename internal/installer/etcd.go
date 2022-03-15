@@ -33,6 +33,10 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 	return e.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
+func (e EtcdChart) initLocalPvHome() error {
+	return nil
+}
+
 func (e *EtcdChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(e.values)

@@ -17,8 +17,8 @@ const (
 	// helm chart name
 	EtcdClusterChart  = "etcd-cluster-1.0.0.tgz"
 	HdfsClusterChart  = "hdfs-cluster-0.1.1.tgz"
-	RedisClusterChart = "redis-operator-3.1.0.tgz"
-	MysqlClusterChart = "pxc-operator-1.9.1.tgz"
+	RedisClusterChart = "redis-cluster-1.0.0.tgz"
+	MysqlClusterChart = "pxc-db-1.9.1.tgz"
 	// release name
 	EtcdClusterName  = "etcd-cluster"
 	HdfsClusterName  = "hdfs-cluster"
