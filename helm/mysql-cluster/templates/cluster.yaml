@@ -68,7 +68,9 @@ spec:
     {{- end }}
     {{- if .Values.image.pullSecrets }}
     imagePullSecrets:
-{{ .Values.image.pullSecrets | toYaml | indent 6 }}
+      {{- range .Values.image.pullSecrets }}
+      - name: {{ . }}
+      {{- end }}
     {{- end }}
 {{- if hasKey $pxc "priorityClassName" }}
     priorityClassName: {{ $pxc.priorityClassName }}
@@ -141,7 +143,9 @@ spec:
     image: {{ include "pxc-db.haproxy-image" . }}
     {{- if .Values.image.pullSecrets }}
     imagePullSecrets:
-{{ .Values.image.pullSecrets | toYaml | indent 6 }}
+      {{- range .Values.image.pullSecrets }}
+      - name: {{ . }}
+      {{- end }}
     {{- end }}
     {{- if $haproxy.configuration }}
     configuration: |
@@ -207,7 +211,9 @@ spec:
     image: {{ include "pxc-db.proxysql-image" . }}
     {{- if .Values.image.pullSecrets }}
     imagePullSecrets:
-    {{- .Values.image.pullSecrets | toYaml | indent 6 }}
+      {{- range .Values.image.pullSecrets }}
+      - name: {{ . }}
+      {{- end }}
     {{- end }}
     {{- if $proxysql.configuration }}
     configuration: |
@@ -323,7 +329,9 @@ spec:
     imagePullPolicy: IfNotPresent
     {{- if .Values.image.pullSecrets }}
     imagePullSecrets:
-{{ .Values.image.pullSecrets | toYaml | indent 6 }}
+      {{- range .Values.image.pullSecrets }}
+      - name: {{ . }}
+      {{- end }}
     {{- end }}
     pitr:
     {{- if not $backup.pitr.enabled }}
