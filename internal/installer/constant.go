@@ -24,6 +24,10 @@ const (
 	HdfsClusterName  = "hdfs-cluster"
 	RedisClusterName = "redis-cluster"
 	MysqlClusterName = "mysql-cluster"
+
+	// dataomnis
+	DataomnisSystemChart = "dataomnis-1.0.0.tgz"
+	DataomnisSystemName = "dataomnis"
 )
 
 const (

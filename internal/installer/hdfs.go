@@ -97,11 +97,16 @@ func (h HdfsChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func NewHdfsChart(release string) *HdfsChart {
+func NewHdfsChart(release string, c Config) *HdfsChart {
 	h := &HdfsChart{}
 	h.ChartName = HdfsClusterChart
 	h.ReleaseName = release
 	h.WaitingReady = true
-	h.values = &HdfsConfig{}
+
+	if c.Hdfs != nil {
+		h.values = c.Hdfs
+	} else {
+		h.values = &HdfsConfig{}
+	}
 	return h
 }

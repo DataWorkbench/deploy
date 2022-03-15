@@ -47,11 +47,16 @@ func (e *EtcdChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func NewEtcdChart(release string) *EtcdChart {
+func NewEtcdChart(release string, c Config) *EtcdChart {
 	e := &EtcdChart{}
 	e.ChartName = EtcdClusterChart
 	e.ReleaseName = release
 	e.WaitingReady = true
-	e.values = &EtcdConfig{}
+
+	if c.Etcd != nil {
+		e.values = c.Etcd
+	} else {
+		e.values = &EtcdConfig{}
+	}
 	return e
 }

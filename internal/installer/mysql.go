@@ -50,11 +50,16 @@ func (m MysqlChart) getLabels() map[string]string {
 	}
 }
 
-func NewMysqlChart(release string) *MysqlChart {
+func NewMysqlChart(release string, c Config) *MysqlChart {
 	m := &MysqlChart{}
 	m.ChartName = MysqlClusterChart
 	m.ReleaseName = release
 	m.WaitingReady = true
-	m.values = &MysqlConfig{}
+
+	if c.Mysql != nil {
+		m.values = c.Mysql
+	} else {
+		m.values = &MysqlConfig{}
+	}
 	return m
 }

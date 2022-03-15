@@ -1,6 +1,6 @@
 apiVersion: v2
-version: 0.0.1
-appVersion: 0.0.1
+version: 1.0.0
+appVersion: 0.8.0
 name: dataomnis
 description: Helm Charts For Dataomnis Service
 maintainers:

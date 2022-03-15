@@ -25,19 +25,23 @@ type RedisChart struct {
 }
 
 // update each field value from global Config if that is ZERO
-func (h RedisChart) updateConfig(c Config) error {
+func (r *RedisChart) updateConfig(c Config) error {
+	if c.Redis != nil {
+		r.values = c.Redis
+	}
+
 	if c.Image != nil {
-		if h.values.Image == nil {
-			h.values.Image = &ImageConfig{}
-			h.values.Image.updateFromConfig(c.Image)
+		if r.values.Image == nil {
+			r.values.Image = &ImageConfig{}
+			r.values.Image.updateFromConfig(c.Image)
 		}
 	}
-	return h.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
+	return r.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
-func (h RedisChart) parseValues() (Values, error) {
+func (r RedisChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
-	bytes, err := json.Marshal(h.values)
+	bytes, err := json.Marshal(r.values)
 	if err != nil {
 		return v, err
 	}
@@ -45,11 +49,16 @@ func (h RedisChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func NewRedisChart(release string) *RedisChart {
+func NewRedisChart(release string, c Config) *RedisChart {
 	r := &RedisChart{}
-	r.ChartName = MysqlClusterChart
+	r.ChartName = RedisClusterChart
 	r.ReleaseName = release
 	r.WaitingReady = true
-	r.values = &RedisConfig{}
+
+	if c.Redis != nil {
+		r.values = c.Redis
+	} else {
+		r.values = &RedisConfig{}
+	}
 	return r
 }

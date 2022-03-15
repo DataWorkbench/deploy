@@ -143,11 +143,11 @@ type DataomnisConfig struct {
 type DataomnisChart struct {
 	ChartMeta
 
-	values DataomnisConfig
+	values *DataomnisConfig
 }
 
 // update each field value from global Config if that is ZERO
-func (d *DataomnisChart) updateFromConfig(c Config) {
+func (d *DataomnisChart) updateFromConfig(c Config) error {
 	if c.Image != nil {
 		if d.values.Image == nil {
 			d.values.Image = &ImageConfig{}
@@ -162,6 +162,7 @@ func (d *DataomnisChart) updateFromConfig(c Config) {
 	d.values.RedisClient.Address = fmt.Sprintf(RedisAddressFmt, RedisClusterName)
 
 	d.values.Apiglobal.updateRegion()
+	return nil
 }
 
 func (d *DataomnisChart) parseValues() (Values, error) {
@@ -172,4 +173,18 @@ func (d *DataomnisChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func NewDataomnisChart(release string, c Config) *DataomnisChart {
+	d := &DataomnisChart{}
+	d.ChartName = DataomnisSystemChart
+	d.ReleaseName = release
+	d.WaitingReady = true
+
+	if c.Dataomnis != nil {
+		d.values = c.Dataomnis
+	} else {
+		d.values = &DataomnisConfig{}
+	}
+	return d
 }

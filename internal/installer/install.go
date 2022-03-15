@@ -25,6 +25,7 @@ var AllServices []string
 func init() {
 	AllServices = append(AllServices, Operators...)
 	AllServices = append(AllServices, DependencyServices...)
+	AllServices = append(AllServices, DataomnisSystemName)
 }
 
 func Install(configFile string, debug bool, services *[]string) error {
@@ -53,7 +54,7 @@ func Install(configFile string, debug bool, services *[]string) error {
 	// install operators
 	for _, service := range *services {
 		if StrContains(Operators, service) {
-			if err = installOperator(ctx, service, logger, debug, *conf); err != nil{
+			if err = installOperator(ctx, service, *conf, logger, debug); err != nil{
 				return err
 			}
 		}
@@ -62,16 +63,21 @@ func Install(configFile string, debug bool, services *[]string) error {
 	// install dependency service
 	for _, service := range *services {
 		if StrContains(DependencyServices, service) {
-			if err = installDependencyService(ctx, service, logger, debug, *conf); err != nil{
+			if err = installDependencyService(ctx, service, *conf, logger, debug); err != nil{
 				return err
 			}
 		}
+	}
+
+	// install dataomnis
+	if StrContains(*services, DataomnisSystemName) {
+		return installDataomnis(ctx, DataomnisSystemName, *conf, logger, debug)
 	}
 	return nil
 }
 
 
-func installOperator(ctx context.Context, name string, logger *glog.Logger, debug bool, c Config) error {
+func installOperator(ctx context.Context, name string, c Config, logger *glog.Logger, debug bool) error {
 	var helm *Proxy
 	var err error
 	logger.Info().String("new helm proxy with namespace", DefaultOperatorNamespace).Fire()
@@ -100,7 +106,7 @@ func installOperator(ctx context.Context, name string, logger *glog.Logger, debu
 }
 
 
-func installDependencyService(ctx context.Context, name string, logger *glog.Logger, debug bool, c Config) error {
+func installDependencyService(ctx context.Context, name string, c Config, logger *glog.Logger, debug bool) error {
 	var helm *Proxy
 	var err error
 	logger.Info().String("install dependency service", name).Msg("..").Fire()
@@ -112,13 +118,13 @@ func installDependencyService(ctx context.Context, name string, logger *glog.Log
 	var chart Chart
 	switch name {
 	case EtcdClusterName:
-		chart = NewEtcdChart(name)
+		chart = NewEtcdChart(name, c)
 	case HdfsClusterName:
-		chart = NewHdfsChart(name)
+		chart = NewHdfsChart(name, c)
 	case MysqlClusterName:
-		chart = NewMysqlChart(name)
+		chart = NewMysqlChart(name, c)
 	case RedisClusterName:
-		chart = NewRedisChart(name)
+		chart = NewRedisChart(name, c)
 	}
 	if err = chart.updateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
@@ -131,6 +137,31 @@ func installDependencyService(ctx context.Context, name string, logger *glog.Log
 	logger.Info().String("install dependency service", name).Msg(", done.").Fire()
 	return nil
 }
+
+
+func installDataomnis(ctx context.Context, name string, c Config, logger *glog.Logger, debug bool) error {
+	var helm *Proxy
+	var err error
+	logger.Info().Msg("install dataomnis ..").Fire()
+	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
+		logger.Error().Error("create helm proxy error", err).Fire()
+		return err
+	}
+
+	var chart Chart
+	chart = NewDataomnisChart(name, c)
+	if err = chart.updateFromConfig(c); err != nil {
+		logger.Error().Error("update values from Config error", err).Fire()
+		return err
+	}
+	if err = helm.install(chart); err != nil {
+		logger.Error().Error("helm install dataomnis error", err).Fire()
+		return err
+	}
+	logger.Info().Msg("install dataomnis, done.").Fire()
+	return nil
+}
+
 
 func StrContains(ss []string, s string) bool {
 	for _, _s := range ss {
