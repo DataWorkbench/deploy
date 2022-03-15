@@ -50,7 +50,7 @@ spec:
           - name: DEVELOPER_JAEGER_SERVER_ADDRESS
             value: '{{ include "dataomnis.fullname" . }}-jaeger'
           - name: DEVELOPER_JAEGER_SERVER_PORT
-            value: {{ .Values.ports.jaeger }}
+            value: "{{ .Values.ports.jaeger }}"
 {{ include "developer.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.developer.envs }}
           - name: {{ $ename }}
