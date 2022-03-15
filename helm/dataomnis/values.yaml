@@ -79,6 +79,15 @@ apiglobal:
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
+  # authentication
+  authentication:
+    identity_providers:
+      enfi:
+        name: enfi
+        client_id: "9034819z8a161e5a809c"
+        client_secret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
+        token_url: "http://9qpah2.natappfree.cc/sys/BigDataOauth/accessToken"
+        redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
   envs:
     API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
     API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
