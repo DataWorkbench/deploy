@@ -17,10 +17,10 @@ type Chart interface {
 	// return relase name
 	getReleaseName() string
 
+	getLabels() map[string]string
+
 	// whether to wait release ready
 	waitingReady() bool
-
-
 }
 
 

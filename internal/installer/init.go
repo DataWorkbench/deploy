@@ -1,0 +1,5 @@
+package installer
+
+func InitConfiguration() {
+
+}

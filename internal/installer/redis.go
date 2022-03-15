@@ -21,7 +21,7 @@ func (v RedisConfig) validate() error {
 type RedisChart struct {
 	ChartMeta
 
-	values RedisConfig
+	values *RedisConfig
 }
 
 // update each field value from global Config if that is ZERO
@@ -43,4 +43,13 @@ func (h RedisChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func NewRedisChart(release string) *RedisChart {
+	r := &RedisChart{}
+	r.ChartName = MysqlClusterChart
+	r.ReleaseName = release
+	r.WaitingReady = true
+	r.values = &RedisConfig{}
+	return r
 }

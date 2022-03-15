@@ -32,3 +32,14 @@ const (
 	HdfsConfigMapFmt     = "%s-common-config"
 	RedisAddressFmt      = "rfs-%s"
 )
+
+const (
+	DefaultOperatorNamespace = "dataomnis-operator"
+	DefaultSystemNamespace   = "dataomnis-system"
+
+	// flink helm chart name
+	FlinkChart = "flink-0.1.6.tgz"
+
+	InstanceLabelKey           = "app.kubernetes.io/instance"
+	MysqlInstanceLabelValueFmt = "%s-pxc-db"
+)

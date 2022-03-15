@@ -2,26 +2,45 @@ package installer
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/DataWorkbench/glog"
 )
 
-const (
-	DefaultOperatorNamespace = "dataomnis-operator"
-	DefaultSystemNamespace   = "dataomnis-system"
-
-	// flink helm chart name
-	FlinkChart = "flink-0.1.6.tgz"
-)
-
-func InitConfiguration() {
-
+var Operators = []string{
+	HdfsOptName,
+	MysqlOptName,
+	RedisOptName,
 }
 
-func Install(configFile string, debug bool) error {
+var DependencyServices = []string{
+	EtcdClusterName,
+	HdfsClusterName,
+	MysqlClusterName,
+	RedisClusterName,
+}
+
+var AllServices []string
+
+func init() {
+	AllServices = append(AllServices, Operators...)
+	AllServices = append(AllServices, DependencyServices...)
+}
+
+func Install(configFile string, debug bool, services *[]string) error {
 	ctx := context.Background()
 	logger := glog.NewDefault()
 	if debug {
 		logger = logger.WithLevel(glog.DebugLevel)
+	}
+
+	// check
+	for _, s := range *services {
+		if !StrContains(AllServices, s) {
+			msg := fmt.Sprintf("The service:%s cat not be installed.", s)
+			logger.Error().Msg(msg).Fire()
+			return errors.New(msg)
+		}
 	}
 
 	conf := &Config{}
@@ -30,20 +49,29 @@ func Install(configFile string, debug bool) error {
 		return err
 	}
 
+
 	// install operators
-	logger.Info().Msg("install operators ..").Fire()
-	if err = installOperators(ctx, logger, debug, *conf); err != nil {
-		return err
+	for _, service := range *services {
+		if StrContains(Operators, service) {
+			if err = installOperator(ctx, service, logger, debug, *conf); err != nil{
+				return err
+			}
+		}
 	}
 
-	logger.Info().Msg("install database-services ..").Fire()
-	if err = installDatabases(ctx, logger, debug, *conf); err != nil {
-		return err
+	// install dependency service
+	for _, service := range *services {
+		if StrContains(DependencyServices, service) {
+			if err = installDependencyService(ctx, service, logger, debug, *conf); err != nil{
+				return err
+			}
+		}
 	}
 	return nil
 }
 
-func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
+
+func installOperator(ctx context.Context, name string, logger *glog.Logger, debug bool, c Config) error {
 	var helm *Proxy
 	var err error
 	logger.Info().String("new helm proxy with namespace", DefaultOperatorNamespace).Fire()
@@ -52,77 +80,63 @@ func installOperators(ctx context.Context, logger *glog.Logger, debug bool, c Co
 		return err
 	}
 
-	logger.Info().Msg("install hdfs-operator ..").Fire()
-	hdfsOperator := NewHdfsOperatorChart(HdfsOptName, c)
-	if err = helm.install(hdfsOperator); err != nil {
-		logger.Error().Error("install hdfs-operator error", err).Fire()
+	var chart Chart
+	switch name {
+	case HdfsOptName:
+		chart = NewHdfsOperatorChart(name, c)
+	case MysqlOptName:
+		chart = NewMysqlOperatorChart(name, c)
+	case RedisOptName:
+		chart = NewRedisOperatorChart(name, c)
+	}
+
+	logger.Info().String("install operator", name).Msg("..").Fire()
+	if err = helm.install(chart); err != nil {
+		logger.Error().Error("install operator error", err).Fire()
 		return err
 	}
-	logger.Info().String("install hdfs-operator, done.", HdfsOptName).Fire()
-
-	logger.Info().Msg("install mysql-operator ..").Fire()
-	mysqlOperator := NewMysqlOperatorChart(MysqlOptName, c)
-	if err = helm.install(mysqlOperator); err != nil {
-		logger.Error().Error("install mysql-operator error", err).Fire()
-		return err
-	}
-	logger.Info().Msg("install mysql-operator, done.").Fire()
-
-	//logger.Info().Msg("install redis-operator ..").Fire()
-	//redisOperator := NewRedisOperatorChart(RedisOptName, c)
-	//if err = helm.install(redisOperator); err != nil {
-	//	logger.Error().Error("install redis-operator error", err).Fire()
-	//	return err
-	//}
-	//logger.Info().Msg("install redis-operator, done.").Fire()
+	logger.Info().String("install operator", name).Msg(", done.").Fire()
 	return nil
 }
 
-func installDatabases(ctx context.Context, logger *glog.Logger, debug bool, c Config) error {
-	var (
-	 	helm *Proxy
-		err error
-	)
-	logger.Info().String("new helm proxy with namespace", DefaultSystemNamespace).Fire()
+
+func installDependencyService(ctx context.Context, name string, logger *glog.Logger, debug bool, c Config) error {
+	var helm *Proxy
+	var err error
+	logger.Info().String("install dependency service", name).Msg("..").Fire()
 	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
-		logger.Error().Error("create helm proxy to install operators error", err).Fire()
+		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
 
-	logger.Info().Msg("install etcd-cluster ..").Fire()
-	etcd := NewEtcdChart(EtcdClusterName)
-	if err = etcd.updateFromConfig(c); err != nil {
-		logger.Error().Error("update etcd values from Config error", err).Fire()
+	var chart Chart
+	switch name {
+	case EtcdClusterName:
+		chart = NewEtcdChart(name)
+	case HdfsClusterName:
+		chart = NewHdfsChart(name)
+	case MysqlClusterName:
+		chart = NewMysqlChart(name)
+	case RedisClusterName:
+		chart = NewRedisChart(name)
+	}
+	if err = chart.updateFromConfig(c); err != nil {
+		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
-	if err = helm.install(etcd); err != nil {
-		logger.Error().Error("helm install etcd-cluster error", err).Fire()
+	if err = helm.install(chart); err != nil {
+		logger.Error().Error("helm install dependency service error", err).Fire()
 		return err
 	}
-	logger.Info().Msg("install etcd-cluster, done.").Fire()
-
-	logger.Info().Msg("install hdfs-cluster ..").Fire()
-	hdfs := NewHdfsChart(HdfsClusterName)
-	if err = hdfs.updateFromConfig(c); err != nil {
-		logger.Error().Error("update hdfs values from Config error", err).Fire()
-		return err
-	}
-	if err = helm.install(hdfs); err != nil {
-		logger.Error().Error("helm install hdfs-cluster error", err).Fire()
-		return err
-	}
-	logger.Info().Msg("install hdfs-cluster, done.").Fire()
-
-	logger.Info().Msg("install mysql-cluster ..").Fire()
-	mysql := NewMysqlChart(MysqlClusterName)
-	if err = mysql.updateFromConfig(c); err != nil {
-		logger.Error().Error("update mysql values from Config error", err).Fire()
-		return err
-	}
-	if err = helm.install(mysql); err != nil {
-		logger.Error().Error("helm install mysql-cluster error", err).Fire()
-		return err
-	}
-	logger.Info().Msg("install mysql-cluster, done.").Fire()
+	logger.Info().String("install dependency service", name).Msg(", done.").Fire()
 	return nil
+}
+
+func StrContains(ss []string, s string) bool {
+	for _, _s := range ss {
+		if _s == s {
+			return true
+		}
+	}
+	return false
 }

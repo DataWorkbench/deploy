@@ -139,16 +139,16 @@ func (p *Proxy) install(chart Chart) error {
 	}
 
 	if chart.waitingReady() {
-		err = p.waitingReady(name, DefaultWaitTimeoutSec, DefaultDurationSec)
+		err = p.waitingReady(chart, DefaultWaitTimeoutSec, DefaultDurationSec)
 	}
 	return err
 }
 
-func (p *Proxy) waitingReady(name string, timeoutSec, durationSec uint64) error {
+func (p *Proxy) waitingReady(chart Chart, timeoutSec, durationSec uint64) error {
+	name := chart.getReleaseName()
 	p.logger.Info().String("waiting release", name).Msg("ready..").Fire()
-	labelMap := map[string]string{
-		"app.kubernetes.io/instance": name,
-	}
+
+	labelMap := chart.getLabels()
 	ops := v1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labelMap).String(),
 	}

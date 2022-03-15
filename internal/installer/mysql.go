@@ -2,6 +2,7 @@ package installer
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type MysqlConfig struct {
@@ -41,6 +42,12 @@ func (m *MysqlChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func (m MysqlChart) getLabels() map[string]string {
+	return map[string]string{
+		InstanceLabelKey: fmt.Sprintf(MysqlInstanceLabelValueFmt, m.ReleaseName),
+	}
 }
 
 func NewMysqlChart(release string) *MysqlChart {

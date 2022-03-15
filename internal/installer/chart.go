@@ -53,6 +53,12 @@ func (m ChartMeta) getReleaseName() string {
 	return m.ReleaseName
 }
 
+func (m ChartMeta) getLabels() map[string]string {
+	return map[string]string{
+		InstanceLabelKey: m.ReleaseName,
+	}
+}
+
 func (m ChartMeta) waitingReady() bool {
 	return m.WaitingReady
 }
