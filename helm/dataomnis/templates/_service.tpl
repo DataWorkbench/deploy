@@ -17,10 +17,6 @@ Service Addresses For ApiServer
 {{ include "dataomnis.fullname" . }}-jobmanager:{{ .Values.ports.jobmanager }}
 {{- end -}}
 
-{{- define "service.zeppelin" -}}
-{{ include "dataomnis.fullname" . }}-zeppelin-server:{{ .Values.ports.zeppelin }}
-{{- end -}}
-
 {{- define "service.resourcemanager" -}}
 {{ include "dataomnis.fullname" . }}-resourcemanager:{{ .Values.ports.resourcemanager }}
 {{- end -}}
@@ -45,8 +41,6 @@ Service Addresses For ApiServer
   value: '{{- include "service.spacemanager" . }}'
 - name: API_SERVER_SCHEDULER_ADDRESS
   value: '{{- include "service.scheduler" . }}'
-- name: API_SERVER_JOB_MANAGER_ADDRESS
-  value: '{{ include "service.jobmanager" . }}'
 - name: API_SERVER_RESOURCE_MANAGER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
 - name: API_SERVER_ACCOUNT_SERVER_ADDRESS
@@ -57,21 +51,8 @@ Service Addresses For ApiServer
   value: '{{ include "service.developer" . }}'
 {{- end -}}
 
-{{- define "jobmanager.link.services" -}}
-- name: JOB_MANAGER_ZEPPELIN_ADDRESS
-  value: '{{ include "service.zeppelin" . }}'
-- name: JOB_MANAGER_RESOURCEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.resourcemanager" . }}'
-- name: JOB_MANAGER_ENGINEMANAGER_SERVER_ADDRESS
-  value: '{{ include "service.enginemanager" . }}'
-- name: JOB_MANAGER_SPACE_MANAGER_ADDRESS
-  value: '{{- include "service.spacemanager" . }}'
-{{- end -}}
-
 
 {{- define "scheduler.link.services" -}}
-- name: SCHEDULER_JOB_MANAGER_ADDRESS
-  value: '{{ include "service.jobmanager" . }}'
 - name: SCHEDULER_DEVELOPER_ADDRESS
   value: '{{ include "service.developer" . }}'
 - name: SCHEDULER_SPACE_MANAGER_ADDRESS
@@ -80,8 +61,6 @@ Service Addresses For ApiServer
 
 
 {{- define "spacemanager.link.services" -}}
-- name: SPACE_MANAGER_JOB_MANAGER_ADDRESS
-  value: '{{ include "service.jobmanager" . }}'
 - name: SPACE_MANAGER_ENGINE_MANAGER_ADDRESS
   value: '{{ include "service.enginemanager" . }}'
 - name: SPACE_MANAGER_SCHEDULER_ADDRESS
