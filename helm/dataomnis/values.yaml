@@ -100,7 +100,7 @@ apiglobal:
   # http proxy
   http_proxy: "http://172.20.0.6:8888"
 
-  envs:
+  envs: {}
 
 # apiserver configuration
 apiserver:
