@@ -42,21 +42,13 @@ spec:
       - name: spacemanager
         image: {{ .Values.image.registry }}/dataomnis/spacemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "spacemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "spacemanager start -c /opt/dataomnis/conf/spacemanager.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.spacemanager }}
           - name: metrics
             containerPort: {{ .Values.metricsPorts.spacemanager }}
         env:
-          - name: SPACE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
-          - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
-          - name: SPACE_MANAGER_CLUSTER_FLINK_DOMAIN
-            value: "{{ .Values.domain }}"
-          - name: SPACE_MANAGER_CLUSTER_FLINK_WEBUI_PORT
-            value: "{{ .Values.port }}"
           - name: SPACE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -65,12 +57,12 @@ spec:
           - name: SPACE_MANAGER_IAAS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: access_key_id
           - name: SPACE_MANAGER_IAAS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: secret_access_key
 {{ include "spacemanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
@@ -99,12 +91,22 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataomnis"
+            mountPath: /opt/dataomnis/conf
             readOnly: true
+          {{- if eq .Values.common.logOutput "file" }}
+          - name: log
+            mountPath: /opt/dataomnis/log/spacemanager
+          {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: spacemanager.yaml
+                path: spacemanager.yaml
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/spacemanager
+            type: Directory
+        {{- end  }}

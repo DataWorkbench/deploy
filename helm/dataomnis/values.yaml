@@ -22,7 +22,6 @@ image:
   zeppelinTag: 0.9.0
 
   busybox: busybox:1.28.4
-  zeppelinInterpreter: dataomnis/zeppelin:0.9.0
   jaeger: jaegertracing/all-in-one:1.22
 
 # common configuration for all service
@@ -30,7 +29,7 @@ common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
-  logLevelOutput: "file" # "console" or "file"
+  logOutput: "file" # "console" or "file"
   grpcLog:
     level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
@@ -75,7 +74,13 @@ redis:
 
 # apiglobal settings
 apiglobal:
-  enable: true
+  enabled: true
+  httpServer:
+    read_timeout: 30s
+    write_timeout: 30s
+    dle_timeout: 30s
+    exit_timeout: 5m
+
   # region settings
   regions:
     testing:
@@ -94,21 +99,16 @@ apiglobal:
         redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
   # http proxy
   http_proxy: "http://172.20.0.6:8888"
+
   envs:
-    API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
-    API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
-    API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
-    http_proxy: "http://172.20.0.6:8888"
 
 # apiserver configuration
 apiserver:
-  read_timeout: 30s
-  write_timeout: 30s
-  idle_timeout: 30s
-  exit_timeout: 5m
-
+  httpServer:
+    read_timeout: 30s
+    write_timeout: 30s
+    idle_timeout: 30s
+    exit_timeout: 5m
   envs:
 
 # account configuration
@@ -118,84 +118,46 @@ account:
 
 # enginemanager configuration
 enginemanager:
-  replicas: 1
-  helmRepoPath: "/root/.cache/helm/repository"
-  kubeConfigPath: "/root/.kube/config"
-  envs:
-    ENGINE_MANAGER_LOG_LEVEL: 1
-    ENGINE_MANAGER_GRPC_LOG_LEVEL: 1
-    ENGINE_MANAGER_TRACER_SERVICE_NAME: "enginemanager"
-    ENGINE_MANAGER_HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
-    ENGINE_MANAGER_HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
-    ENGINE_MANAGER_HELM_DRIVER: ""
-    ENGINE_MANAGER_HELM_DEBUG: false
-    ENGINE_MANAGER_HELM_QUERY_STATUS_DURATION: 10
+  kubeConfPath: "/root/.kube/config"
+  helm:
+    repoConfig: "/root/.config/helm/repositories.yaml"
+    repoCachePath: "/root/.cache/helm/repository"
+    debug: false
 
-    ENGINE_MANAGER_FLINK_REST_SERVICE_PORT: "8081"
-    ENGINE_MANAGER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-    ENGINE_MANAGER_FLINK_INGRESS_CLASS: "nginx"
-    ENGINE_MANAGER_FLINK_ENABLE_MULTUS: false
+  flink:
+    restServicePort: "8081"
+    restServiceNameFmt: "%s-flink-jobmanager-rest"
+    ingressClass: "nginx"
+    enableMultus: false
 
-# jobmanager configuration
-jobmanager:
-  envs:
-    JOB_MANAGER_TRACER_SERVICE_NAME: "jobmanager"
-
-# logmanager configuration
-logmanager:
-  envs:
-    LOG_MANAGER_TRACER_SERVICE_NAME: "logmanager"
-    LOG_MANAGER_HDFS_SERVER_USER_NAME: "root"
-    LOG_MANAGER_HDFS_SERVER_BUFFER_SIZE: 1024
-
-# notifier configuration
-notifier:
-  envs:
-    NOTIFIER_NF_CONFIG_CHANNEL: "SMTPChannel"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_ACCESS_KEY_ID: "IKSMDBWVIECPIVNDYZAB"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_SECRET_ACCESS_KEY: "JnEco2qZ6EvXt89mJpCVdkBoc5AwPA0unrkFkOxq"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_HOST: "api.alphacloud.com"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_PORT: 7777
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_PROTOCOL: "http"
-    NOTIFIER_NF_CONFIG_SDK_CONFIG_URI: "/iaas"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_HOST: "smtp.163.com"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PORT: 25
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_USER_NAME: "xiaobai417sos@163.com"
-    NOTIFIER_NF_CONFIG_SMTP_CONFIG_PASSWORD: "82717785"
-
-# observer configuration
-observer:
   envs: {}
 
 # resourcemanager configuration
 resourcemanager:
-  envs:
-    RESOURCE_MANAGER_HADOOP_CONF_DIR: /etc/hadoop
-    RESOURCE_MANAGER_TRACER_SERVICE_NAME: "resourcemanager"
+  storage:
+    background: "hdfs"
+    hadoopConfDir: "/etc/hadoop/conf"
+    s3:
+      endpoint: "s3.gd2.qingstor.com"
+      region: "gd2" # us-west-2
+      bucket: "demo-yu-gd2-15"
+
+  envs: {}
 
 # scheduler configuration
 scheduler:
-  envs:
-    SCHEDULER_TRACER_SERVICE_NAME: "scheduler"
-    SCHEDULER_ETCD_DIAL_TIMEOUT: 5s
+  etcdDialTimeout: 5s
+
+  streamJobCrontabRetryInterval: 120s
+  streamJobCheckInstanceStateInterval: 30s
+  syncJobCrontabRetryInterval: 120s
+  syncJobCheckInstanceStateInterval: 30s
+
+  envs: {}
 
 # spacemanager configuration
 spacemanager:
-  envs:
-    SPACE_MANAGER_TRACER_SERVICE_NAME: "spacemanager"
-    SPACE_MANAGER_ETCD_DIAL_TIMEOUT: 5s
-    SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
-    SPACE_MANAGER_CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-
-# zeppelin configuration
-zeppelin:
-  hdfsConfigDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
-  envs:
-    ZEPPELIN_HOME: /opt/zeppelin
-    ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
-    ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE: spark:2.4.5
-    SPARK_MASTER: k8s://https://kubernetes.default.svc
-    SPARK_HOME: /spark
+  envs: {}
 
 developer:
   envs:

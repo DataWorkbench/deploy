@@ -63,12 +63,12 @@ spec:
           - name: ACCOUNT_IAAS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: access_key_id
           - name: ACCOUNT_IAAS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: secret_access_key
           {{- range $ename, $evalue := .Values.account.envs }}
           - name: {{ $ename }}
@@ -98,7 +98,7 @@ spec:
           - name: config
             mountPath: /opt/dataomnis/conf
             readOnly: true
-          {{- eq .Values.common.logLevelOutput "file" }}
+          {{- if eq .Values.common.logOutput "file" }}
           - name: log
             mountPath: /opt/dataomnis/log
           {{- end }}
@@ -109,7 +109,7 @@ spec:
             items:
               - key: "account.yaml"
                 path: "account.yaml"
-        {{- eq .Values.common.logLevelOutput "file" }}
+        {{- if eq .Values.common.logOutput "file" }}
         - name: log
           hostPath:
             path: {{ .Values.persistent.hostPath }}/log

@@ -43,17 +43,13 @@ spec:
       - name: enginemanager
         image: {{ .Values.image.registry }}/dataomnis/enginemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "enginemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "enginemanager start -c /opt/dataomnis/conf/enginemanager.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.enginemanager }}
           - name: metrics
             containerPort: {{ .Values.metricsPorts.enginemanager }}
         env:
-          - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.enginemanager }}"
-          - name: ENGINE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.enginemanager }}"
           - name: ENGINE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -62,21 +58,13 @@ spec:
           - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: access_key_id
           - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
             valueFrom:
               secretKeyRef:
-                name: dataomnis-secret
+                name: dataomnis-iaas-secret
                 key: secret_access_key
-          - name: ENGINE_MANAGER_FLINK_DOMAIN
-            value: {{ .Values.domain | quote }}
-          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAME
-            value: {{ .Values.hdfs.configmapName }}
-          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAMESPACE
-            value: {{ .Release.Namespace | quote }}
-          - name: ENGINE_MANAGER_FLINK_IMAGE_REPO
-            value: "{{- .Values.image.registry }}/dataomnis/flink"
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -85,14 +73,18 @@ spec:
           - name: dataomnis-config
             mountPath: "/etc/dataomnis"
             readOnly: true
-         {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+          {{- if .Values.enginemanager.kubeConfPath }}
           - name: kube-config-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+            mountPath: {{ .Values.enginemanager.kubeConfPath }}
             readOnly: true
-        {{- end }}
+          {{- end }}
           - name: helm-repo-volume
-            mountPath: {{ .Values.enginemanager.envs.ENGINE_MANAGER_HELM_REPOSITORY_CACHE }}
+            mountPath: {{ .Values.enginemanager.helm.repoCachePath }}
             readOnly: true
+          {{- if eq .Values.common.logOutput "file" }}
+          - name: log
+            mountPath: /opt/dataomnis/log/enginemanager
+          {{- end }}
         readinessProbe:
           exec:
             command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
@@ -114,13 +106,13 @@ spec:
           initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
           {{- end }}
       volumes:
-        - name: dataomnis-config
+        - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
-        {{- if .Values.enginemanager.envs.ENGINE_MANAGER_KUBE_CONF_PATH }}
+              - key: enginemanager.yaml
+                path: enginemanager.yaml
+        {{- if .Values.enginemanager.kubeConfPath }}
         - name: kube-config-volume
           hostPath:
             path: {{ .Values.enginemanager.kubeConfigPath }}
@@ -130,3 +122,9 @@ spec:
           hostPath:
             path: {{ .Values.enginemanager.helmRepoPath }}
             type: Directory
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/enginemanager
+            type: Directory
+        {{- end  }}

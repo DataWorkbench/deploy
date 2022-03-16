@@ -6,16 +6,15 @@ metadata:
 {{ include "dataomnis.labels" . | indent 4 }}
 data:
   account.yaml: |
-    # config for log.
     log:
-      level: {{ coalesce .Values.account.logLevel .Values.common.logLevel }} # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
-      output: {{ coalesce .Values.account.logLevelOutput .Values.common.logLevelOutput }}
+      level: {{ coalesce .Values.account.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.account.logOutput .Values.common.logOutput }}
       file:
         path: "/opt/dataomnis/log/account/account.log"
         max_size: 128 # In MB.
         max_age: 0
         max_backups: 0
-        compress: false # determines if the rotated log files should be compressed using gzip.
+        compress: false
 
     grpc_server:
       address: "0.0.0.0:{{- .Values.ports.account }}"
@@ -65,21 +64,21 @@ data:
 
   apiserver.yaml: |
     log:
-      level: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel }} # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
-      output: "file" # "console" or "file"
+      level: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.apiserver.logOutput .Values.common.logOutput }}
       file:
-        path: "/opt/dataomnis/log/apiserver/account.log"
+        path: "/opt/dataomnis/log/apiserver/apiserver.log"
         max_size: 128 # In MB.
         max_age: 0
         max_backups: 0
-        compress: false # determines if the rotated log files should be compressed using gzip.
+        compress: false
 
     http_server:
       address: "0.0.0.0:{{ .Values.ports.apiserver }}"
-      read_timeout:  {{ .Values.apiserver.read_timeout }}
-      write_timeout: {{ .Values.apiserver.write_timeout }}
-      idel_timeout:  {{ .Values.apiserver.idle_timeout }}
-      exit_timeout:  {{ .Values.apiserver.exit_timeout }}
+      read_timeout:  {{ .Values.apiserver.httpServer.read_timeout }}
+      write_timeout: {{ .Values.apiserver.httpServer.write_timeout }}
+      idel_timeout:  {{ .Values.apiserver.httpServer.idle_timeout }}
+      exit_timeout:  {{ .Values.apiserver.httpServer.exit_timeout }}
 
     tracer:
       service_name: "apiserver"
@@ -90,52 +89,28 @@ data:
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
 
-  config.yaml: |
-    log_level: {{ .Values.common.logLevel }}
+  {{- if .Values.apiglobal.enabled }}
+  apiglobal.yaml: |
+    log:
+      level: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.apiglobal.logOutput .Values.common.logOutput }}
+      file:
+        path: "/opt/dataomnis/log/apiglobal/apiglobal.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
 
-    grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
-      verbosity: {{ .Values.common.grpcLog.verbosity }}
-
-    grpc_server:
-      level: {{ .Values.common.grpcLog.logLevel }}
-      verbosity: {{ .Values.common.grpcLog.verbosity }}
-
-    metrics_server:
-      enabled: {{ .Values.common.metrics.enabled }}
-      url_path: {{ .Values.common.metrics.urlPath }}
-
-    mysql:
-      hosts: {{ include "mysql.hostPort" . | quote }}
-      users: {{ .Values.mysql.user }}
-      database: {{ .Values.mysql.database }}
-      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
-      max_open_conn: {{ .Values.mysql.maxOpenConn }}
-      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
-      log_level: {{ .Values.mysql.logLevel }}
-      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+    http_server:
+      address: "0.0.0.0:{{ .Values.ports.apiglobal }}"
+      read_timeout: {{ .Values.apiglobal.httpServer.read_timeout }}
+      write_timeout: {{ .Values.apiglobal.httpServer.write_timeout }}
+      idel_timeout: {{ .Values.apiglobal.httpServer.idle_timeout }}
+      exit_timeout: {{ .Values.apiglobal.httpServer.exit_timeout }}
 
     tracer:
+      service_name: "apiglobal"
       local_agent: {{ include "service.jaeger" . | quote }}
-
-    redis:
-      sentinel_addr: {{ include "service.redis" . | quote }}
-      database: {{ .Values.redis.database }}
-      master_name: {{ .Values.redis.masterName }}
-      mode: "sentinel"
-
-    etcd:
-      endpoints: {{ include "etcd.endpoints" . | quote }}
-      dial_timeout: 5s
-
-    # iaas api configuration
-    iaas:
-      zone: {{ .Values.iaas.zone }}
-      protocol: {{ .Values.iaas.protocol }}
-      host: {{ .Values.iaas.host }}
-      port: {{ .Values.iaas.port }}
-      uri: {{ .Values.iaas.uri }}
-      timeout: {{ .Values.iaas.timeout }}
 
     # region info for apiglobal
     regions:
@@ -159,6 +134,206 @@ data:
           redirect_url: {{ $provider.redirect_url }}
       {{- end }}
 
-    # http proxy for apiglobal
-    http_proxy: {{ .Values.apiglobal.http_proxy }}
+      # http proxy for apiglobal
+      http_proxy: {{ .Values.apiglobal.httpProxy }}
+  {{- end }}
 
+  enginemanager.yaml: |
+    log:
+      level: {{ coalesce .Values.enginemanager.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.enginemanager.logOutput .Values.common.logOutput }}
+      file:
+        path: "/opt/dataomnis/log/enginemanager/enginemanager.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.enginemanager }}"
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metrics_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.enginemanager }}"
+      url_path: {{ .Values.common.metrics.urlPath }}
+
+    tracer:
+      service_name: "enginemanager"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    mysql:
+      hosts: {{ include "mysql.hostPort" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    kube_conf_path: {{ .Values.enginemanager.kubeConfPath }}
+    helm:
+      repository_config: {{ .Values.enginemanager.helm.repoConfig }}
+      repository_cache: {{ .Values.enginemanager.helm.repoCachePath }}
+      debug: {{ .Values.enginemanager.helm.debug }}
+
+    flink:
+      image_repo: "{{ .Values.image.registry }}/dataomnis/flink"
+      image_pull_secret: {{ .Values.image.pullSecret }}
+      hdfs_configmap_name: {{ .Values.hdfs.configmapName }}
+      hdfs_configmap_namespace: {{ .Release.Namespace | quote }}
+      ingress_class: {{ .Values.enginemanager.flink.ingressClass }}
+      domain: {{ .Values.domain | quote }}
+      rest_service_port: {{ .Values.enginemanager.flink.restServicePort }}
+      rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt }}
+      enable_multus: {{ .Values.enginemanager.flink.enableMultus }}
+
+    # iaas api configuration
+    iaas:
+      zone: {{ .Values.iaas.zone }}
+      protocol: {{ .Values.iaas.protocol }}
+      host: {{ .Values.iaas.host }}
+      port: {{ .Values.iaas.port }}
+      uri: {{ .Values.iaas.uri }}
+      timeout: {{ .Values.iaas.timeout }}
+
+
+  resourcemanager.yaml: |
+    log:
+      level: {{ coalesce .Values.resourcemanager.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.resourcemanager.logOutput .Values.common.logOutput }}
+      file:
+        path: "/opt/dataomnis/log/resourcemanager/resourcemanager.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
+      log_level: {{ .Values.common.grpcLog.logLevel }}
+      log_verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metircs_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.resourcemanager }}"
+
+    tracer:
+      service_name: "resourcemanager"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    storeage:
+      background: {{ .Values.resourcemanager.storage.background }}
+      hadoop_conf_dir: {{ .Values.resourcemanager.storage.hadoopConfDir }}
+      s3:
+        endpoint: {{ .Values.resourcemanager.storage.s3.endpoint }}
+        region: {{ .Values.resourcemanager.storage.s3.region }}
+        bucket: {{ .Values.resourcemanager.storage.s3.bucket }}
+        disable_ssl: false
+        force_path_style: false
+
+
+  scheduler.yaml: |
+    log:
+      level: {{ coalesce .Values.scheduler.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.scheduler.logOutput .Values.common.logOutput }}
+      file:
+        path: "/opt/dataomnis/log/scheduler/scheduler.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.scheduler }}"
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metircs_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.scheduler }}"
+
+    tracer:
+      service_name: "scheduler"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    mysql:
+      hosts: {{ include "mysql.hostPort" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    etcd:
+      endpoints: {{ include "etcd.endpoints" . | quote }}
+      dial_timeout: {{ .Values.scheduler.etcdDialTimeout }}
+
+    schedule:
+      stream_job_crontab_retry_interval: {{ .Values.scheduler.streamJobCrontabRetryInterval }}
+      stream_job_check_instance_state_interval: {{ .Values.scheduler.streamJobCheckInstanceStateInterval }}
+      sync_job_crontab_retry_interval: {{ .Values.scheduler.syncJobCrontabRetryInterval }}
+      sync_job_check_instance_state_interval: {{ .Values.scheduler.syncJobCheckInstanceStateInterval }}
+
+  spacemanager.yaml: |
+    log:
+      level: {{ coalesce .Values.spacemanager.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.spacemanager.logOutput .Values.common.logOutput }}
+      file:
+        path: "/opt/dataomnis/log/spacemanager/spacemanager.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.spacemanager }}"
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metircs_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
+
+    tracer:
+      service_name: "spacemanager"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    mysql:
+      hosts: {{ include "mysql.hostPort" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    cluster:
+      flink:
+        domain: {{ .Values.domain | quote }}
+        webui_port: {{ .Values.port }}
+        rest_service_port: {{ .Values.enginemanager.flink.restServicePort }}
+        rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt }}
+
+    # iaas api configuration
+    iaas:
+      zone: {{ .Values.iaas.zone }}
+      protocol: {{ .Values.iaas.protocol }}
+      host: {{ .Values.iaas.host }}
+      port: {{ .Values.iaas.port }}
+      uri: {{ .Values.iaas.uri }}
+      timeout: {{ .Values.iaas.timeout }}

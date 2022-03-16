@@ -1,4 +1,4 @@
-{{- if .Values.apiglobal.enable }}
+{{- if .Values.apiglobal.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -38,15 +38,11 @@ spec:
         - name: apiglobal
           image: {{ .Values.image.registry }}/dataomnis/apiglobal:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/sh", "-c", "apiglobal start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+          command: ["/bin/sh", "-c", "apiglobal start -c /opt/dataomnis/conf/apiglobal.yaml"]
           ports:
             - name: service
               containerPort: {{ .Values.ports.apiglobal }}
           env:
-            - name: API_GLOBAL_LOG_LEVEL
-              value: {{ coalesce .Values.apiglobal.logLevel .Values.common.logLevel | quote }}
-            - name: API_GLOBAL_HTTP_SERVER_ADDRESS
-              value: "0.0.0.0:{{ .Values.ports.apiglobal }}"
             - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
               value: '{{ include "service.account" . }}'
             {{- range $ename, $evalue := .Values.apiglobal.envs }}
@@ -74,16 +70,27 @@ spec:
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
           volumeMounts:
-            - name: dataomnis-config
-              mountPath: "/etc/dataomnis"
+            - name: config
+              mountPath: /opt/dataomnis/conf
               readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log/apiglobal
+            {{- end }}
       volumes:
-        - name: dataomnis-config
+        - name: config
           configMap:
             name: dataomnis-config
             items:
               - key: "config.yaml"
-                path: "common-config.yaml"
+                path: "apiglobal.yaml"
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/apiglobal
+            type: Directory
+        {{- end  }}
+
 ---
 apiVersion: v1
 kind: Service

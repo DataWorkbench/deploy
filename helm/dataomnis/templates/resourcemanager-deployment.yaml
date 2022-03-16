@@ -38,22 +38,30 @@ spec:
       - name: resourcemanager
         image: {{ .Values.image.registry }}/dataomnis/resourcemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "resourcemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "resourcemanager start -c /opt/dataomnis/conf/resourcemanager.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.resourcemanager }}
           - name: metrics
             containerPort: {{ .Values.metricsPorts.resourcemanager }}
         env:
-          - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
-          - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.resourcemanager }}"
           - name: RESOURCE_MANAGER_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
+          {{- if eq .Values.resourcemanager.storeage.background "s3" }}
+          - name: RESOURCE_MANAGER_STORAGE_S3_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-iaas-secret
+                key: access_key_id
+          - name: RESOURCE_MANAGER_STORAGE_S3_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: dataomnis-iaas-secret
+                key: secret_access_key
+          {{- end }}
           {{- range $ename, $evalue := .Values.resourcemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -80,18 +88,25 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: /etc/dataomnis
+            mountPath: /opt/dataomnis/conf
             readOnly: true
+          {{- if eq .Values.resourcemanager.storeage.background "hdfs" }}
           - name: hdfs-config
-            mountPath: {{ .Values.resourcemanager.envs.RESOURCE_MANAGER_HADOOP_CONF_DIR }}
+            mountPath: {{ .Values.resourcemanager.storage.hadoop_conf_dir }}
             readOnly: true
+          {{- end }}
+          {{- if eq .Values.common.logOutput "file" }}
+          - name: log
+            mountPath: /opt/dataomnis/log/resourcemanager
+          {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: config.yaml
-                path: common-config.yaml
+              - key: resourcemanager.yaml
+                path: resourcemanager.yaml
+        {{- if eq .Values.resourcemanager.storeage.background "hdfs" }}
         - name: hdfs-config
           configMap:
             name: {{ .Values.hdfs.configmapName }}
@@ -100,3 +115,10 @@ spec:
                 path: core-site.xml
               - key: hdfs-site.xml
                 path: hdfs-site.xml
+        {{- end }}
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/resourcemanager
+            type: Directory
+        {{- end  }}
