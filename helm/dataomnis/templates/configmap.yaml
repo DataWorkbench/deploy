@@ -20,7 +20,7 @@ data:
       address: "0.0.0.0:{{- .Values.ports.account }}"
 
     grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
+      level: {{ .Values.common.grpcLog.level }}
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
     metrics_server:
@@ -34,8 +34,8 @@ data:
 
     mysql:
       hosts: {{ include "mysql.hostPort" . | quote }}
-      users: {{ .Values.mysql.user }}
-      database: {{ .Values.mysql.database }}
+      users: "{{ .Values.mysql.user }}"
+      database: "{{ .Values.mysql.database }}"
       max_idle_conn: {{ .Values.mysql.maxIdleConn }}
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
@@ -85,7 +85,7 @@ data:
       local_agent: {{ include "service.jaeger" . | quote }}
 
     grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
+      level: {{ .Values.common.grpcLog.level }}
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
 
@@ -135,13 +135,13 @@ data:
       {{- end }}
 
       # http proxy for apiglobal
-      http_proxy: {{ .Values.apiglobal.httpProxy }}
+      http_proxy: {{ .Values.apiglobal.http_proxy }}
   {{- end }}
 
   enginemanager.yaml: |
     log:
       level: {{ coalesce .Values.enginemanager.logLevel .Values.common.logLevel }}
-      output: {{ coalesce .Values.enginemanager.logOutput .Values.common.logOutput }}
+      output: "{{ coalesce .Values.enginemanager.logOutput .Values.common.logOutput }}"
       file:
         path: "/opt/dataomnis/log/enginemanager/enginemanager.log"
         max_size: 128 # In MB.
@@ -153,13 +153,13 @@ data:
       address: "0.0.0.0:{{- .Values.ports.enginemanager }}"
 
     grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
+      level: {{ .Values.common.grpcLog.level }}
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
     metrics_server:
       enabled: {{ .Values.common.metrics.enabled }}
       address: "0.0.0.0:{{- .Values.metricsPorts.enginemanager }}"
-      url_path: {{ .Values.common.metrics.urlPath }}
+      url_path: "{{ .Values.common.metrics.urlPath }}"
 
     tracer:
       service_name: "enginemanager"
@@ -167,29 +167,29 @@ data:
 
     mysql:
       hosts: {{ include "mysql.hostPort" . | quote }}
-      users: {{ .Values.mysql.user }}
-      database: {{ .Values.mysql.database }}
+      users: "{{ .Values.mysql.user }}"
+      database: "{{ .Values.mysql.database }}"
       max_idle_conn: {{ .Values.mysql.maxIdleConn }}
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
       log_level: {{ .Values.mysql.logLevel }}
       slow_threshold: {{ .Values.mysql.slowTshreshold }}
 
-    kube_conf_path: {{ .Values.enginemanager.kubeConfPath }}
+    kube_conf_path: "{{ .Values.enginemanager.kubeConfPath }}"
     helm:
-      repository_config: {{ .Values.enginemanager.helm.repoConfig }}
-      repository_cache: {{ .Values.enginemanager.helm.repoCachePath }}
+      repository_config: "{{ .Values.enginemanager.helm.repoConfig }}"
+      repository_cache: "{{ .Values.enginemanager.helm.repoCachePath }}"
       debug: {{ .Values.enginemanager.helm.debug }}
 
     flink:
       image_repo: "{{ .Values.image.registry }}/dataomnis/flink"
       image_pull_secret: {{ .Values.image.pullSecret }}
-      hdfs_configmap_name: {{ .Values.hdfs.configmapName }}
-      hdfs_configmap_namespace: {{ .Release.Namespace | quote }}
-      ingress_class: {{ .Values.enginemanager.flink.ingressClass }}
-      domain: {{ .Values.domain | quote }}
+      hdfs_configmap_name: "{{ .Values.hdfs.configmapName }}"
+      hdfs_configmap_namespace: "{{ .Release.Namespace }}"
+      ingress_class: "{{ .Values.enginemanager.flink.ingressClass }}"
+      domain: "{{ .Values.domain }}"
       rest_service_port: {{ .Values.enginemanager.flink.restServicePort }}
-      rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt }}
+      rest_service_name_fmt: "{{ .Values.enginemanager.flink.restServiceNameFmt }}"
       enable_multus: {{ .Values.enginemanager.flink.enableMultus }}
 
     # iaas api configuration
@@ -215,10 +215,11 @@ data:
 
     grpc_server:
       address: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
-      log_level: {{ .Values.common.grpcLog.logLevel }}
-      log_verbosity: {{ .Values.common.grpcLog.verbosity }}
+    grpc_log:
+      level: {{ .Values.common.grpcLog.level }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
 
-    metircs_server:
+    metrics_server:
       enabled: {{ .Values.common.metrics.enabled }}
       url_path: {{ .Values.common.metrics.urlPath }}
       address: "0.0.0.0:{{- .Values.metricsPorts.resourcemanager }}"
@@ -227,13 +228,13 @@ data:
       service_name: "resourcemanager"
       local_agent: {{ include "service.jaeger" . | quote }}
 
-    storeage:
-      background: {{ .Values.resourcemanager.storage.background }}
-      hadoop_conf_dir: {{ .Values.resourcemanager.storage.hadoopConfDir }}
+    storage:
+      background: {{ .Values.resourcemanager.storage.background | quote }}
+      hadoop_conf_dir: {{ .Values.resourcemanager.storage.hadoopConfDir | quote }}
       s3:
-        endpoint: {{ .Values.resourcemanager.storage.s3.endpoint }}
-        region: {{ .Values.resourcemanager.storage.s3.region }}
-        bucket: {{ .Values.resourcemanager.storage.s3.bucket }}
+        endpoint: {{ .Values.resourcemanager.storage.s3.endpoint | quote }}
+        region: {{ .Values.resourcemanager.storage.s3.region | quote }}
+        bucket: {{ .Values.resourcemanager.storage.s3.bucket | quote }}
         disable_ssl: false
         force_path_style: false
 
@@ -253,10 +254,10 @@ data:
       address: "0.0.0.0:{{- .Values.ports.scheduler }}"
 
     grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
+      level: {{ .Values.common.grpcLog.level }}
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
-    metircs_server:
+    metrics_server:
       enabled: {{ .Values.common.metrics.enabled }}
       url_path: {{ .Values.common.metrics.urlPath }}
       address: "0.0.0.0:{{- .Values.metricsPorts.scheduler }}"
@@ -267,8 +268,8 @@ data:
 
     mysql:
       hosts: {{ include "mysql.hostPort" . | quote }}
-      users: {{ .Values.mysql.user }}
-      database: {{ .Values.mysql.database }}
+      users: "{{ .Values.mysql.user }}"
+      database: "{{ .Values.mysql.database }}"
       max_idle_conn: {{ .Values.mysql.maxIdleConn }}
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
@@ -285,10 +286,11 @@ data:
       sync_job_crontab_retry_interval: {{ .Values.scheduler.syncJobCrontabRetryInterval }}
       sync_job_check_instance_state_interval: {{ .Values.scheduler.syncJobCheckInstanceStateInterval }}
 
+
   spacemanager.yaml: |
     log:
       level: {{ coalesce .Values.spacemanager.logLevel .Values.common.logLevel }}
-      output: {{ coalesce .Values.spacemanager.logOutput .Values.common.logOutput }}
+      output: {{ coalesce .Values.spacemanager.logOutput .Values.common.logOutput | quote }}
       file:
         path: "/opt/dataomnis/log/spacemanager/spacemanager.log"
         max_size: 128 # In MB.
@@ -300,10 +302,10 @@ data:
       address: "0.0.0.0:{{- .Values.ports.spacemanager }}"
 
     grpc_log:
-      level: {{ .Values.common.grpcLog.logLevel }}
+      level: {{ .Values.common.grpcLog.level }}
       verbosity: {{ .Values.common.grpcLog.verbosity }}
 
-    metircs_server:
+    metrics_server:
       enabled: {{ .Values.common.metrics.enabled }}
       url_path: {{ .Values.common.metrics.urlPath }}
       address: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
@@ -314,8 +316,8 @@ data:
 
     mysql:
       hosts: {{ include "mysql.hostPort" . | quote }}
-      users: {{ .Values.mysql.user }}
-      database: {{ .Values.mysql.database }}
+      users: "{{ .Values.mysql.user }}"
+      database: "{{ .Values.mysql.database }}"
       max_idle_conn: {{ .Values.mysql.maxIdleConn }}
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
@@ -327,7 +329,7 @@ data:
         domain: {{ .Values.domain | quote }}
         webui_port: {{ .Values.port }}
         rest_service_port: {{ .Values.enginemanager.flink.restServicePort }}
-        rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt }}
+        rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt | quote }}
 
     # iaas api configuration
     iaas:

@@ -82,8 +82,8 @@ spec:
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "apiglobal.yaml"
+              - key: apiglobal.yaml
+                path: apiglobal.yaml
         {{- if eq .Values.common.logOutput "file" }}
         - name: log
           hostPath:

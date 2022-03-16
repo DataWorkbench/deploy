@@ -70,8 +70,8 @@ spec:
             value: {{ $evalue | quote }}
           {{- end }}
         volumeMounts:
-          - name: dataomnis-config
-            mountPath: "/etc/dataomnis"
+          - name: config
+            mountPath: /opt/dataomnis/conf
             readOnly: true
           {{- if .Values.enginemanager.kubeConfPath }}
           - name: kube-config-volume
@@ -115,12 +115,12 @@ spec:
         {{- if .Values.enginemanager.kubeConfPath }}
         - name: kube-config-volume
           hostPath:
-            path: {{ .Values.enginemanager.kubeConfigPath }}
+            path: {{ .Values.enginemanager.kubeConfPath }}
             type: File
         {{- end }}
         - name: helm-repo-volume
           hostPath:
-            path: {{ .Values.enginemanager.helmRepoPath }}
+            path: {{ .Values.enginemanager.helm.repoCachePath }}
             type: Directory
         {{- if eq .Values.common.logOutput "file" }}
         - name: log

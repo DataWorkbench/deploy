@@ -50,7 +50,7 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
-          {{- if eq .Values.resourcemanager.storeage.background "s3" }}
+          {{- if eq .Values.resourcemanager.storage.background "s3" }}
           - name: RESOURCE_MANAGER_STORAGE_S3_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
@@ -90,9 +90,9 @@ spec:
           - name: config
             mountPath: /opt/dataomnis/conf
             readOnly: true
-          {{- if eq .Values.resourcemanager.storeage.background "hdfs" }}
+          {{- if eq .Values.resourcemanager.storage.background "hdfs" }}
           - name: hdfs-config
-            mountPath: {{ .Values.resourcemanager.storage.hadoop_conf_dir }}
+            mountPath: {{ .Values.resourcemanager.storage.hadoopConfDir }}
             readOnly: true
           {{- end }}
           {{- if eq .Values.common.logOutput "file" }}
@@ -106,7 +106,7 @@ spec:
             items:
               - key: resourcemanager.yaml
                 path: resourcemanager.yaml
-        {{- if eq .Values.resourcemanager.storeage.background "hdfs" }}
+        {{- if eq .Values.resourcemanager.storage.background "hdfs" }}
         - name: hdfs-config
           configMap:
             name: {{ .Values.hdfs.configmapName }}
