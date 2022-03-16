@@ -74,3 +74,6 @@ data:
           redirect_url: {{ $provider.redirect_url }}
       {{- end }}
 
+    # http proxy for apiglobal
+    http_proxy: {{ .Values.apiglobal.http_proxy }}
+

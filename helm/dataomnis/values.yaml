@@ -88,6 +88,8 @@ apiglobal:
         client_secret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
         token_url: "http://x6ftpx.natappfree.cc/sys/BigDataOauth/accessToken"
         redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
+  # http proxy
+  http_proxy: "http://172.20.0.6:8888"
   envs:
     API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
     API_GLOBAL_HTTP_SERVER_WRITE_TIMEOUT: 30s
