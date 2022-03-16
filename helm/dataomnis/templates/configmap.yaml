@@ -62,3 +62,15 @@ data:
           en_us: {{ $region.names.en_us | quote }}
     {{- end }}
 
+    # authentication info for apiglobal
+    authentication:
+      identity_providers:
+      {{- range $providerId, $provider := .Values.apiglobal.authentication.identity_providers }}
+        {{ $providerId }}:
+          name: {{ $provider.name }}
+          client_id: {{ $provider.client_id }}
+          client_secret: {{ $provider.client_secret }}
+          token_url: {{ $provider.token_url }}
+          redirect_url: {{ $provider.redirect_url }}
+      {{- end }}
+
