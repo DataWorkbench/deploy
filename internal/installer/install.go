@@ -94,6 +94,8 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 		chart = NewMysqlOperatorChart(name, c)
 	case RedisOptName:
 		chart = NewRedisOperatorChart(name, c)
+	default:
+		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
 	logger.Info().String("install operator", name).Msg("..").Fire()
@@ -125,6 +127,8 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		chart = NewMysqlChart(name, c)
 	case RedisClusterName:
 		chart = NewRedisChart(name, c)
+	default:
+		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 	if err = chart.updateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()

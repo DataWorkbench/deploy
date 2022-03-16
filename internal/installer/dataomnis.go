@@ -155,7 +155,7 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 		d.values.Image.updateFromConfig(c.Image)
 	}
 	d.values.Image.Tag = d.values.Version
-
+w
 	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
 	d.values.EtcdClient.Endpoint = EtcdClusterName
 	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)

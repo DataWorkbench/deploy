@@ -46,4 +46,5 @@ const (
 
 	InstanceLabelKey           = "app.kubernetes.io/instance"
 	MysqlInstanceLabelValueFmt = "%s-pxc-db"
+	HdfsInstanceLabelKey = "qy.dataworkbench.com/cluster-name"
 )

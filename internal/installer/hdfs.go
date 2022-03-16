@@ -97,6 +97,12 @@ func (h HdfsChart) parseValues() (Values, error) {
 	return v, err
 }
 
+func (h HdfsChart) getLabels() map[string]string {
+	return map[string]string{
+		HdfsInstanceLabelKey: h.ReleaseName,
+	}
+}
+
 func NewHdfsChart(release string, c Config) *HdfsChart {
 	h := &HdfsChart{}
 	h.ChartName = HdfsClusterChart
