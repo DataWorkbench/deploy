@@ -48,17 +48,13 @@ spec:
       - name: account
         image: {{ .Values.image.registry }}/dataomnis/account:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "account start -c ${DATAOMNIS_CONF}/common-config.yaml"]
+        command: ["sh", "-c", "account start -c /opt/dataomnis/conf/account.yaml"]
         ports:
           - name: service
             containerPort: {{ .Values.ports.account }}
           - name: metrics
             containerPort: {{ .Values.metricsPorts.account }}
         env:
-          - name: ACCOUNT_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.account }}"
-          - name: ACCOUNT_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.account }}"
           - name: ACCOUNT_MYSQL_PASSWORD
             valueFrom:
               secretKeyRef:
@@ -100,12 +96,22 @@ spec:
           {{- end }}
         volumeMounts:
           - name: config
-            mountPath: "/etc/dataomnis"
+            mountPath: /opt/dataomnis/conf
             readOnly: true
+          {{- eq .Values.common.logLevelOutput "file" }}
+          - name: log
+            mountPath: /opt/dataomnis/log
+          {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: "account.yaml"
+                path: "account.yaml"
+        {{- eq .Values.common.logLevelOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log
+            type: Directory
+        {{- end  }}

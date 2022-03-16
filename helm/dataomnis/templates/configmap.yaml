@@ -5,6 +5,91 @@ metadata:
   labels:
 {{ include "dataomnis.labels" . | indent 4 }}
 data:
+  account.yaml: |
+    # config for log.
+    log:
+      level: {{ coalesce .Values.account.logLevel .Values.common.logLevel }} # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+      output: {{ coalesce .Values.account.logLevelOutput .Values.common.logLevelOutput }}
+      file:
+        path: "/opt/dataomnis/log/account/account.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false # determines if the rotated log files should be compressed using gzip.
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.account }}"
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metrics_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.account }}"
+
+    tracer:
+      service_name: "account"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    mysql:
+      hosts: {{ include "mysql.hostPort" . | quote }}
+      users: {{ .Values.mysql.user }}
+      database: {{ .Values.mysql.database }}
+      max_idle_conn: {{ .Values.mysql.maxIdleConn }}
+      max_open_conn: {{ .Values.mysql.maxOpenConn }}
+      conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
+      log_level: {{ .Values.mysql.logLevel }}
+      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+
+    redis:
+      mode: "sentinel"
+      master_name: {{ .Values.redis.masterName }}
+      sentinel_addr: {{ include "service.redis" . | quote }}
+      database: {{ .Values.redis.database }}
+      #standalone_addr: "127.0.0.1:6379"
+      #cluster_addr: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005"
+
+    # iaas api configuration
+    iaas:
+      zone: {{ .Values.iaas.zone }}
+      protocol: {{ .Values.iaas.protocol }}
+      host: {{ .Values.iaas.host }}
+      port: {{ .Values.iaas.port }}
+      uri: {{ .Values.iaas.uri }}
+      timeout: {{ .Values.iaas.timeout }}
+
+    source: "{{ .Values.account.source }}"
+
+
+  apiserver.yaml: |
+    log:
+      level: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel }} # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+      output: "file" # "console" or "file"
+      file:
+        path: "/opt/dataomnis/log/apiserver/account.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false # determines if the rotated log files should be compressed using gzip.
+
+    http_server:
+      address: "0.0.0.0:{{ .Values.ports.apiserver }}"
+      read_timeout:  {{ .Values.apiserver.read_timeout }}
+      write_timeout: {{ .Values.apiserver.write_timeout }}
+      idel_timeout:  {{ .Values.apiserver.idle_timeout }}
+      exit_timeout:  {{ .Values.apiserver.exit_timeout }}
+
+    tracer:
+      service_name: "apiserver"
+      local_agent: {{ include "service.jaeger" . | quote }}
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.logLevel }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+
   config.yaml: |
     log_level: {{ .Values.common.logLevel }}
 

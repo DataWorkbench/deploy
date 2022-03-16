@@ -30,6 +30,7 @@ common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+  logLevelOutput: "file" # "console" or "file"
   grpcLog:
     level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
@@ -42,6 +43,9 @@ common:
   readinessProbe:
     periodSeconds: 10
     initialDelaySeconds: 20
+
+persistent:
+  hostPath: /data/dataomnis/dataomnis
 
 etcd:
   endpoint: etcd-cluster
@@ -100,19 +104,17 @@ apiglobal:
 
 # apiserver configuration
 apiserver:
+  read_timeout: 30s
+  write_timeout: 30s
+  idle_timeout: 30s
+  exit_timeout: 5m
+
   envs:
-    API_SERVER_READ_TIMEOUT: 30s
-    API_SERVER_WRITE_TIMEOUT: 30s
-    API_SERVER_DLE_TIMEOUT: 30s
-    API_SERVER_EXIT_TIMEOUT: 5m
-    API_SERVER_TRACER_SERVICE_NAME: "apiserver"
-    API_SERVER_REGION_ID: "testing"
 
 # account configuration
 account:
+  source: "qingcloud"
   envs:
-    ACCOUNT_TRACER_SERVICE_NAME: "account"
-    ACCOUNT_SOURCE: "qingcloud"
 
 # enginemanager configuration
 enginemanager:
