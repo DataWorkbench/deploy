@@ -86,7 +86,7 @@ apiglobal:
         name: enfi
         client_id: "9034819z8a161e5a809c"
         client_secret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
-        token_url: "http://9qpah2.natappfree.cc/sys/BigDataOauth/accessToken"
+        token_url: "http://x6ftpx.natappfree.cc/sys/BigDataOauth/accessToken"
         redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
   envs:
     API_GLOBAL_HTTP_SERVER_READ_TIMEOUT: 30s
@@ -94,6 +94,7 @@ apiglobal:
     API_GLOBAL_HTTP_SERVER_DLE_TIMEOUT: 30s
     API_GLOBAL_HTTP_SERVER_EXIT_TIMEOUT: 5m
     API_GLOBAL_TRACER_SERVICE_NAME: apiglobal
+    http_proxy: "http://172.20.0.6:8888"
 
 # apiserver configuration
 apiserver:
