@@ -39,6 +39,8 @@ Service Addresses For ApiServer
 
 
 {{- define "apiserver.link.services" -}}
+- name: API_SERVER_TRACER_LOCAL_AGENT
+  value: '{{- include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
   value: '{{- include "service.spacemanager" . }}'
 - name: API_SERVER_SCHEDULER_ADDRESS
