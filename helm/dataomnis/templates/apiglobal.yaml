@@ -43,8 +43,13 @@ spec:
             - name: service
               containerPort: {{ .Values.ports.apiglobal }}
           env:
-            - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
-              value: '{{ include "service.account" . }}'
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: API_GLOBAL_LOG_FILE_PATH
+              value: /opt/dataomnis/log/$(POD_NAME).log
+{{ include "apiglobal.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiglobal.envs }}
             - name: {{ $ename }}
               value: {{ $evalue | quote }}
@@ -75,7 +80,7 @@ spec:
               readOnly: true
             {{- if eq .Values.common.logOutput "file" }}
             - name: log
-              mountPath: /opt/dataomnis/log/apiglobal
+              mountPath: /opt/dataomnis/log
             {{- end }}
       volumes:
         - name: config

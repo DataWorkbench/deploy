@@ -65,6 +65,12 @@ spec:
               secretKeyRef:
                 name: dataomnis-iaas-secret
                 key: secret_access_key
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: ENGINE_MANAGER_LOG_FILE_PATH
+            value: "/opt/dataomnis/log/$(POD_NAME).log"
           {{- range $ename, $evalue := .Values.enginemanager.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}
@@ -83,7 +89,7 @@ spec:
             readOnly: true
           {{- if eq .Values.common.logOutput "file" }}
           - name: log
-            mountPath: /opt/dataomnis/log/enginemanager
+            mountPath: /opt/dataomnis/log
           {{- end }}
         readinessProbe:
           exec:

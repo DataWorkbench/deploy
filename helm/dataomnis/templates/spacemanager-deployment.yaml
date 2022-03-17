@@ -64,6 +64,12 @@ spec:
               secretKeyRef:
                 name: dataomnis-iaas-secret
                 key: secret_access_key
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: SPACE_MANAGER_LOG_FILE_PATH
+            value: "/opt/dataomnis/log/$(POD_NAME).log"
 {{ include "spacemanager.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.spacemanager.envs }}
           - name: {{ $ename }}
@@ -95,7 +101,7 @@ spec:
             readOnly: true
           {{- if eq .Values.common.logOutput "file" }}
           - name: log
-            mountPath: /opt/dataomnis/log/spacemanager
+            mountPath: /opt/dataomnis/log
           {{- end }}
       volumes:
         - name: config

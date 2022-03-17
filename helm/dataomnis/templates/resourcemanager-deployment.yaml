@@ -50,6 +50,12 @@ spec:
               secretKeyRef:
                 name: {{ .Values.mysql.secretName }}
                 key: root
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: RESOURCE_MANAGER_LOG_FILE_PATH
+            value: "/opt/dataomnis/log/$(POD_NAME).log"
           {{- if eq .Values.resourcemanager.storage.background "s3" }}
           - name: RESOURCE_MANAGER_STORAGE_S3_ACCESS_KEY_ID
             valueFrom:
@@ -97,7 +103,7 @@ spec:
           {{- end }}
           {{- if eq .Values.common.logOutput "file" }}
           - name: log
-            mountPath: /opt/dataomnis/log/resourcemanager
+            mountPath: /opt/dataomnis/log
           {{- end }}
       volumes:
         - name: config

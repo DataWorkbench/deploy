@@ -33,20 +33,20 @@ Service Addresses For ApiServer
 {{ include "dataomnis.fullname" . }}-developer:{{ .Values.ports.developer }}
 {{- end -}}
 
+{{- define "apiglobal.link.services" -}}
+- name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
+  value: '{{ include "service.account" . }}'
+{{- end -}}
 
 {{- define "apiserver.link.services" -}}
-- name: API_SERVER_TRACER_LOCAL_AGENT
-  value: '{{- include "service.jaeger" . }}'
 - name: API_SERVER_SPACE_MANAGER_ADDRESS
   value: '{{- include "service.spacemanager" . }}'
-- name: API_SERVER_SCHEDULER_ADDRESS
-  value: '{{- include "service.scheduler" . }}'
 - name: API_SERVER_RESOURCE_MANAGER_ADDRESS
   value: '{{ include "service.resourcemanager" . }}'
 - name: API_SERVER_ACCOUNT_SERVER_ADDRESS
   value: '{{ include "service.account" . }}'
-- name: API_SERVER_ENGINE_MANAGER_ADDRESS
-  value: '{{ include "service.enginemanager" . }}'
+- name: API_SERVER_SCHEDULER_ADDRESS
+  value: '{{- include "service.scheduler" . }}'
 - name: API_SERVER_DEVELOPER_ADDRESS
   value: '{{ include "service.developer" . }}'
 {{- end -}}

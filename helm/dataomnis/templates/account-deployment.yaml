@@ -70,6 +70,12 @@ spec:
               secretKeyRef:
                 name: dataomnis-iaas-secret
                 key: secret_access_key
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: ACCOUNT_LOG_FILE_PATH
+            value: /opt/dataomnis/log/$(POD_NAME).log
           {{- range $ename, $evalue := .Values.account.envs }}
           - name: {{ $ename }}
             value: {{ $evalue | quote }}

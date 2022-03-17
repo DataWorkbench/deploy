@@ -42,6 +42,12 @@ spec:
             - name: service
               containerPort: {{ .Values.ports.apiserver }}
           env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: API_SERVER_LOG_FILE_PATH
+              value: /opt/dataomnis/log/$(POD_NAME).log
 {{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
             - name: API_SERVER_{{ $ename }}
@@ -73,7 +79,7 @@ spec:
               readOnly: true
             {{- if eq .Values.common.logOutput "file" }}
             - name: log
-              mountPath: /opt/dataomnis/log/apiserver
+              mountPath: /opt/dataomnis/log
             {{- end }}
       volumes:
         - name: config
