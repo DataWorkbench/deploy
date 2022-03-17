@@ -40,6 +40,26 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
+      {{- if .Values.filebeat.enabled }}
+      - name: filebeat-sidecar
+        image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+        imagePullPolicy: IfNotPresent
+        args:
+          - '-c'
+          - /etc/logsidecar/filebeat.yaml
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+        volumeMounts:
+          - name: log
+            mountPath: /logs
+          - name: filebeat-config
+            mountPath: /etc/logsidecar
+            readOnly: true
+      {{- end }}
       - name: enginemanager
         image: {{ .Values.image.registry }}/dataomnis/enginemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -118,19 +138,27 @@ spec:
             items:
               - key: enginemanager.yaml
                 path: enginemanager.yaml
+        - name: helm-repo-volume
+          hostPath:
+            path: {{ .Values.enginemanager.helm.repoCachePath }}
+            type: Directory
         {{- if .Values.enginemanager.kubeConfPath }}
         - name: kube-config-volume
           hostPath:
             path: {{ .Values.enginemanager.kubeConfPath }}
             type: File
         {{- end }}
-        - name: helm-repo-volume
-          hostPath:
-            path: {{ .Values.enginemanager.helm.repoCachePath }}
-            type: Directory
         {{- if eq .Values.common.logOutput "file" }}
         - name: log
           hostPath:
             path: {{ .Values.persistent.hostPath }}/log/enginemanager
             type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
         {{- end  }}

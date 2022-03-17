@@ -1,3 +1,4 @@
+{{- if .Values.filebeat.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,8 +9,9 @@ data:
     - type: log
       enabled: true
       paths:
-      - /log/*.log
+      - /logs/*.log
     output.console:
       codec.format:
         string: '%{[log.file.path]} %{[message]}'
     logging.level: warning
+{{- end }}

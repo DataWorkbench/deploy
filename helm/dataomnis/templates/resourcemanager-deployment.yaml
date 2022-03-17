@@ -35,6 +35,26 @@ spec:
         imagePullPolicy: IfNotPresent
         command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
       containers:
+      {{- if .Values.filebeat.enabled }}
+      - name: filebeat-sidecar
+        image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+        imagePullPolicy: IfNotPresent
+        args:
+          - '-c'
+          - /etc/logsidecar/filebeat.yaml
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+        volumeMounts:
+          - name: log
+            mountPath: /logs
+          - name: filebeat-config
+            mountPath: /etc/logsidecar
+            readOnly: true
+      {{- end }}
       - name: resourcemanager
         image: {{ .Values.image.registry }}/dataomnis/resourcemanager:{{- .Values.image.tag }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -127,4 +147,12 @@ spec:
           hostPath:
             path: {{ .Values.persistent.hostPath }}/log/resourcemanager
             type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
         {{- end  }}

@@ -34,6 +34,26 @@ spec:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       containers:
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: filebeat-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
         - name: apiserver
           image: {{ .Values.image.registry }}/dataomnis/apiserver:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -86,11 +106,19 @@ spec:
           configMap:
             name: dataomnis-config
             items:
-              - key: "apiserver.yaml"
-                path: "apiserver.yaml"
+              - key: apiserver.yaml
+                path: apiserver.yaml
         {{- if eq .Values.common.logOutput "file" }}
         - name: log
           hostPath:
             path: {{ .Values.persistent.hostPath }}/log/apiserver
             type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
         {{- end  }}

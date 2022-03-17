@@ -174,7 +174,8 @@ jaeger:
 iaas:
   zone: "testing"
   protocol: "http"
-  host: "api.testing.com"
+#  host: "api.testing.com"
+  host: "172.31.60.141"
   port: "7777"
   uri: "/iaas/"
   timeout: 600
@@ -223,3 +224,6 @@ serviceMonitor:
 
 web:
   enabled: false
+
+filebeat:
+  enabled: true
