@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+data:
+  filebeat.yaml: |
+    filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+      - /log/*.log
+    output.console:
+      codec.format:
+        string: '%{[log.file.path]} %{[message]}'
+    logging.level: warning
