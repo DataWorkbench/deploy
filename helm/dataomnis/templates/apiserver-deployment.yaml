@@ -29,36 +29,82 @@ spec:
         {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - apiserver
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
+      initContainers:
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
         - name: apiserver
           image: {{ .Values.image.registry }}/dataomnis/apiserver:{{- .Values.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/sh", "-c", "apiserver start -c ${DATAOMNIS_CONF}/apiserver.yaml"]
+          command: ["/bin/sh", "-c", "apiserver start -c /opt/dataomnis/conf/apiserver.yaml"]
           ports:
             - name: service
               containerPort: {{ .Values.ports.apiserver }}
           env:
-            - name: API_SERVER_LOG_LEVEL
-              value: {{ coalesce .Values.apiserver.logLevel .Values.common.logLevel | quote }}
-            - name: API_SERVER_GRPC_LOG_LEVEL
-              value: {{ coalesce .Values.apiserver.grpcLogLevel .Values.common.grpcLog.level | quote }}
-            - name: API_SERVER_GRPC_LOG_VERBOSITY
-              value: {{ coalesce .Values.apiserver.grpcLogVerbosity .Values.common.grpcLog.verbosity | quote }}
-            - name: API_SERVER_HTTP_SERVER_ADDRESS
-              value: "0.0.0.0:{{ .Values.ports.apiserver }}"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: API_SERVER_LOG_FILE_PATH
+              value: /opt/dataomnis/log/$(POD_NAME).log
 {{ include "apiserver.link.services" . | indent 12 }}
             {{- range $ename, $evalue := .Values.apiserver.envs }}
-            - name: {{ $ename }}
+            - name: API_SERVER_{{ $ename }}
               value: {{ $evalue | quote }}
             {{- end }}
           readinessProbe:
             tcpSocket:
               port: service
-  {{- if .Values.apiserver.readinessProbe }}
+            {{- if .Values.apiserver.readinessProbe }}
             periodSeconds: {{ .Values.apiserver.readinessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.apiserver.readinessProbe.initialDelaySeconds }}
             {{- else }}
@@ -76,13 +122,33 @@ spec:
             initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
             {{- end }}
           volumeMounts:
-            - name: dataomnis-config
-              mountPath: "/etc/dataomnis"
+            - name: config
+              mountPath: /opt/dataomnis/conf
               readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
       volumes:
-        - name: dataomnis-config
+        - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: apiserver.yaml
+                path: apiserver.yaml
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/apiserver
+            type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}

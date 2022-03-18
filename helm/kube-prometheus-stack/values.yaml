@@ -119,7 +119,7 @@ alertmanager:
 
   ## Deploy alertmanager
   ##
-  enabled: false
+  enabled: true
 
   ## Annotations for Alertmanager
   ##
@@ -298,10 +298,10 @@ alertmanager:
 
     ## Port for Alertmanager Service to listen on
     ##
-    port: 9093
+    port: 13093
     ## To be used with a proxy extraContainer port
     ##
-    targetPort: 9093
+    targetPort: 13093
     ## Port to expose on each node
     ## Only used if service.type is 'NodePort'
     ##
@@ -397,7 +397,7 @@ alertmanager:
     ## Image of Alertmanager
     ##
     image:
-      repository: dataworkbench/alertmanager
+      repository: dockerhub.dataomnis.io/dataomnis/alertmanager
       tag: v0.21.0
       sha: ""
 
@@ -645,7 +645,7 @@ grafana:
   adminPassword: prom-operator
 
   image:
-    repository: dataworkbench/grafana
+    repository: dockerhub.dataomnis.io/dataomnis/grafana
     tag: 7.5.4
     sha: ""
 
@@ -689,6 +689,11 @@ grafana:
     #   - grafana.example.com
 
   sidecar:
+    image:
+      repository: dockerhub.dataomnis.io/dataomnis/k8s-sidecar
+      tag: 1.14.2
+      sha: ""
+      imagePullPolicy: IfNotPresent
     dashboards:
       enabled: true
       label: grafana_dashboard

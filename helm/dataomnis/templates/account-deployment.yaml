@@ -29,6 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - account
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.dns.qingcloudApiIP }}
       hostAliases:
         - ip: {{ .Values.dns.qingcloudApiIP | quote }}
@@ -40,72 +50,131 @@ spec:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       initContainers:
-      - name: wait-mysql
-        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: wait-mysql
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
+          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
-      - name: account
-        image: {{ .Values.image.registry }}/dataomnis/account:{{- .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "account start -c ${DATAOMNIS_CONF}/common-config.yaml"]
-        ports:
-          - name: service
-            containerPort: {{ .Values.ports.account }}
-          - name: metrics
-            containerPort: {{ .Values.metricsPorts.account }}
-        env:
-          - name: ACCOUNT_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.account }}"
-          - name: ACCOUNT_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.account }}"
-          - name: ACCOUNT_MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.mysql.secretName }}
-                key: root
-          - name: ACCOUNT_IAAS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: dataomnis-secret
-                key: access_key_id
-          - name: ACCOUNT_IAAS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataomnis-secret
-                key: secret_access_key
-          {{- range $ename, $evalue := .Values.account.envs }}
-          - name: {{ $ename }}
-            value: {{ $evalue | quote }}
-          {{- end }}
-        readinessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
-          {{- if .Values.account.readinessProbe }}
-          periodSeconds: {{ .Values.account.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.account.readinessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
-          {{- end }}
-        livenessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
-          {{- if .Values.account.livenessProbe }}
-          periodSeconds: {{ .Values.account.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.account.livenessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
-          {{- end }}
-        volumeMounts:
-          - name: config
-            mountPath: "/etc/dataomnis"
-            readOnly: true
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
+        - name: account
+          image: {{ .Values.image.registry }}/dataomnis/account:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "account start -c /opt/dataomnis/conf/account.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.account }}
+            - name: metrics
+              containerPort: {{ .Values.metricsPorts.account }}
+          env:
+            - name: ACCOUNT_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: root
+            - name: ACCOUNT_IAAS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: access_key_id
+            - name: ACCOUNT_IAAS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: secret_access_key
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ACCOUNT_LOG_FILE_PATH
+              value: /opt/dataomnis/log/$(POD_NAME).log
+            {{- range $ename, $evalue := .Values.account.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          readinessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
+            {{- if .Values.account.readinessProbe }}
+            periodSeconds: {{ .Values.account.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.account.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          livenessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]
+            {{- if .Values.account.livenessProbe }}
+            periodSeconds: {{ .Values.account.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.account.livenessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/dataomnis/conf
+              readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: account.yaml
+                path: account.yaml
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/account
+            type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}
