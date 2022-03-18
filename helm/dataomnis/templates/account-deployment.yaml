@@ -29,6 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - account
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.dns.qingcloudApiIP }}
       hostAliases:
         - ip: {{ .Values.dns.qingcloudApiIP | quote }}

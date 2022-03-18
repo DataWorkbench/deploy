@@ -29,6 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - enginemanager
+              topologyKey: 'kubernetes.io/hostname'
       serviceAccountName: {{ .Release.Name }}-engine-manager
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
