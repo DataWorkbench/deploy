@@ -9,7 +9,7 @@ data:
     - type: log
       enabled: true
       paths:
-      - /logs/*.log
+      - /logs/${POD_NAME}.log
     output.console:
       codec.format:
         string: '%{[log.file.path]} %{[message]}'

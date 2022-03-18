@@ -44,6 +44,24 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
+      initContainers:
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
         {{- if .Values.filebeat.enabled }}
         - name: filebeat-sidecar
@@ -61,7 +79,7 @@ spec:
           volumeMounts:
             - name: log
               mountPath: /logs
-            - name: filebeat-config
+            - name: injected-config
               mountPath: /etc/logsidecar
               readOnly: true
         {{- end }}
@@ -132,6 +150,8 @@ spec:
             items:
               - key: filebeat.yaml
                 path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
         {{- end  }}
 
 ---
