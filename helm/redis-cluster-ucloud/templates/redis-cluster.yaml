@@ -1,0 +1,27 @@
+apiVersion: redis.kun/v1alpha1
+kind: DistributedRedisCluster
+metadata:
+  annotations:
+    # if your operator run as cluster-scoped, add this annotations
+    redis.kun/scope: cluster-scoped
+  name: {{ include "redis-cluster.fullname" . }}
+spec:
+  masterSize: {{ $.Values.redisCluster.masterSize }}
+  clusterReplicas: {{ $.Values.redisCluster.clusterReplicas }}
+  image: {{ $.Values.redisCluster.image }}
+  imagePullPolicy: {{ $.Values.redisCluster.imagePullPolicy }}
+  storage:
+    type: persistent-claim
+    size: {{ $.Values.storageSpec.size }}
+    class: {{ include "redis-cluster.fullname" . }}-sc
+    deleteClaim: true
+  config:
+    logfile: "/data/redis.log"
+    activerehashing: "yes"
+    appendonly: "yes"
+    list-compress-depth: "0"
+    slowlog-log-slower-than: "10000"
+    slowlog-max-len: "128"
+    stop-writes-on-bgsave-error: "yes"
+    tcp-keepalive: "0"
+    timeout: "0"

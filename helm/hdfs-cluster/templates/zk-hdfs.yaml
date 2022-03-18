@@ -3,7 +3,9 @@ kind: Service
 metadata:
   name: zk-hs
   labels:
-    app: zk
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: zk-hdfs
 spec:
   ports:
   - port: 2888
@@ -14,39 +16,33 @@ spec:
     name: leader-election
   clusterIP: None
   selector:
-    app: zk
+    app: zk-hdfs
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: zk-cs
   labels:
-    app: zk
+    app: zk-hdfs
 spec:
   ports:
   - port: 2181
     name: client
   selector:
-    app: zk
----
-apiVersion: policy/v1
-kind: PodDisruptionBudget
-metadata:
-  name: zk-pdb
-spec:
-  selector:
-    matchLabels:
-      app: zk
-  maxUnavailable: 1
+    app: zk-hdfs
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: zk
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: zk-hdfs
 spec:
   selector:
     matchLabels:
-      app: zk
+      app: zk-hdfs
   serviceName: zk-hs
   replicas: {{ include "zookeeper.length" . }}
   updateStrategy:
@@ -55,17 +51,8 @@ spec:
   template:
     metadata:
       labels:
-        app: zk
+        app: zk-hdfs
     spec:
-#      affinity:
-#        nodeAffinity:
-#          requiredDuringSchedulingIgnoredDuringExecution:
-#            nodeSelectorTerms:
-#              - matchExpressions:
-#                  - key: hdfs/nodetype
-#                    operator: NotIn
-#                    values:
-#                      - namenode
       containers:
       - name: kubernetes-zookeeper
         #imagePullPolicy: Always
