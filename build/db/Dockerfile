@@ -9,6 +9,5 @@ USER root
 RUN apk add --no-cache mysql-client
 
 RUN mkdir -p /flyway/ddl
-COPY ./deploy/build/db/ddl_init.sh /flyway/ddl/
-COPY ./deploy/build/db/ddl/*.sql /flyway/ddl/
-COPY ./deploy/build/db/sql/*.sql  /flyway/sql/
+COPY ./ddl/* /flyway/ddl/
+COPY ./sql/*.sql  /flyway/sql/
