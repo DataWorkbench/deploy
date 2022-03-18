@@ -2,8 +2,9 @@
 # the home path of local pv to storage data, recommend：the path that mount a disk;
 localPvHome: /data
 
-# if config pullSecrets, create docker registry secret by kubectl:
-# kubectl create secret docker-registry my-docker-registry-secret
+# if config pullSecrets, create docker registry secret in namespace dataomnis-operator/dataomnis-system by kubectl:
+# kubectl -n dataomnis-operator create secret docker-registry
+#                                       my-docker-registry-secret
 #                                       --docker-server=<your-registry-server>
 #                                       --docker-username=<your-name>
 #                                       --docker-password=<your-pword>
@@ -14,7 +15,7 @@ localPvHome: /data
 image:
   registry: dockerhub.qingcloud.com
   pullSecrets:
-    - qingcloud-docker-regisrty-secret
+    - my-docker-regisrty-secret
   pullPolicy:
 
 dataomnis:
