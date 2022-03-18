@@ -60,7 +60,7 @@ build-flink-utile:
 
 .PHONY: build-image
 build-image: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
+	$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 
