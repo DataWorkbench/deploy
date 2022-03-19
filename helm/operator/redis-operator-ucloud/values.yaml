@@ -4,8 +4,8 @@ operator:
   replicas: 1
   service_account_name: "redis-cluster-operator"
   namespace: ""  # keep this value "" if you want to deploy cluster-wide operator
-  image_source: "fishu/redis-cluster-operator"
-  image_tag: "latest"
+  image_source: "docker.io/weitingwei/redis-cluster-operator"
+  image_tag: "v1"
   imagePullPolicy: "Always"
   resources:
     limits:

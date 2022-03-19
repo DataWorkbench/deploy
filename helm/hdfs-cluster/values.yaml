@@ -8,6 +8,7 @@ hdfsHome: /data/dataomnis
 
 imageRegistry: dockerhub.dataomnis.io
 image: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
+imagePullPolicy: IfNotPresent
 
 nodes:
   - worker-s001
@@ -17,7 +18,9 @@ nodes:
 namenode:
   nodePort: 30091
   webPort: 50070  # 3.x 9870 ; 2.x 50070
-  nodes: []
+  nodes:   #   namenode has only two pods, and PV node is configured separately
+    - worker-s001
+    - worker-s002
   storage:
     capacity: 10Gi
     reclaimPolicy: Retain
