@@ -25,8 +25,8 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "dataomnis.labels" -}}
-app.kubernetes.io/name: {{ .Chart.Name }}
 helm.sh/chart: {{ include "dataomnis.chart" . }}
+app.kubernetes.io/name: {{ .Chart.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}

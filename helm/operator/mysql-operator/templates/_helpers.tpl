@@ -35,13 +35,14 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "pxc-operator.labels" -}}
-app.kubernetes.io/name: {{ include "pxc-operator.name" . }}
 helm.sh/chart: {{ include "pxc-operator.chart" . }}
+app.kubernetes.io/name: {{ include "pxc-operator.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: dataomnis
 {{- end -}}
 
 {{/*
