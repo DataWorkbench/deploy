@@ -1,9 +1,8 @@
 apiVersion: v2
-name: redis-cluster
-description: A Helm chart for Redis cluster operator deployment
-
-type: application
-
 version: 0.1.0
+appVersion: 5.0.4-alpine
+name: redis-cluster
+type: application
+description: A Helm chart for Redis cluster deployment
 
-appVersion: 0.1.0
+

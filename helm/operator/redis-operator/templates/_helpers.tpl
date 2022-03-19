@@ -32,6 +32,14 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Selector labels
+*/}}
+{{- define "redis-cluster-operator.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "redis-cluster-operator.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "redis-cluster-operator.labels" -}}
@@ -41,14 +49,6 @@ helm.sh/chart: {{ include "redis-cluster-operator.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end }}
-
-{{/*
-Selector labels
-*/}}
-{{- define "redis-cluster-operator.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "redis-cluster-operator.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
@@ -66,5 +66,5 @@ Create the name of the service account to use
 redis-operator image
 */}}
 {{- define "redis-cluster-operator.image" -}}
-{{ .Values.image.registry }}/dataomnis/redis-cluster-operator:{{- .Chart.appVersion }}
+{{ .Values.image.registry }}/{{- .Values.image.operator}}:{{- .Chart.AppVersion }}
 {{- end }}

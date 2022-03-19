@@ -6,13 +6,19 @@ metadata:
     redis.kun/scope: cluster-scoped
   name: {{ include "redis-cluster.fullname" . }}
 spec:
-  masterSize: {{ $.Values.redisCluster.masterSize }}
-  clusterReplicas: {{ $.Values.redisCluster.clusterReplicas }}
-  image: {{ $.Values.redisCluster.image }}
-  imagePullPolicy: {{ $.Values.redisCluster.imagePullPolicy }}
+  masterSize: {{ .Values.redisCluster.masterSize }}
+  clusterReplicas: {{ .Values.redisCluster.clusterReplicas }}
+  image: {{ include "redis-cluster.image" . }}
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  {{- if .Values.image.pullSecrets }}
+  imagePullSecrets:
+    {{- range .Values.image.pullSecrets }}
+    - name: {{ . }}
+    {{- end }}
+  {{- end }}
   storage:
     type: persistent-claim
-    size: {{ $.Values.storageSpec.size }}
+    size: {{ .Values.storageSpec.size }}
     class: {{ include "redis-cluster.fullname" . }}-sc
     deleteClaim: true
   config:

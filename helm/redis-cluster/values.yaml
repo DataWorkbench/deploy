@@ -1,11 +1,17 @@
----
+
+image:
+  registry: docker.io
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+  redis: redis
+
+
 redisCluster:
   masterSize: 3
   clusterReplicas: 1
-  image: redis:5.0.4-alpine
-  imagePullPolicy: IfNotPresent
 
-storageSpec:
+
+persistent:
   enable: true
   size: 10Gi
   accessModes: ["ReadWriteOnce"]

@@ -3,7 +3,8 @@
 image:
   registry: docker.io
   pullPolicy: IfNotPresent
-  pullSecretName:
+  pullSecrets:
+  operator: dataomnis/redis-cluster-operator
 
 operator:
   backup_enabled: "false"

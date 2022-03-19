@@ -24,3 +24,10 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
+{{/*
+redis-cluster image
+*/}}
+{{- define "redis-cluster.image" -}}
+{{ .Values.image.registry }}/{{- .Values.image.redis}}:{{- .Chart.AppVersion }}
+{{- end }}
+
