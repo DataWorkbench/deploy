@@ -7,7 +7,8 @@ storageClass: ""
 hdfsHome: /data/dataomnis
 
 image:
-  registry: dockerhub.qingcloud.com
+  registry: docker.io
+  pullPolicy: IfNotPresent
   hadoop: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
   zookeeper: fastop/zookeeper:3.4.10
 

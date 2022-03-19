@@ -5,6 +5,7 @@ metadata:
 spec:
   version: {{ .Chart.AppVersion }}  # hadoop version
   image: {{ .Values.image.registry }}/{{ .Values.image.hadoop }}
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc

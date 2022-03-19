@@ -1,9 +1,8 @@
 apiVersion: v2
+appVersion: v0.1.9
+version: 0.1.0
+type: application
 name: redis-cluster-operator
 description: A Helm chart for Redis cluster operator deployment
 
-type: application
 
-version: 0.1.0
-
-appVersion: 0.1.0
