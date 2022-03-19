@@ -1,4 +1,0 @@
-apiVersion: v2
-description: A Helm chart for the Spotahome Redis Operator, copy from https://github.com/spotahome/redis-operator/tree/master/charts/redisoperator
-name: redis-operator
-version: 3.1.0
