@@ -61,3 +61,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+redis-operator image
+*/}}
+{{- define "redis-cluster-operator.image" -}}
+{{ .Values.image.registry }}/dataomnis/redis-cluster-operator:{{- .Chart.appVersion }}
+{{- end }}

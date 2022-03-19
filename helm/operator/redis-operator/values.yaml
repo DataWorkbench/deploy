@@ -1,12 +1,15 @@
+
+# image configurations
+image:
+  registry: docker.io
+  pullPolicy: IfNotPresent
+  pullSecretName:
+
 operator:
   backup_enabled: "false"
-  name: "redis-cluster-operator"
   replicas: 1
   service_account_name: "redis-cluster-operator"
   namespace: ""  # keep this value "" if you want to deploy cluster-wide operator
-  image_source: "docker.io/weitingwei/redis-cluster-operator"
-  image_tag: "v1"
-  imagePullPolicy: "Always"
   resources:
     limits:
       cpu: 200m
