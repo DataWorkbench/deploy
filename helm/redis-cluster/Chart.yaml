@@ -1,6 +1,0 @@
-apiVersion: v2
-name: redis-cluster
-description: A Helm chart for redis-cluster managed by redis-operator
-type: application
-version: 1.0.0
-appVersion: 4.0-alpine
