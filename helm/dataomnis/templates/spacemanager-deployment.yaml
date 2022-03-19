@@ -29,72 +29,148 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - spacemanager
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       initContainers:
-      - name: wait-mysql
-        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: wait-mysql
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
+          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
-      - name: spacemanager
-        image: {{ .Values.image.registry }}/dataomnis/spacemanager:{{- .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "spacemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
-        ports:
-          - name: service
-            containerPort: {{ .Values.ports.spacemanager }}
-          - name: metrics
-            containerPort: {{ .Values.metricsPorts.spacemanager }}
-        env:
-          - name: SPACE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.spacemanager }}"
-          - name: SPACE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
-          - name: SPACE_MANAGER_CLUSTER_FLINK_DOMAIN
-            value: "{{ .Values.domain }}"
-          - name: SPACE_MANAGER_CLUSTER_FLINK_WEBUI_PORT
-            value: "{{ .Values.port }}"
-          - name: SPACE_MANAGER_MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.mysql.secretName }}
-                key: root
-{{ include "spacemanager.link.services" . | indent 10 }}
-          {{- range $ename, $evalue := .Values.spacemanager.envs }}
-          - name: SPACE_MANAGER_{{ $ename }}
-            value: {{ $evalue | quote }}
-          {{- end }}
-        readinessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}"]
-          {{- if .Values.spacemanager.readinessProbe }}
-          periodSeconds: {{ .Values.spacemanager.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.spacemanager.readinessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
-          {{- end }}
-        livenessProbe:
-          exec:
-            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}" ]
-          {{- if .Values.spacemanager.livenessProbe }}
-          periodSeconds: {{ .Values.spacemanager.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.spacemanager.livenessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
-          {{- end }}
-        volumeMounts:
-          - name: config
-            mountPath: "/etc/dataomnis"
-            readOnly: true
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
+
+        - name: spacemanager
+          image: {{ .Values.image.registry }}/dataomnis/spacemanager:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "spacemanager start -c /opt/dataomnis/conf/spacemanager.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.spacemanager }}
+            - name: metrics
+              containerPort: {{ .Values.metricsPorts.spacemanager }}
+          env:
+            - name: SPACE_MANAGER_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: root
+            - name: SPACE_MANAGER_IAAS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: access_key_id
+            - name: SPACE_MANAGER_IAAS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: secret_access_key
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SPACE_MANAGER_LOG_FILE_PATH
+              value: "/opt/dataomnis/log/$(POD_NAME).log"
+{{ include "spacemanager.link.services" . | indent 12 }}
+            {{- range $ename, $evalue := .Values.spacemanager.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          readinessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}"]
+            {{- if .Values.spacemanager.readinessProbe }}
+            periodSeconds: {{ .Values.spacemanager.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.spacemanager.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          livenessProbe:
+            exec:
+              command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.spacemanager }}" ]
+            {{- if .Values.spacemanager.livenessProbe }}
+            periodSeconds: {{ .Values.spacemanager.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.spacemanager.livenessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/dataomnis/conf
+              readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
+              - key: spacemanager.yaml
+                path: spacemanager.yaml
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/spacemanager
+            type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}

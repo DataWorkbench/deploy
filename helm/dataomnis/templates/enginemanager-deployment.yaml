@@ -29,104 +29,165 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - enginemanager
+              topologyKey: 'kubernetes.io/hostname'
       serviceAccountName: {{ .Release.Name }}-engine-manager
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       initContainers:
-      - name: wait-mysql
-        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: wait-mysql
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
+          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
-      - name: enginemanager
-        image: {{ .Values.image.registry }}/dataomnis/enginemanager:{{- .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "enginemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
-        ports:
-          - name: service
-            containerPort: {{ .Values.ports.enginemanager }}
-          - name: metrics
-            containerPort: {{ .Values.metricsPorts.enginemanager }}
-        env:
-          - name: ENGINE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.enginemanager }}"
-          - name: ENGINE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.enginemanager }}"
-          - name: ENGINE_MANAGER_MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.mysql.secretName }}
-                key: root
-          - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
-            valueFrom:
-              secretKeyRef:
-                name: dataomnis-iaas-secret
-                key: access_key_id
-          - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
-            valueFrom:
-              secretKeyRef:
-                name: dataomnis-iaas-secret
-                key: secret_access_key
-          - name: ENGINE_MANAGER_FLINK_DOMAIN
-            value: {{ .Values.domain | quote }}
-          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAME
-            value: {{ .Values.hdfs.configmapName }}
-          - name: ENGINE_MANAGER_FLINK_HDFS_CONFIGMAP_NAMESPACE
-            value: {{ .Release.Namespace | quote }}
-          - name: ENGINE_MANAGER_FLINK_IMAGE_REPO
-            value: "{{- .Values.image.registry }}/dataomnis/flink"
-          {{- range $ename, $evalue := .Values.enginemanager.envs }}
-          - name: ENGINE_MANAGER_{{ $ename }}
-            value: {{ $evalue | quote }}
-          {{- end }}
-        volumeMounts:
-          - name: dataomnis-config
-            mountPath: "/etc/dataomnis"
-            readOnly: true
-         {{- if .Values.enginemanager.envs.KUBE_CONF_PATH }}
-          - name: kube-config-volume
-            mountPath: {{ .Values.enginemanager.envs.KUBE_CONF_PATH }}
-            readOnly: true
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
         {{- end }}
-          - name: helm-repo-volume
-            mountPath: {{ .Values.enginemanager.envs.HELM_REPOSITORY_CACHE }}
-            readOnly: true
-        readinessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
-          {{- if .Values.enginemanager.readinessProbe }}
-          periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
-          {{- end }}
-        livenessProbe:
-          exec:
-            command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}" ]
-          {{- if .Values.enginemanager.livenessProbe }}
-          periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
-          {{- end }}
+        - name: enginemanager
+          image: {{ .Values.image.registry }}/dataomnis/enginemanager:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "enginemanager start -c /opt/dataomnis/conf/enginemanager.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.enginemanager }}
+            - name: metrics
+              containerPort: {{ .Values.metricsPorts.enginemanager }}
+          env:
+            - name: ENGINE_MANAGER_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: root
+            - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: access_key_id
+            - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: secret_access_key
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ENGINE_MANAGER_LOG_FILE_PATH
+              value: "/opt/dataomnis/log/$(POD_NAME).log"
+            {{- range $ename, $evalue := .Values.enginemanager.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/dataomnis/conf
+              readOnly: true
+            {{- if .Values.enginemanager.kubeConfPath }}
+            - name: kube-config-volume
+              mountPath: {{ .Values.enginemanager.kubeConfPath }}
+              readOnly: true
+            {{- end }}
+            - name: helm-repo-volume
+              mountPath: {{ .Values.enginemanager.helm.repoCachePath }}
+              readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
+          readinessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]
+            {{- if .Values.enginemanager.readinessProbe }}
+            periodSeconds: {{ .Values.enginemanager.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.enginemanager.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          livenessProbe:
+            exec:
+              command: [ "grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}" ]
+            {{- if .Values.enginemanager.livenessProbe }}
+            periodSeconds: {{ .Values.enginemanager.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.enginemanager.livenessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
       volumes:
-        - name: dataomnis-config
+        - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: "config.yaml"
-                path: "common-config.yaml"
-        {{- if .Values.enginemanager.envs.KUBE_CONF_PATH }}
-        - name: kube-config-volume
-          hostPath:
-            path: {{ .Values.enginemanager.kubeConfigPath }}
-            type: File
-        {{- end }}
+              - key: enginemanager.yaml
+                path: enginemanager.yaml
         - name: helm-repo-volume
           hostPath:
-            path: {{ .Values.enginemanager.helmRepoPath }}
+            path: {{ .Values.enginemanager.helm.repoCachePath }}
             type: Directory
+        {{- if .Values.enginemanager.kubeConfPath }}
+        - name: kube-config-volume
+          hostPath:
+            path: {{ .Values.enginemanager.kubeConfPath }}
+            type: File
+        {{- end }}
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/enginemanager
+            type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}

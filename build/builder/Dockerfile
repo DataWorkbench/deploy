@@ -2,7 +2,7 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-FROM golang:1.15.5-alpine3.12 as builder
+FROM golang:1.17.8-alpine3.15 as builder
 
 ARG WORKSPACE=/opt
 WORKDIR ${WORKSPACE}
@@ -20,7 +20,7 @@ RUN GRPC_HEALTH_PROBE_VERSION=v0.4.4 && \
     mv grpc_health_probe /usr/local/bin/
 
 
-FROM golang:1.15.5-alpine3.12
+FROM golang:1.17.8-alpine3.15
 RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories
 RUN apk add --no-cache bash git make openssl build-base
 

@@ -25,73 +25,141 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - resourcemanager
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
       {{- end }}
       initContainers:
-      - name: wait-mysql
-        image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
-        imagePullPolicy: IfNotPresent
-        command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: wait-mysql
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
+          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        - name: envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
       containers:
-      - name: resourcemanager
-        image: {{ .Values.image.registry }}/dataomnis/resourcemanager:{{- .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: ["sh", "-c", "resourcemanager start -c ${DATAOMNIS_CONF}/common-config.yaml"]
-        ports:
-          - name: service
-            containerPort: {{ .Values.ports.resourcemanager }}
-          - name: metrics
-            containerPort: {{ .Values.metricsPorts.resourcemanager }}
-        env:
-          - name: RESOURCE_MANAGER_GRPC_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.ports.resourcemanager }}"
-          - name: RESOURCE_MANAGER_METRICS_SERVER_ADDRESS
-            value: "0.0.0.0:{{- .Values.metricsPorts.resourcemanager }}"
-          - name: RESOURCE_MANAGER_MYSQL_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.mysql.secretName }}
-                key: root
-          {{- range $ename, $evalue := .Values.resourcemanager.envs }}
-          - name: RESOURCE_MANAGER_{{ $ename }}
-            value: {{ $evalue | quote }}
-          {{- end }}
-        readinessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
-          {{- if .Values.resourcemanager.readinessProbe }}
-          periodSeconds: {{ .Values.resourcemanager.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.resourcemanager.readinessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
-          {{- end }}
-        livenessProbe:
-          exec:
-            command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
-          {{- if .Values.resourcemanager.livenessProbe }}
-          periodSeconds: {{ .Values.resourcemanager.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.resourcemanager.livenessProbe.initialDelaySeconds }}
-          {{- else }}
-          periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
-          initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
-          {{- end }}
-        volumeMounts:
-          - name: config
-            mountPath: /etc/dataomnis
-            readOnly: true
-          - name: hdfs-config
-            mountPath: {{ .Values.resourcemanager.envs.RESOURCE_MANAGER_HADOOP_CONF_DIR }}
-            readOnly: true
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
+        - name: resourcemanager
+          image: {{ .Values.image.registry }}/dataomnis/resourcemanager:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "resourcemanager start -c /opt/dataomnis/conf/resourcemanager.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.resourcemanager }}
+            - name: metrics
+              containerPort: {{ .Values.metricsPorts.resourcemanager }}
+          env:
+            - name: RESOURCE_MANAGER_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: root
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: RESOURCE_MANAGER_LOG_FILE_PATH
+              value: "/opt/dataomnis/log/$(POD_NAME).log"
+            {{- if eq .Values.resourcemanager.storage.background "s3" }}
+            - name: RESOURCE_MANAGER_STORAGE_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: access_key_id
+            - name: RESOURCE_MANAGER_STORAGE_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dataomnis-iaas-secret
+                  key: secret_access_key
+            {{- end }}
+            {{- range $ename, $evalue := .Values.resourcemanager.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          readinessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
+            {{- if .Values.resourcemanager.readinessProbe }}
+            periodSeconds: {{ .Values.resourcemanager.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.resourcemanager.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          livenessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.resourcemanager }}"]
+            {{- if .Values.resourcemanager.livenessProbe }}
+            periodSeconds: {{ .Values.resourcemanager.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.resourcemanager.livenessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/dataomnis/conf
+              readOnly: true
+            {{- if eq .Values.resourcemanager.storage.background "hdfs" }}
+            - name: hdfs-config
+              mountPath: {{ .Values.resourcemanager.storage.hadoopConfDir }}
+              readOnly: true
+            {{- end }}
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
       volumes:
         - name: config
           configMap:
             name: dataomnis-config
             items:
-              - key: config.yaml
-                path: common-config.yaml
+              - key: resourcemanager.yaml
+                path: resourcemanager.yaml
+        {{- if eq .Values.resourcemanager.storage.background "hdfs" }}
         - name: hdfs-config
           configMap:
             name: {{ .Values.hdfs.configmapName }}
@@ -100,3 +168,20 @@ spec:
                 path: core-site.xml
               - key: hdfs-site.xml
                 path: hdfs-site.xml
+        {{- end }}
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/resourcemanager
+            type: Directory
+        {{- end  }}
+        {{- if .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}

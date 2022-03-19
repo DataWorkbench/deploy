@@ -1,0 +1,58 @@
+# Default values for logbackup.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: dockerhub.dataomnis.io/dataomnis/logbackup
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: 0.3.0
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+ports:
+  logbackup: 15001
+
+logConfig:
+  hostSvcPath: "/mnt/backup"
+  containerPath: "/dataomnis/workspace"
+  zone: gd2
+  bucketName: "new_testing_bucket"
+  level: 1
+  maxSize: 100
+  access_key_id: PRINGBKLXSCTVDWAIQSC
+  secret_access_key: yQCKT6DB0OxOx1DPWZPsihwlDlOvp1jKiQBIJVSF
+
+
+
+common:
+  livenessProbe:
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readinessProbe:
+    periodSeconds: 10
+    initialDelaySeconds: 20
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

@@ -17,12 +17,11 @@ image:
   pullSecret:
   pullPolicy: Always  # pullPolicy: IfNotPresent
 
-  registry: dockerhub.databench.io
+  registry: dockerhub.dataomnis.io
   tag: dev
   zeppelinTag: 0.9.0
 
   busybox: busybox:1.28.4
-  zeppelinInterpreter: dataomnis/zeppelin:0.9.0
   jaeger: jaegertracing/all-in-one:1.22
 
 # common configuration for all service
@@ -30,6 +29,7 @@ common:
   replicas: 1
   strategy: RollingUpdate
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+  logOutput: "file" # "console" or "file"
   grpcLog:
     level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
     verbosity: 99
@@ -42,6 +42,9 @@ common:
   readinessProbe:
     periodSeconds: 10
     initialDelaySeconds: 20
+
+persistent:
+  hostPath: /data/dataomnis/dataomnis
 
 etcd:
   endpoint: etcd-cluster
@@ -71,7 +74,13 @@ redis:
 
 # apiglobal settings
 apiglobal:
-  enable: true
+  enabled: true
+  httpServer:
+    read_timeout: 30s
+    write_timeout: 30s
+    idle_timeout: 30s
+    exit_timeout: 5m
+
   # region settings
   regions:
     testing:
@@ -79,84 +88,79 @@ apiglobal:
       names:
         zh_cn: "开发测试区"
         en_us: "testing"
-  envs:
-    HTTP_SERVER_READ_TIMEOUT: 30s
-    HTTP_SERVER_WRITE_TIMEOUT: 30s
-    HTTP_SERVER_DLE_TIMEOUT: 30s
-    HTTP_SERVER_EXIT_TIMEOUT: 5m
-    TRACER_SERVICE_NAME: apiglobal
+  # authentication
+  authentication:
+    identity_providers:
+      enfi:
+        name: enfi
+        client_id: "9034819z8a161e5a809c"
+        client_secret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
+        token_url: "http://x6ftpx.natappfree.cc/sys/BigDataOauth/accessToken"
+        redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
+  # http proxy
+  http_proxy: "http://172.20.0.6:8888"
+
+  envs: {}
+
 
 # apiserver configuration
 apiserver:
-  envs:
-    READ_TIMEOUT: 30s
-    WRITE_TIMEOUT: 30s
-    DLE_TIMEOUT: 30s
-    EXIT_TIMEOUT: 5m
-    TRACER_SERVICE_NAME: "apiserver"
-    REGION_ID: "testing"
+  httpServer:
+    read_timeout: 30s
+    write_timeout: 30s
+    idle_timeout: 30s
+    exit_timeout: 5m
+  envs: {}
+
 
 # account configuration
 account:
-  envs:
-    TRACER_SERVICE_NAME: "account"
-    SOURCE: "qingcloud"
+  source: "qingcloud"
+  envs: {}
+
 
 # enginemanager configuration
 enginemanager:
-  replicas: 1
-  helmRepoPath: "/root/.cache/helm/repository"
-  kubeConfigPath: "/root/.kube/config"
-  envs:
-    LOG_LEVEL: 1
-    GRPC_LOG_LEVEL: 1
-    TRACER_SERVICE_NAME: "enginemanager"
+  kubeConfPath: "/root/.kube/config"
+  helm:
+    repoConfig: "/root/.config/helm/repositories.yaml"
+    repoCachePath: "/root/.cache/helm/repository"
+    debug: false
 
-    HELM_REPOSITORY_CONFIG: "/root/.config/helm/repositories.yaml"
-    HELM_REPOSITORY_CACHE: "/root/.cache/helm/repository"
-    HELM_DRIVER: ""
-    HELM_DEBUG: false
-    HELM_QUERY_STATUS_DURATION: 10
+  flink:
+    restServicePort: 8081
+    restServiceNameFmt: "%s-flink-jobmanager-rest"
+    ingressClass: "nginx"
+    enableMultus: false
 
-    FLINK_REST_SERVICE_PORT: "8081"
-    FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-    FLINK_INGRESS_CLASS: "nginx"
-    FLINK_ENABLE_MULTUS: false
-
-# jobmanager configuration
-jobmanager:
-  envs:
-    TRACER_SERVICE_NAME: "jobmanager"
+  envs: {}
 
 # resourcemanager configuration
 resourcemanager:
-  envs:
-    HADOOP_CONF_DIR: /etc/hadoop
-    TRACER_SERVICE_NAME: "resourcemanager"
+  storage:
+    background: "hdfs"
+    hadoopConfDir: "/etc/hadoop/conf"
+    s3:
+      endpoint: "s3.gd2.qingstor.com"
+      region: "gd2" # us-west-2
+      bucket: "demo-yu-gd2-15"
+
+  envs: {}
 
 # scheduler configuration
 scheduler:
-  envs:
-    TRACER_SERVICE_NAME: "scheduler"
-    ETCD_DIAL_TIMEOUT: 5s
+  etcdDialTimeout: 5s
+
+  streamJobCrontabRetryInterval: 120s
+  streamJobCheckInstanceStateInterval: 30s
+  syncJobCrontabRetryInterval: 120s
+  syncJobCheckInstanceStateInterval: 30s
+
+  envs: {}
 
 # spacemanager configuration
 spacemanager:
-  envs:
-     TRACER_SERVICE_NAME: "spacemanager"
-     ETCD_DIAL_TIMEOUT: 5s
-     CLUSTER_FLINK_REST_SERVICE_PORT: "8081"
-     CLUSTER_FLINK_REST_SERVICE_NAME_FMT: "%s-flink-jobmanager-rest"
-
-# zeppelin configuration
-zeppelin:
-  hdfsConfigDir: /zeppelin/hadoop/hadoop-2.7.5/etc/hadoop
-  envs:
-    ZEPPELIN_HOME: /opt/zeppelin
-    ZEPPELIN_SERVER_RPC_PORTRANGE: 12320:12320
-    ZEPPELIN_K8S_SPARK_CONTAINER_IMAGE: spark:2.4.5
-    SPARK_MASTER: k8s://https://kubernetes.default.svc
-    SPARK_HOME: /spark
+  envs: {}
 
 developer:
   envs:
@@ -173,7 +177,8 @@ jaeger:
 iaas:
   zone: "testing"
   protocol: "http"
-  host: "api.testing.com"
+#  host: "api.testing.com"
+  host: "172.31.60.141"
   port: "7777"
   uri: "/iaas/"
   timeout: 600
@@ -223,3 +228,6 @@ serviceMonitor:
 
 webservice:
   enabled: false
+
+filebeat:
+  enabled: true

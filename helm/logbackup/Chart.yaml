@@ -1,0 +1,9 @@
+apiVersion: v2
+version: 0.0.1
+appVersion: 0.0.1
+name: dataomnis-logbackup
+description: Helm Charts For Dataomnis Log Files Backup
+maintainers:
+  - name: QingCloud Dataomnis
+    email: dataomnis@yunify.com
+home: https://github.com/DataWorkbench

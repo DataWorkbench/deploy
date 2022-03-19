@@ -2,7 +2,7 @@
 # Use of this source code is governed by a Apache license
 # that can be found in the LICENSE file.
 
-repo:=dockerhub.databench.io
+repo:=dockerhub.dataomnis.io
 TRAG.Gopkg:=DataWorkbench
 
 DEFAULT_TAG=dev
@@ -28,7 +28,7 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,jobmanager,scheduler,resourcemanager,notifier,account,enginemanager
+service=apiglobal,apiserver,spacemanager,scheduler,resourcemanager,account,enginemanager
 SERVICE_ARRAY=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=dataomnis-db-ctrl
 
@@ -60,7 +60,7 @@ build-flink-utile:
 
 .PHONY: build-image
 build-image: compile  ## Build dataomnis image
-	@$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
+	$(foreach S,$(SERVICE_ARRAY),cd $(PWD_DIR)/.. && docker build --build-arg SERVICE=$(S) -t $(repo)/dataomnis/$(S):$(tag) -f $(DOCKERFILE) .;)
 	docker image prune -f 1>/dev/null 2>&1
 	@echo "build $(service) done"
 

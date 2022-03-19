@@ -54,6 +54,8 @@ spec:
               value: /bitnami/etcd/data
             - name: ETCD_LOG_LEVEL
               value: info
+            - name: ETCD_LOG_OUTPUTS
+              value: 'stdout,/bitnami/etcd/etcd.log,stderr,/bitnami/etcd/error.log'
             - name: ALLOW_NONE_AUTHENTICATION
               value: "yes"
             - name: ETCD_ADVERTISE_CLIENT_URLS

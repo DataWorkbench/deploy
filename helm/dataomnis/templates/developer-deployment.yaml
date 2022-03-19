@@ -29,6 +29,16 @@ spec:
       {{ $key | quote }}: {{ $value | quote }}
       {{- end }}
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - developer
+              topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
@@ -47,6 +57,10 @@ spec:
             value: "{{ .Values.ports.developerHttp }}"
           - name: DEVELOPER_GRPC_PORT
             value: "{{ .Values.ports.developer }}"
+          - name: DEVELOPER_JAEGER_SERVER_ADDRESS
+            value: '{{ include "dataomnis.fullname" . }}-jaeger'
+          - name: DEVELOPER_JAEGER_SERVER_PORT
+            value: "{{ .Values.ports.jaeger }}"
 {{ include "developer.link.services" . | indent 10 }}
           {{- range $ename, $evalue := .Values.developer.envs }}
           - name: DEVELOPER_{{ $ename }}

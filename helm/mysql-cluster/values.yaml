@@ -41,11 +41,16 @@ pxc:
 #    innodb_log_buffer_size=8M
   configuration: |
     [mysqld]
-    datadir=/var/lib/mysql
     max_connections=10000
     max_user_connections=9000
     slow_query_log=ON
     long_query_time=10
+    sync_binlog=0
+    max_binlog_size=10M
+    datadir=/var/lib/mysql/data
+    log_error=/var/lib/mysql/log/mysql-error.log
+    log_bin=/var/lib/mysql/mysql-bin/mysql-bin
+    log_bin_index=/var/lib/mysql/mysql-bin/mysql-bin.index
   resources:
     requests:
       cpu: 1000m
@@ -74,7 +79,7 @@ pxc:
   persistent:
     enabled: true
     accessMode: ReadWriteOnce
-    size: 10Gi
+    size: 100Gi
     localPv:
       enabled: true
       reclaimPolicy: Retain
@@ -216,7 +221,7 @@ backup:
   image: ""
   # - name: private-registry-credentials
   pitr:
-    enabled: true
+    enabled: false
     storageName: qingstor
     timeBetweenUploads: 60
   storages:

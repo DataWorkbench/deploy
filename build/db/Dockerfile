@@ -11,10 +11,4 @@ RUN apk add --no-cache mysql-client
 RUN mkdir -p /flyway/ddl
 COPY ./deploy/build/db/ddl_init.sh /flyway/ddl/
 COPY ./deploy/build/db/ddl/*.sql /flyway/ddl/
-
-COPY ./spacemanager/scripts/sql/schema/V0.0.0__space_manager_init.sql /flyway/sql/V0.0.0.0__space_manager_init.sql
-COPY ./jobmanager/scripts/sql/schema/job_manager.sql /flyway/sql/V0.0.0.2__jobmanager.sql
-COPY ./resourcemanager/scripts/sql/schema/V0.0.0__resource.sql  /flyway/sql/V0.0.0.4__resource.sql
-COPY ./notifier/scripts/sql/schema/V0.0.0__notifier.sql  /flyway/sql/V0.0.0.5__notifier.sql
-COPY ./account/scripts/sql/schema/V0.0.0__account.sql  /flyway/sql/V0.0.0.6__account.sql
-COPY ./enginemanager/scripts/sql/schema/V0.0.0__engine_manager_init.sql  /flyway/sql/V0.0.0.7__engine_manager_init.sql
+COPY ./deploy/build/db/sql/*.sql  /flyway/sql/
