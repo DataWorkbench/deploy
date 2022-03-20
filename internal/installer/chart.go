@@ -31,6 +31,10 @@ func (m *ChartMeta) updateFromConfig(c Config) error {
 	return nil
 }
 
+func (m *ChartMeta) initLocalPvHome() error {
+	return nil
+}
+
 func (m ChartMeta) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	if m.values == nil || m.values.Image == nil {

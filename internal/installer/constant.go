@@ -6,18 +6,18 @@ const (
 	// operators:
 	// helm chart name
 	HdfsOptChart  = "hdfs-operator-0.1.0.tgz"
-	RedisOptChart = "redis-operator-3.1.0.tgz"
+	RedisOptChart = "redis-cluster-operator-0.1.0.tgz"
 	MysqlOptChart = "pxc-operator-1.9.1.tgz"
 	// release name
 	HdfsOptName  = "hdfs-operator"
-	RedisOptName = "redis-operator"
+	RedisOptName = "redis-cluster-operator"
 	MysqlOptName = "mysql-operator"
 
 	// Dependence-Service:
 	// helm chart name
 	EtcdClusterChart  = "etcd-cluster-1.0.0.tgz"
 	HdfsClusterChart  = "hdfs-cluster-0.1.1.tgz"
-	RedisClusterChart = "redis-cluster-1.0.0.tgz"
+	RedisClusterChart = "redis-cluster-0.1.0.tgz"
 	MysqlClusterChart = "pxc-db-1.9.1.tgz"
 	// release name
 	EtcdClusterName  = "etcd-cluster"

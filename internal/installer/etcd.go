@@ -2,6 +2,7 @@ package installer
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type EtcdConfig struct {
@@ -33,7 +34,13 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 	return e.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
-func (e EtcdChart) initLocalPvHome() error {
+func (e *EtcdChart) initLocalPvHome() error {
+	localPvHome := fmt.Sprintf("%s/%s", e.values.Persistent.LocalPv.Home, EtcdClusterName)
+	for _, node := range e.values.Persistent.LocalPv.Nodes {
+		if err := CreateRemoteDir(node, localPvHome); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

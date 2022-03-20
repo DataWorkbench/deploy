@@ -34,6 +34,16 @@ func (m *MysqlChart) updateFromConfig(c Config) error {
 	return m.values.Pxc.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
+func (m *MysqlChart) initLocalPvHome() error {
+	localPvHome := fmt.Sprintf("%s/%s/{data,log,mysql-bin}", m.values.Pxc.Persistent.LocalPv.Home, MysqlClusterName)
+	for _, node := range m.values.Pxc.Persistent.LocalPv.Nodes {
+		if err := CreateRemoteDir(node, localPvHome); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (m *MysqlChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(m.values)

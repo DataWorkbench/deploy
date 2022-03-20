@@ -15,9 +15,9 @@ var Operators = []string{
 
 var DependencyServices = []string{
 	EtcdClusterName,
-	HdfsClusterName,
 	MysqlClusterName,
 	RedisClusterName,
+	HdfsClusterName,
 }
 
 var AllServices []string
@@ -134,6 +134,10 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
+	if err = chart.initLocalPvHome(); err != nil {
+		logger.Error().Error("init local pv home error", err).Fire()
+		return err
+	}
 	if err = helm.install(chart); err != nil {
 		logger.Error().Error("helm install dependency service error", err).Fire()
 		return err
@@ -152,10 +156,13 @@ func installDataomnis(ctx context.Context, name string, c Config, logger *glog.L
 		return err
 	}
 
-	var chart Chart
-	chart = NewDataomnisChart(name, c)
+	chart := NewDataomnisChart(name, c)
 	if err = chart.updateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
+		return err
+	}
+	if err = chart.initHostPathDir(c); err != nil {
+		logger.Error().Error("init hostPath dir error", err).Fire()
 		return err
 	}
 	if err = helm.install(chart); err != nil {

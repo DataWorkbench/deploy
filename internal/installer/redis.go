@@ -2,13 +2,17 @@ package installer
 
 import (
 	"encoding/json"
+	"fmt"
 )
+
 
 // RedisConfig for hdfs-cluster
 type RedisConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Redis WorkloadConfig `json:"redis,omitempty" yaml:"redis,omitempty"`
+	WorkloadConfig `json:",inline" yaml:",inline"`
+
+	MasterSize int `json:"masterSize,omitempty" yaml:"-"`
 }
 
 // TODO: validate the yaml and nodes == 3 by default
@@ -36,10 +40,26 @@ func (r *RedisChart) updateConfig(c Config) error {
 			r.values.Image.updateFromConfig(c.Image)
 		}
 	}
-	return r.values.Redis.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
+
+	if err := r.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes); err != nil {
+		return err
+	}
+
+	r.values.MasterSize = len(r.values.Persistent.LocalPv.Nodes)
+	return nil
 }
 
-func (r RedisChart) parseValues() (Values, error) {
+func (r *RedisChart) initLocalPvHome() error {
+	localPvHome := fmt.Sprintf("%s/%s/{01,02}", r.values.Persistent.LocalPv.Home, RedisClusterName)
+	for _, node := range r.values.Persistent.LocalPv.Nodes {
+		if err := CreateRemoteDir(node, localPvHome); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (r *RedisChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(r.values)
 	if err != nil {

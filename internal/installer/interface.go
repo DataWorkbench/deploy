@@ -21,6 +21,8 @@ type Chart interface {
 
 	// whether to wait release ready
 	waitingReady() bool
+
+	initLocalPvHome() error
 }
 
 

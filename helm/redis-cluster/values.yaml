@@ -6,9 +6,8 @@ image:
   redis: redis
 
 
-redisCluster:
-  masterSize: 3
-  clusterReplicas: 1
+masterSize: 3
+clusterReplicas: 1
 
 
 persistent:

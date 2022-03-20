@@ -87,6 +87,16 @@ func (h HdfsChart) updateFromConfig(c Config) error {
 	return err
 }
 
+func (h HdfsChart) initLocalPvHome() error {
+	localPvHome := fmt.Sprintf("%s/%s/{namenode,datanode,journalnode,zookeeper}", h.values.HdfsHome, HdfsClusterName)
+	for _, node := range h.values.Nodes {
+		if err := CreateRemoteDir(node, localPvHome); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (h HdfsChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(h.values)
@@ -97,7 +107,7 @@ func (h HdfsChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func (h HdfsChart) getLabels() map[string]string {
+func (h *HdfsChart) getLabels() map[string]string {
 	return map[string]string{
 		HdfsInstanceLabelKey: h.ReleaseName,
 	}

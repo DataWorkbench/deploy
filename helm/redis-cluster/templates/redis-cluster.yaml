@@ -6,8 +6,8 @@ metadata:
     redis.kun/scope: cluster-scoped
   name: {{ include "redis-cluster.fullname" . }}
 spec:
-  masterSize: {{ .Values.redisCluster.masterSize }}
-  clusterReplicas: {{ .Values.redisCluster.clusterReplicas }}
+  masterSize: {{ .Values.masterSize }}
+  clusterReplicas: {{ .Values.clusterReplicas }}
   image: {{ include "redis-cluster.image" . }}
   imagePullPolicy: {{ .Values.image.pullPolicy }}
   {{- if .Values.image.pullSecrets }}

@@ -165,6 +165,16 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 	return nil
 }
 
+func (d *DataomnisChart) initHostPathDir(c Config) error {
+	localPvHome := fmt.Sprintf("%s/%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler, spacemanager}", c.LocalPVHome, DataomnisSystemName)
+	for _, node := range c.Nodes {
+		if err := CreateRemoteDir(node, localPvHome); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (d *DataomnisChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(d.values)
