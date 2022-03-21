@@ -44,25 +44,13 @@ done
 # create hdfs dir
 for node in ${HdfsNodes[@]}
 do
-  ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/datanode"
-done
-for node in ${HdfsNodes[@]}
-do
-  ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/namenode"
-done
-for node in ${HdfsNodes[@]}
-do
-  ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/journalnode"
-done
-for node in ${HdfsNodes[@]}
-do
-  ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/zookeeper"
+  ssh root@${node} "mkdir -p ${VolumeHome}/${HdfsReleaseName}/{datanode,namenode,journalnode,zookeeper}"
 done
 
 # create mysql dir
 for node in ${MysqlNodes[@]}
 do
-  ssh root@${node} "mkdir -p ${VolumeHome}/${MysqlReleaseName}"
+  ssh root@${node} "mkdir -p ${VolumeHome}/${MysqlReleaseName}/{data,log,mysql-bin}"
 done
 
 # create etcd dir
