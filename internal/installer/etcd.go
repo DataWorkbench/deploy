@@ -3,6 +3,7 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 type EtcdConfig struct {
@@ -36,8 +37,16 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 
 func (e *EtcdChart) initLocalPvHome() error {
 	localPvHome := fmt.Sprintf("%s/%s", e.values.Persistent.LocalPv.Home, EtcdClusterName)
+	var host *Host
+	var conn *Connection
+	var err error
 	for _, node := range e.values.Persistent.LocalPv.Nodes {
-		if err := CreateRemoteDir(node, localPvHome); err != nil {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}

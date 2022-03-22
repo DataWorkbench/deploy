@@ -3,6 +3,7 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 
@@ -51,8 +52,16 @@ func (r *RedisChart) updateConfig(c Config) error {
 
 func (r *RedisChart) initLocalPvHome() error {
 	localPvHome := fmt.Sprintf("%s/%s/{01,02}", r.values.Persistent.LocalPv.Home, RedisClusterName)
+	var host *Host
+	var conn *Connection
+	var err error
 	for _, node := range r.values.Persistent.LocalPv.Nodes {
-		if err := CreateRemoteDir(node, localPvHome); err != nil {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}

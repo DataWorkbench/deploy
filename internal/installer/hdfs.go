@@ -3,6 +3,7 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 const RoleNameNode = "namenode"
@@ -89,8 +90,16 @@ func (h HdfsChart) updateFromConfig(c Config) error {
 
 func (h HdfsChart) initLocalPvHome() error {
 	localPvHome := fmt.Sprintf("%s/%s/{namenode,datanode,journalnode,zookeeper}", h.values.HdfsHome, HdfsClusterName)
+	var host *Host
+	var conn *Connection
+	var err error
 	for _, node := range h.values.Nodes {
-		if err := CreateRemoteDir(node, localPvHome); err != nil {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}

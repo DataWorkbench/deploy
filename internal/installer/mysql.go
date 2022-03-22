@@ -3,6 +3,7 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/pkg/errors"
 )
 
 type MysqlConfig struct {
@@ -36,8 +37,16 @@ func (m *MysqlChart) updateFromConfig(c Config) error {
 
 func (m *MysqlChart) initLocalPvHome() error {
 	localPvHome := fmt.Sprintf("%s/%s/{data,log,mysql-bin}", m.values.Pxc.Persistent.LocalPv.Home, MysqlClusterName)
+	var host *Host
+	var conn *Connection
+	var err error
 	for _, node := range m.values.Pxc.Persistent.LocalPv.Nodes {
-		if err := CreateRemoteDir(node, localPvHome); err != nil {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}

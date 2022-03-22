@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/DataWorkbench/common/lib/iaas"
+	"github.com/pkg/errors"
 )
 
 type MetricsConfig struct {
@@ -167,8 +168,16 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 
 func (d *DataomnisChart) initHostPathDir(c Config) error {
 	localPvHome := fmt.Sprintf("%s/%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler, spacemanager}", c.LocalPVHome, DataomnisSystemName)
+	var host *Host
+	var conn *Connection
+	var err error
 	for _, node := range c.Nodes {
-		if err := CreateRemoteDir(node, localPvHome); err != nil {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}
