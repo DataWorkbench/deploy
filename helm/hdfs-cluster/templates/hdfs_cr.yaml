@@ -6,6 +6,7 @@ spec:
   version: {{ .Chart.AppVersion }}  # hadoop version
   image: {{ .Values.imageRegistry }}/{{ .Values.image }}
   imagePullPolicy: {{ $.Values.imagePullPolicy }}
+  imagePullSecrets: {{ $.Values.imagePullSecrets }}
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc

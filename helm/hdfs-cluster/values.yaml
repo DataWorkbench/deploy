@@ -9,6 +9,8 @@ hdfsHome: /data/dataomnis
 imageRegistry: dockerhub.dataomnis.io
 image: dataomnis/hadoop:2.9.2   # dataomnis/hdfs-metrics:3.1.0
 imagePullPolicy: IfNotPresent
+imagePullSecrets:
+  - testSecrets  #  example
 
 nodes:
   - worker-s001
