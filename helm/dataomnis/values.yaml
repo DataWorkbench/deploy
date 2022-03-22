@@ -9,7 +9,7 @@ port:
 # the host info for pod
 # qingcloudApiIP: the ip of api.qingcloud.com
 dns:
-  qingcloudApiIP: 172.31.60.141
+  qingcloudApiIP:
 
 image:
   # kubectl -n dataomnis create secret docker-registry docker-registry-secret --docker-server=dockerhub.qingcloud.com --docker-username=push-dataomnis --docker-password=<your-pword>
@@ -17,9 +17,8 @@ image:
   pullSecret:
   pullPolicy: Always  # pullPolicy: IfNotPresent
 
-  registry: dockerhub.dataomnis.io
+  registry: docker.io
   tag: dev
-  zeppelinTag: 0.9.0
 
   busybox: busybox:1.28.4
   jaeger: jaegertracing/all-in-one:1.22
@@ -179,8 +178,8 @@ iaas:
   port: "7777"
   uri: "/iaas/"
   timeout: 600
-  access_key_id: "LTMJGBXPHSEZRNVKKPHU"
-  secret_access_key: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+  access_key_id: ""
+  secret_access_key: ""
 
 # serviceName: port
 ports:
