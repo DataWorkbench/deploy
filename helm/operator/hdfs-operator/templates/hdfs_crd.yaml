@@ -87,7 +87,6 @@ spec:
                 imagePullPolicy:
                   type: string
                 imagePullSecrets:
-                  description: ImagePullSecrets []LocalObjectReference  `json:"imagePullSecrets"`
                   items:
                     type: string
                   type: array
