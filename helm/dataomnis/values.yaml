@@ -14,7 +14,7 @@ dns:
 image:
   # kubectl -n dataomnis create secret docker-registry docker-registry-secret --docker-server=dockerhub.qingcloud.com --docker-username=push-dataomnis --docker-password=<your-pword>
   # if need, first create docker-registry secret named "docker-registry-secret" by above cmd in namespace dataomnis and set secret to "docker-registry-secret"
-  pullSecret:
+  pullSecrets: []
   pullPolicy: Always  # pullPolicy: IfNotPresent
 
   registry: dockerhub.dataomnis.io
@@ -61,7 +61,7 @@ mysql:
   maxOpenConn: 128
   connMaxLifetime: 10m
   logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
-  slowTshreshold: 2s
+  slowThreshold: 2s
 
 hdfs:
   configmapName: hdfs-cluster-common-config
@@ -76,10 +76,10 @@ redis:
 apiglobal:
   enabled: true
   httpServer:
-    read_timeout: 30s
-    write_timeout: 30s
-    idle_timeout: 30s
-    exit_timeout: 5m
+    readTimeout: 30s
+    writeTimeout: 30s
+    idleTimeout: 30s
+    exitTimeout: 5m
 
   # region settings
   regions:
@@ -90,15 +90,15 @@ apiglobal:
         en_us: "testing"
   # authentication
   authentication:
-    identity_providers:
+    identityProviders:
       enfi:
         name: enfi
-        client_id: "9034819z8a161e5a809c"
-        client_secret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
-        token_url: "http://x6ftpx.natappfree.cc/sys/BigDataOauth/accessToken"
-        redirect_url: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
+        clientId: "9034819z8a161e5a809c"
+        clientSecret: "785v4f1551785df46b64baf8ikj931cfc72b087dc"
+        tokenUrl: "http://x6ftpx.natappfree.cc/sys/BigDataOauth/accessToken"
+        redirectUrl: "http://global.dataomnis.192.168.27.90.nip.io/v1/auth/redirect/enfi"
   # http proxy
-  http_proxy: "http://172.20.0.6:8888"
+  httpProxy: "http://172.20.0.6:8888"
 
   envs: {}
 
@@ -106,10 +106,10 @@ apiglobal:
 # apiserver configuration
 apiserver:
   httpServer:
-    read_timeout: 30s
-    write_timeout: 30s
-    idle_timeout: 30s
-    exit_timeout: 5m
+    readTimeout: 30s
+    writeTimeout: 30s
+    idleTimeout: 30s
+    exitTimeout: 5m
   envs: {}
 
 
@@ -121,7 +121,6 @@ account:
 
 # enginemanager configuration
 enginemanager:
-  kubeConfPath: "/root/.kube/config"
   helm:
     repoConfig: "/root/.config/helm/repositories.yaml"
     repoCachePath: "/root/.cache/helm/repository"
@@ -150,12 +149,6 @@ resourcemanager:
 # scheduler configuration
 scheduler:
   etcdDialTimeout: 5s
-
-  streamJobCrontabRetryInterval: 120s
-  streamJobCheckInstanceStateInterval: 30s
-  syncJobCrontabRetryInterval: 120s
-  syncJobCheckInstanceStateInterval: 30s
-
   envs: {}
 
 # spacemanager configuration
@@ -177,7 +170,6 @@ jaeger:
 iaas:
   zone: "testing"
   protocol: "http"
-#  host: "api.testing.com"
   host: "172.31.60.141"
   port: "7777"
   uri: "/iaas/"

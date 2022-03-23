@@ -40,7 +40,7 @@ data:
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
       log_level: {{ .Values.mysql.logLevel }}
-      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+      slow_threshold: {{ .Values.mysql.slowThreshold }}
 
     redis:
       mode: "sentinel"
@@ -75,10 +75,10 @@ data:
 
     http_server:
       address: "0.0.0.0:{{ .Values.ports.apiserver }}"
-      read_timeout:  {{ .Values.apiserver.httpServer.read_timeout }}
-      write_timeout: {{ .Values.apiserver.httpServer.write_timeout }}
-      idel_timeout:  {{ .Values.apiserver.httpServer.idle_timeout }}
-      exit_timeout:  {{ .Values.apiserver.httpServer.exit_timeout }}
+      read_timeout:  {{ .Values.apiserver.httpServer.readTimeout }}
+      write_timeout: {{ .Values.apiserver.httpServer.writeTimeout }}
+      idel_timeout:  {{ .Values.apiserver.httpServer.idleTimeout }}
+      exit_timeout:  {{ .Values.apiserver.httpServer.exitTimeout }}
 
     tracer:
       service_name: "apiserver"
@@ -103,10 +103,10 @@ data:
 
     http_server:
       address: "0.0.0.0:{{ .Values.ports.apiglobal }}"
-      read_timeout: {{ .Values.apiglobal.httpServer.read_timeout }}
-      write_timeout: {{ .Values.apiglobal.httpServer.write_timeout }}
-      idel_timeout: {{ .Values.apiglobal.httpServer.idle_timeout }}
-      exit_timeout: {{ .Values.apiglobal.httpServer.exit_timeout }}
+      read_timeout: {{ .Values.apiglobal.httpServer.readTimeout }}
+      write_timeout: {{ .Values.apiglobal.httpServer.writeTimeout }}
+      idel_timeout: {{ .Values.apiglobal.httpServer.idleTimeout }}
+      exit_timeout: {{ .Values.apiglobal.httpServer.exitTimeout }}
 
     tracer:
       service_name: "apiglobal"
@@ -125,17 +125,17 @@ data:
     # authentication info for apiglobal
     authentication:
       identity_providers:
-      {{- range $providerId, $provider := .Values.apiglobal.authentication.identity_providers }}
+      {{- range $providerId, $provider := .Values.apiglobal.authentication.identityProviders }}
         {{ $providerId }}:
           name: {{ $provider.name }}
-          client_id: {{ $provider.client_id }}
-          client_secret: {{ $provider.client_secret }}
-          token_url: {{ $provider.token_url }}
-          redirect_url: {{ $provider.redirect_url }}
+          client_id: {{ $provider.clientId }}
+          client_secret: {{ $provider.clientSecret }}
+          token_url: {{ $provider.tokenUrl }}
+          redirect_url: {{ $provider.redirectUrl }}
       {{- end }}
 
       # http proxy for apiglobal
-      http_proxy: {{ .Values.apiglobal.http_proxy }}
+      http_proxy: {{ .Values.apiglobal.httpProxy }}
   {{- end }}
 
   enginemanager.yaml: |
@@ -173,7 +173,7 @@ data:
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
       log_level: {{ .Values.mysql.logLevel }}
-      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+      slow_threshold: {{ .Values.mysql.slowThreshold }}
 
     kube_conf_path: "{{ .Values.enginemanager.kubeConfPath }}"
     helm:
@@ -274,17 +274,17 @@ data:
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
       log_level: {{ .Values.mysql.logLevel }}
-      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+      slow_threshold: {{ .Values.mysql.slowThreshold }}
 
     etcd:
       endpoints: {{ include "etcd.endpoints" . | quote }}
       dial_timeout: {{ .Values.scheduler.etcdDialTimeout }}
 
     schedule:
-      stream_job_crontab_retry_interval: {{ .Values.scheduler.streamJobCrontabRetryInterval }}
-      stream_job_check_instance_state_interval: {{ .Values.scheduler.streamJobCheckInstanceStateInterval }}
-      sync_job_crontab_retry_interval: {{ .Values.scheduler.syncJobCrontabRetryInterval }}
-      sync_job_check_instance_state_interval: {{ .Values.scheduler.syncJobCheckInstanceStateInterval }}
+      stream_job_crontab_retry_interval: 120s
+      stream_job_check_instance_state_interval: 30s
+      sync_job_crontab_retry_interval: 120s
+      sync_job_check_instance_state_interval: 30s
 
 
   spacemanager.yaml: |
@@ -322,7 +322,7 @@ data:
       max_open_conn: {{ .Values.mysql.maxOpenConn }}
       conn_max_lifetime: {{ .Values.mysql.connMaxLifetime }}
       log_level: {{ .Values.mysql.logLevel }}
-      slow_threshold: {{ .Values.mysql.slowTshreshold }}
+      slow_threshold: {{ .Values.mysql.slowThreshold }}
 
     cluster:
       flink:

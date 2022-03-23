@@ -26,7 +26,7 @@ dataomnis:
     maxOpenConn: 128
     connMaxLifetime: 10m
     logLevel: 4  # 1 => Silent, 2 => Error, 3 => Warn, 4 => Info
-    slowTshreshold: 2s
+    slowThreshold: 2s
 
   global:
     replicas: 1

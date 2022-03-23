@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+//TODO: add backup-config
 type MysqlConfig struct {
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 

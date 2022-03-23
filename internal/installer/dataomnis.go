@@ -7,19 +7,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-type MetricsConfig struct {
+type Metrics struct {
 	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty"`
 }
 
-type GrpcLogConfig struct {
-	Level     int8 `json:"level,omitempty" yaml:"level,omitempty"`
+type GrpcLog struct {
+	Level     int8 `json:"level,omitempty"     yaml:"level,omitempty"`
 	Verbosity int8 `json:"verbosity,omitempty" yaml:"verbosity,omitempty"`
 }
 
-type ServiceConfig struct {
-	LogLevel    int8           `json:"logLevel,omitempty" yaml:"logLevel"`
-	GrpcLog     *GrpcLogConfig `json:"grpcLog,omitempty" yaml:"grpcLog,omitempty"`
-	Metrics     *MetricsConfig `json:"metrics,omitempty" yaml:"metrics,omitempty"`
+type Service struct {
+	LogLevel  int8     `json:"logLevel,omitempty" yaml:"logLevel"`
+	LogOutput string   `json:"logOutput"          yaml:"logOutput"`
+	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"  yaml:"grpcLog,omitempty"`
+	Metrics   *Metrics `json:"metrics,omitempty"  yaml:"metrics,omitempty"`
 
 	WorkloadConfig `json:",omitempty,inline" yaml:",omitempty,inline"`
 
@@ -32,16 +33,23 @@ type Webservice struct {
 
 // TODO: update from webservice enable
 // TODO: generate default region
-type ApiGlobalConfig struct {
-	Enabled bool     `json:"enabled" yaml:"enabled" yaml:"enabled"`
-	Regions []Region `json:"-" yaml:"regions,flow,omitempty"`
+type Apiglobal struct {
+	Enabled    bool       `json:"enabled" yaml:"enabled" yaml:"enabled"`
+	HttpServer HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
 
+	Regions      []Region                 `json:"-"       yaml:"regions,flow,omitempty"`
 	RegionValues []map[string]RegionValue `json:"regions" yaml:"-"`
 
-	ServiceConfig `json:",omitempty,inline" yaml:",inline"`
+	// Authentication: for helm values.yaml
+	// IdentityProviders: for user configuration
+	Authentication    *Authentication    `json:"authentication"      yaml:"-"`
+	IdentityProviders []IdentityProvider `json:"-"                   yaml:"identityProviders"`
+	HttpProxy         string             `json:"httpProxy,omitempty" yaml:"httpProxy"`
+
+	Service `json:",omitempty,inline" yaml:",inline"`
 }
 
-func (a ApiGlobalConfig) updateRegion() {
+func (a *Apiglobal) updateRegion() {
 	for _, r := range a.Regions {
 		rv := RegionValue{
 			Host: r.Host,
@@ -56,17 +64,32 @@ func (a ApiGlobalConfig) updateRegion() {
 	}
 }
 
-// Region for configurations, parse to RegionValue.
+func (a *Apiglobal) updateAuthentication() {
+	if len(a.IdentityProviders) > 0 {
+		pMap := map[string]IdentityProvider{}
+		for _, p := range a.IdentityProviders {
+			pMap[p.Name] = p
+		}
+		a.Authentication.IdentityProviders = pMap
+	}
+}
+
+// HttpServer config
+type HttpServer struct {
+	ReadTimeout  string `json:"read_timeout,omitempty" yaml:"readTimeout,omitempty"`
+	WriteTimeout string `json:"write_timeout,omitempty" yaml:"writeTimeout,omitempty"`
+	IdleTimeout  string `json:"idle_timeout,omitempty" yaml:"idleTimeout,omitempty"`
+	ExitTimeout  string `json:"exit_timeout,omitempty" yaml:"exitTimeout,omitempty"`
+}
+
+// Region for configuration by user, parsed to RegionValue.
 type Region struct {
 	Host string `json:"-" yaml:"host"`
 	EnUs string `json:"-" yaml:"enUsName"`
 	ZhCn string `json:"-" yaml:"zhCnName"`
 }
 
-// ***********************************************************
-
-// ***********************************************************
-// RegionValue for apiglobal values.yaml, updated from Region.
+// RegionValue for helm values.yaml, updated from Region.
 type Names struct {
 	ZhCn string `json:"zh_cn" yaml:"-"`
 	EnUs string `json:"en_us" yaml:"-"`
@@ -77,37 +100,104 @@ type RegionValue struct {
 	Name Names  `json:"names"`
 }
 
-// ***********************************************************
-
-type ServiceMonitorConfig struct {
-	Enabled  bool   `yaml:"enabled"`
-	Interval string `yaml:"interval"`
+// IdentityProvider for authentication
+type IdentityProvider struct {
+	Name         string `json:"name"         yaml:"name"`
+	ClientId     string `json:"clientId"     yaml:"clientId"`
+	ClientSecret string `json:"clientSecret" yaml:"clientSecret"`
+	TokenUrl     string `json:"tokenUrl"     yaml:"tokenUrl"`
+	RedirectUrl  string `json:"redirectUrl"  yaml:"redirectUrl"`
 }
 
-type MysqlClientConfig struct {
+type Authentication struct {
+	IdentityProviders map[string]IdentityProvider `json:"identityProviders,omitempty" yaml:"-"`
+}
+
+// ***********************************************************
+type Apiserver struct {
+	Service    `json:",omitempty,inline" yaml:",inline"`
+	HttpServer HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
+}
+
+// ***********************************************************
+type Account struct {
+	Service `json:",omitempty,inline" yaml:",inline"`
+	Source  string `json:"source,omitempty"   yaml:"source,omitempty"`
+}
+
+// ***********************************************************
+type Enginemanager struct {
+	Service `json:",omitempty,inline" yaml:",inline"`
+	Helm    *HelmClient `json:"helm,omitempty"   yaml:"helm,omitempty"`
+	Flink   Flink       `json:"flink,omitempty"   yaml:"flink,omitempty"`
+}
+
+type HelmClient struct {
+	RepoCachePath string `json:"repoCachePath,omitempty"   yaml:"RepoCachePath,omitempty"`
+	Debug         bool   `json:"debug,omitempty"   yaml:"debug,omitempty"`
+}
+
+type Flink struct {
+	RestServicePort    int8   `json:"restServicePort,omitempty"   yaml:"restServicePort,omitempty"`
+	RestServiceNameFmt string `json:"restServiceNameFmt,omitempty"   yaml:"restServiceNameFmt,omitempty"`
+	IngressClass       string `json:"ingressClass,omitempty"   yaml:"ingressClass,omitempty"`
+	EnableMultus       bool   `json:"enableMultus,omitempty"   yaml:"enableMultus,omitempty"`
+}
+
+// ***********************************************************
+type Resourcemanager struct {
+	Service `json:",omitempty,inline" yaml:",inline"`
+	Storage *Storage `json:"storage,omitempty"   yaml:"storage,omitempty"`
+}
+
+type Storage struct {
+	Background    string `json:"background,omitempty"    yaml:"background,omitempty"`
+	HadoopConfDir string `json:"hadoopConfDir,omitempty" yaml:"hadoopConfDir,omitempty"`
+	S3            *S3    `json:"s3,omitempty"            yaml:"s3,omitempty"`
+}
+
+type S3 struct {
+	Endpoint string `json:"endpoint,omitempty"   yaml:"endpoint,omitempty"`
+	Region   string `json:"region,omitempty"   yaml:"region,omitempty"`
+	Bucket   string `json:"bucket,omitempty"   yaml:"bucket,omitempty"`
+}
+
+// ***********************************************************
+type Scheduler struct {
+	Service         `json:",omitempty,inline" yaml:",inline"`
+	EtcdDialTimeout string `json:"etcdDialTimeout,omitempty"   yaml:"etcdDialTimeout,omitempty"`
+}
+
+// ***********************************************************
+type ServiceMonitor struct {
+	Enabled  bool   `json:"enabled"  yaml:"enabled"`
+	Interval string `json:"interval" yaml:"interval"`
+}
+
+type MysqlClient struct {
 	ExternalHost string `json:"externalHost" yaml:"-"`
 	SecretName   string `json:"secretName" yaml:"-"`
 
-	LogLevel        int8   `json:"logLevel,omitempty" yaml:"logLevel,omitempty"`
-	MaxIdleConn     int32  `json:"maxIdleConn,omitempty" yaml:"maxIdleConn,omitempty"`
-	MaxOpenConn     int32  `json:"maxOpenConn,omitempty" yaml:"maxOpenConn,omitempty"`
+	LogLevel        int8   `json:"logLevel,omitempty"        yaml:"logLevel,omitempty"`
+	MaxIdleConn     int32  `json:"maxIdleConn,omitempty"     yaml:"maxIdleConn,omitempty"`
+	MaxOpenConn     int32  `json:"maxOpenConn,omitempty"     yaml:"maxOpenConn,omitempty"`
 	ConnMaxLifetime string `json:"connMaxLifetime,omitempty" yaml:"connMaxLifetime,omitempty"`
-	SlowTshreshold  string `json:"slowTshreshold,omitempty" yaml:"slowTshreshold,omitempty"`
+	SlowThreshold   string `json:"slowThreshold,omitempty"   yaml:"slowThreshold,omitempty"`
 }
 
-type EtcdClientConfig struct {
+type EtcdClient struct {
 	Endpoint string `json:"endpoint" yaml:"-"`
 }
 
-type HdfsClientConfig struct {
+type HdfsClient struct {
 	ConfigmapName string `json:"configmapName" yaml:"-"`
 }
 
-type RedisClientConfig struct {
+type RedisClient struct {
 	Address string `json:"address" yaml:"-"`
 }
 
-type DataomnisConfig struct {
+type Dataomnis struct {
 	// dataomnis version
 	Version string `json:"version" yaml:"version"`
 
@@ -117,34 +207,33 @@ type DataomnisConfig struct {
 	// global configurations for all service as default
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
-	MysqlClient *MysqlClientConfig `json:"mysql"   yaml:"mysql"`
-	EtcdClient  *EtcdClientConfig  `json:"etcd" yaml:"-"`
-	HdfsClient  *HdfsClientConfig  `json:"hdfs" yaml:"-"`
-	RedisClient *RedisClientConfig `json:"redis" yaml:"-"`
+	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
+	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
+	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
+	RedisClient *RedisClient `json:"redis" yaml:"-"`
 
 	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
-	Common *ServiceConfig `json:"common,inline" yaml:",inline"`
+	Common *Service `json:"common,inline" yaml:",inline"`
 
-	WebService      *Webservice      `json:"webservice" yaml:"webservice"`
-	Apiglobal       *ApiGlobalConfig `json:"apiglobal" yaml:"apiGlobal"`
-	Apiserver       *ServiceConfig   `json:"apiserver" yaml:"apiserver"`
-	Account         *ServiceConfig   `json:"account" yaml:"account"`
-	Developer       *ServiceConfig   `json:"developer" yaml:"developer"`
-	Enginemanager   *ServiceConfig   `json:"enginemanager" yaml:"enginemanager"`
-	Jobmanager      *ServiceConfig   `json:"jobmanager" yaml:"jobmanager"`
-	Resourcemanager *ServiceConfig   `json:"resourcemanager" yaml:"resourcemanager"`
-	Scheduler       *ServiceConfig   `json:"scheduler" yaml:"scheduler"`
-	Spacemanager    *ServiceConfig   `json:"spacemanager" yaml:"spacemanager"`
+	WebService      *Webservice      `json:"webservice"      yaml:"webservice"`
+	Apiglobal       *Apiglobal       `json:"apiglobal"       yaml:"apiGlobal"`
+	Apiserver       *Apiserver       `json:"apiserver"       yaml:"apiserver"`
+	Account         *Account         `json:"account"         yaml:"account"`
+	Developer       *Service         `json:"developer"       yaml:"developer"`
+	Enginemanager   *Enginemanager   `json:"enginemanager"   yaml:"enginemanager"`
+	Resourcemanager *Resourcemanager `json:"resourcemanager" yaml:"resourcemanager"`
+	Scheduler       *Scheduler       `json:"scheduler"       yaml:"scheduler"`
+	Spacemanager    *Service         `json:"spacemanager"    yaml:"spacemanager"`
 
-	Jaeger         *ServiceConfig        `json:"jaeger" yaml:"jaeger"`
-	ServiceMonitor *ServiceMonitorConfig `json:"serviceMonitor" yaml:"serviceMonitor"`
+	Jaeger         *WorkloadConfig `json:"jaeger"         yaml:"jaeger"`
+	ServiceMonitor *ServiceMonitor `json:"serviceMonitor" yaml:"serviceMonitor"`
 }
 
 type DataomnisChart struct {
 	ChartMeta
 
-	values *DataomnisConfig
+	values *Dataomnis
 }
 
 // update each field value from global Config if that is ZERO
@@ -156,13 +245,14 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 		d.values.Image.updateFromConfig(c.Image)
 	}
 	d.values.Image.Tag = d.values.Version
-	
+
 	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
 	d.values.EtcdClient.Endpoint = EtcdClusterName
 	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)
 	d.values.RedisClient.Address = fmt.Sprintf(RedisAddressFmt, RedisClusterName)
 
 	d.values.Apiglobal.updateRegion()
+	d.values.Apiglobal.updateAuthentication()
 	return nil
 }
 
@@ -203,7 +293,7 @@ func NewDataomnisChart(release string, c Config) *DataomnisChart {
 	if c.Dataomnis != nil {
 		d.values = c.Dataomnis
 	} else {
-		d.values = &DataomnisConfig{}
+		d.values = &Dataomnis{}
 	}
 	return d
 }
