@@ -41,7 +41,9 @@ spec:
               topologyKey: 'kubernetes.io/hostname'
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+        {{- range .Values.image.pullSecret }}
+        - name: {{ . }}
+        {{- end }}
       {{- end }}
       containers:
       - name: developer

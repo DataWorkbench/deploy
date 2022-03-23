@@ -42,7 +42,9 @@ spec:
       serviceAccountName: {{ .Release.Name }}-engine-manager
       {{- if .Values.image.pullSecret }}
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+        {{- range .Values.image.pullSecret }}
+        - name: {{ . }}
+        {{- end }}
       {{- end }}
       initContainers:
         - name: wait-mysql
