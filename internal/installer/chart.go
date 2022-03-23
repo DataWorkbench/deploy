@@ -67,6 +67,10 @@ func (m ChartMeta) waitingReady() bool {
 	return m.WaitingReady
 }
 
+func (m ChartMeta) getTimeoutSecond() int {
+	return DefaultTimeoutSecond
+}
+
 type MetaConfig struct {
 	Image *ImageConfig `json:"image,omitempty"`
 }

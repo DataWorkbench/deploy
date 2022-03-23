@@ -19,8 +19,7 @@ const (
 	DefaultHelmRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
 	DefaultHelmRepositoryCacheFmt  = "%s/.cache/helm/repository"
 
-	DefaultWaitTimeoutSec = 60 * 20
-	DefaultDurationSec    = 10
+	DefaultDurationSec = 20
 )
 
 // **************************************************
@@ -139,12 +138,12 @@ func (p *Proxy) install(chart Chart) error {
 	}
 
 	if chart.waitingReady() {
-		err = p.waitingReady(chart, DefaultWaitTimeoutSec, DefaultDurationSec)
+		err = p.waitingReady(chart)
 	}
 	return err
 }
 
-func (p *Proxy) waitingReady(chart Chart, timeoutSec, durationSec uint64) error {
+func (p *Proxy) waitingReady(chart Chart) error {
 	name := chart.getReleaseName()
 	p.logger.Info().String("waiting release", name).Msg("ready..").Fire()
 
@@ -155,15 +154,18 @@ func (p *Proxy) waitingReady(chart Chart, timeoutSec, durationSec uint64) error 
 
 	ready := false
 	var err error
-	duration := time.Duration(durationSec) * time.Second
 	p.kclient, err = NewKClient()
 	if err != nil {
 		p.logger.Error().Error("new kube client error", err).Fire()
 		return err
 	}
 
-	for timeoutSec > 0 {
+	timeoutSec := chart.getTimeoutSecond()
+	duration := time.Duration(DefaultDurationSec) * time.Second
+	spendSecs := 0
+	for spendSecs < timeoutSec {
 		time.Sleep(duration)
+		spendSecs += DefaultDurationSec
 
 		ready, err = p.isReady(ops)
 		if err != nil {
@@ -171,13 +173,14 @@ func (p *Proxy) waitingReady(chart Chart, timeoutSec, durationSec uint64) error 
 			return err
 		}
 		if ready {
-			p.logger.Info().String("all pods ready of release", name).String("in namespace", p.namespace).Fire()
+			p.logger.Info().String("all pods ready of release", name).
+				String("in namespace", p.namespace).Int("spend seconds", spendSecs).Fire()
 			return nil
 		}
-
-		timeoutSec -= durationSec
 	}
-	return errors.New(fmt.Sprintf("install release=%s failed, timeout.", name))
+	msg := fmt.Sprintf("install release=%s failed, timeout.", name)
+	p.logger.Error().Msg(msg).Fire()
+	return errors.New(msg)
 }
 
 // Note: need to init p.kubeClient before

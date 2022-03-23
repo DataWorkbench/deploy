@@ -16,7 +16,7 @@ type EtcdConfig struct {
 // EtcdChart for etcd-cluster, implement Chart
 type EtcdChart struct {
 	ChartMeta `json:",inline" yaml:",inline"`
-	values    *EtcdConfig `json:"config,omitempty" yaml:"config,omitempty"`
+	values    *EtcdConfig `yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO
@@ -61,6 +61,13 @@ func (e *EtcdChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func (e *EtcdChart) getTimeoutSecond() int {
+	if e.values.TimeoutSecond == 0 {
+		return e.ChartMeta.getTimeoutSecond()
+	}
+	return e.values.TimeoutSecond
 }
 
 func NewEtcdChart(release string, c Config) *EtcdChart {

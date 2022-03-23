@@ -23,6 +23,8 @@ dataomnis:
   domain: dataomnis.192.168.27.90.nip.io
   port:
 
+  timeoutSecond: 600
+
   mysql:
     maxIdleConn: 16
     maxOpenConn: 128
@@ -55,6 +57,7 @@ dataomnis:
   iaas:
 
 mysqlCluster:
+  timeoutSecond: 1200
   pxc:
     resources:
       requests:
@@ -73,6 +76,7 @@ mysqlCluster:
           - worker-s003
 
 hdfsCluster:
+  timeoutSecond: 1200
   nodes:
     - worker-s001
     - worker-s002
@@ -103,6 +107,7 @@ hdfsCluster:
         nodes:
 
 redisCluster:
+  timeoutSecond: 900
   persistent:
     size: 50Gi
     localPv:
@@ -112,6 +117,7 @@ redisCluster:
         - worker-s003
 
 etcdCluster:
+  timeoutSecond: 600
   persistent:
     size: 50Gi
     localPv:

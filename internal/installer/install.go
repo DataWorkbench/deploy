@@ -104,6 +104,7 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 		return err
 	}
 	logger.Info().String("install operator", name).Msg(", done.").Fire()
+	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 
@@ -145,6 +146,7 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		return err
 	}
 	logger.Info().String("install dependency service", name).Msg(", done.").Fire()
+	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 
@@ -172,6 +174,7 @@ func installDataomnis(ctx context.Context, name string, c Config, logger *glog.L
 		return err
 	}
 	logger.Info().Msg("install dataomnis, done.").Fire()
+	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 

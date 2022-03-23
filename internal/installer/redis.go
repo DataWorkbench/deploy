@@ -85,6 +85,13 @@ func (r *RedisChart) getLabels() map[string]string {
 	}
 }
 
+func (r *RedisChart) getTimeoutSecond() int {
+	if r.values.TimeoutSecond == 0 {
+		return r.ChartMeta.getTimeoutSecond()
+	}
+	return r.values.TimeoutSecond
+}
+
 func NewRedisChart(release string, c Config) *RedisChart {
 	r := &RedisChart{}
 	r.ChartName = RedisClusterChart

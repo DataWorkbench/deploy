@@ -31,11 +31,11 @@ func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) err
 
 // HdfsConfig for hdfs-cluster
 type HdfsConfig struct {
-	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
+	TimeoutSecond int `json:"-" yaml:"timeoutSecond,omitempty"`
 
-	Nodes []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-
-	HdfsHome string `json:"hdfsHome" yaml:"-"`
+	Image    *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
+	Nodes    []string     `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
+	HdfsHome string       `json:"hdfsHome" yaml:"-"`
 
 	Namenode    *HdfsNodeConfig `json:"namenode,omitempty" yaml:"namenode" validate:"eq=0|eq=2"`
 	Datanode    *HdfsNodeConfig `json:"datanode,omitempty" yaml:"datanode" validate:"eq=0|min=3"`
@@ -106,7 +106,7 @@ func (h HdfsChart) initLocalPvHome() error {
 	return nil
 }
 
-func (h HdfsChart) parseValues() (Values, error) {
+func (h *HdfsChart) parseValues() (Values, error) {
 	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(h.values)
 	if err != nil {
@@ -120,6 +120,13 @@ func (h *HdfsChart) getLabels() map[string]string {
 	return map[string]string{
 		HdfsInstanceLabelKey: h.ReleaseName,
 	}
+}
+
+func (h *HdfsChart) getTimeoutSecond() int {
+	if h.values.TimeoutSecond == 0 {
+		return h.ChartMeta.getTimeoutSecond()
+	}
+	return h.values.TimeoutSecond
 }
 
 func NewHdfsChart(release string, c Config) *HdfsChart {

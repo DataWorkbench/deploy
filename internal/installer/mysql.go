@@ -8,6 +8,8 @@ import (
 
 //TODO: add backup-config
 type MysqlConfig struct {
+	TimeoutSecond int `json:"-" yaml:"timeoutSecond,omitempty"`
+
 	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
 
 	Pxc *WorkloadConfig `json:"pxc" yaml:"pxc"`
@@ -64,10 +66,17 @@ func (m *MysqlChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func (m MysqlChart) getLabels() map[string]string {
+func (m *MysqlChart) getLabels() map[string]string {
 	return map[string]string{
 		InstanceLabelKey: fmt.Sprintf(MysqlInstanceLabelValueFmt, m.ReleaseName),
 	}
+}
+
+func (m *MysqlChart) getTimeoutSecond() int {
+	if m.values.TimeoutSecond == 0 {
+		return m.ChartMeta.getTimeoutSecond()
+	}
+	return m.values.TimeoutSecond
 }
 
 func NewMysqlChart(release string, c Config) *MysqlChart {

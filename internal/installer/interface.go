@@ -21,10 +21,10 @@ type Chart interface {
 
 	// whether to wait release ready
 	waitingReady() bool
+	getTimeoutSecond() int
 
 	initLocalPvHome() error
 }
-
 
 // helm client interface for dataomnis-service
 type Helm interface {
@@ -39,7 +39,7 @@ type Helm interface {
 	waitingReady(string, int64, int64) error
 
 	// check if a release is ready
-	isReady(v1.ListOptions)(bool, error)
+	isReady(v1.ListOptions) (bool, error)
 
 	// upgrade a release with Chart
 	upgrade(*Chart) error

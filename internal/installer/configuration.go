@@ -48,28 +48,28 @@ func (i *ImageConfig) updateFromConfig(source *ImageConfig) {
 }
 
 type Resource struct {
-	Cpu    string `json:"cpu,omitempty" yaml:"cpu,omitempty"`
+	Cpu    string `json:"cpu,omitempty"    yaml:"cpu,omitempty"`
 	Memory string `json:"memory,omitempty" yaml:"memory,omitempty"`
 }
 
 type ResourceConfig struct {
-	Limits   Resource `json:"limits,omitempty" yaml:"limits,omitempty"`
+	Limits   Resource `json:"limits,omitempty"   yaml:"limits,omitempty"`
 	Requests Resource `json:"requests,omitempty" yaml:"requests,omitempty"`
 }
 
 // k8s workload(a deployment / statefulset / .. in a Chart) configurations
 type WorkloadConfig struct {
-	Replicas       int8   `json:"replicas,omitempty" yaml:"replicas,omitempty"`
+	Replicas       int8   `json:"replicas,omitempty"       yaml:"replicas,omitempty"`
 	UpdateStrategy string `json:"updateStrategy,omitempty" yaml:"updateStrategy,omitempty"`
+	TimeoutSecond  int    `json:"-"                        yaml:"timeoutSecond,omitempty"`
 
-	Resource *ResourceConfig `json:"resources,omitempty" yaml:"resources,omitempty"`
-
+	Resource   *ResourceConfig   `json:"resources,omitempty"  yaml:"resources,omitempty"`
 	Persistent *PersistentConfig `json:"persistent,omitempty" yaml:"persistent,omitempty"`
 }
 
 type LocalPvConfig struct {
 	Nodes []string `json:"nodes" yaml:"nodes"`
-	Home  string   `json:"home" yaml:"-"`
+	Home  string   `json:"home"  yaml:"-"`
 }
 
 type PersistentConfig struct {
