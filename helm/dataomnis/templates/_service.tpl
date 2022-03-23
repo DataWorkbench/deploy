@@ -109,7 +109,3 @@ Etcd Settings
 {{- define "etcd.waiting.cmd" -}}
 until nc -z {{ .Values.etcd.endpoint }} {{ .Values.ports.etcd }}; do echo "waiting for etcd.."; sleep 2; done;
 {{- end -}}
-
-{{- define "service.redis" -}}
-{{ .Values.redis.address }}:{{ .Values.ports.redis }}
-{{- end -}}

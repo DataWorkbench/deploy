@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/DataWorkbench/common/lib/iaas"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 type Metrics struct {
@@ -194,7 +195,25 @@ type HdfsClient struct {
 }
 
 type RedisClient struct {
-	Address string `json:"address" yaml:"-"`
+	Mode         string `json:"mode,omitempty"         yaml:"mode,omitempty"`
+	SentinelAddr string `json:"sentinelAddr,omitempty" yaml:"sentinelAddr,omitempty"`
+	ClusterAddr  string `json:"clusterAddr,omitempty"  yaml:"clusterAddr,omitempty"`
+	MasterName   string `json:"masterName,omitempty"   yaml:"masterName,omitempty"`
+	Database     string `json:"database,omitempty"     yaml:"database,omitempty"`
+	Username     string `json:"username,omitempty"     yaml:"username,omitempty"`
+	Password     string `json:"password,omitempty"     yaml:"password,omitempty"`
+}
+
+func (r *RedisClient) generateAddr(releaseName string, size int)  {
+	var addrs []string
+	if r.Mode == "cluster" && r.ClusterAddr == "" {
+		if releaseName == RedisClusterChartName {
+			for i := 0; i < size; i++ {
+				addrs = append(addrs, fmt.Sprintf(RedisClusterAddrFmt, releaseName, i, RedisClusterPort))
+			}
+		}
+		r.ClusterAddr = strings.Join(addrs, ",")
+	}
 }
 
 type Dataomnis struct {
@@ -210,7 +229,7 @@ type Dataomnis struct {
 	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
 	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
-	RedisClient *RedisClient `json:"redis" yaml:"-"`
+	RedisClient *RedisClient `json:"redis" yaml:"redisCluster,omitempty"`
 
 	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
@@ -249,7 +268,7 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
 	d.values.EtcdClient.Endpoint = EtcdClusterName
 	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)
-	d.values.RedisClient.Address = fmt.Sprintf(RedisAddressFmt, RedisClusterName)
+	d.values.RedisClient.generateAddr(RedisClusterName, 3)
 
 	d.values.Apiglobal.updateRegion()
 	d.values.Apiglobal.updateAuthentication()

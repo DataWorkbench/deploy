@@ -19,6 +19,7 @@ const (
 	HdfsClusterChart  = "hdfs-cluster-0.1.1.tgz"
 	RedisClusterChart = "redis-cluster-0.1.0.tgz"
 	MysqlClusterChart = "pxc-db-1.9.1.tgz"
+
 	// release name
 	EtcdClusterName  = "etcd-cluster"
 	HdfsClusterName  = "hdfs-cluster"
@@ -27,14 +28,17 @@ const (
 
 	// dataomnis
 	DataomnisSystemChart = "dataomnis-1.0.0.tgz"
-	DataomnisSystemName = "dataomnis"
+	DataomnisSystemName  = "dataomnis"
 )
 
 const (
 	MysqlExternalHostFmt = "%s-pxc-db-haproxy"
 	MysqlSecretNameFmt   = "%s-pxc-db"
 	HdfsConfigMapFmt     = "%s-common-config"
-	RedisAddressFmt      = "rfs-%s"
+
+	RedisClusterChartName = "redis-cluster"
+	RedisClusterPort      = 6379
+	RedisClusterAddrFmt   = "%s-%d:%d"
 )
 
 const (
@@ -46,6 +50,6 @@ const (
 
 	InstanceLabelKey           = "app.kubernetes.io/instance"
 	MysqlInstanceLabelValueFmt = "%s-pxc-db"
-	HdfsInstanceLabelKey = "qy.dataworkbench.com/cluster-name"
-	RedisInstanceLabelKey = "redis.kun/name"
+	HdfsInstanceLabelKey       = "qy.dataworkbench.com/cluster-name"
+	RedisInstanceLabelKey      = "redis.kun/name"
 )

@@ -43,12 +43,16 @@ data:
       slow_threshold: {{ .Values.mysql.slowThreshold }}
 
     redis:
-      mode: "sentinel"
-      master_name: {{ .Values.redis.masterName }}
-      sentinel_addr: {{ include "service.redis" . | quote }}
+      mode: {{ .Values.redis.mode | quote }}
+      master_name: {{ .Values.redis.masterName | quote }}
       database: {{ .Values.redis.database }}
-      #standalone_addr: "127.0.0.1:6379"
-      #cluster_addr: "127.0.0.1:7000,127.0.0.1:7001,127.0.0.1:7002,127.0.0.1:7003,127.0.0.1:7004,127.0.0.1:7005"
+      user_name: {{ .Values.redis.username | quote }}
+      password: {{ .Values.redis.password | quote }}
+      {{- if eq .Values.redis.mode "cluster" }}
+      sentinel_addr: {{ .Values.redis.sentinelAddr | quote }}
+      {{- else }}
+      cluster_addr: {{ .Values.redis.clusterAddr | quote }}
+      {{- end }}
 
     # iaas api configuration
     iaas:

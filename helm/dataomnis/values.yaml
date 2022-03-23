@@ -68,9 +68,13 @@ hdfs:
 
 # redis-cluster configuration
 redis:
-  address: rfs-redis-cluster
-  database: 0
+  mode: "cluster"
+  sentinelAddr: ""
+  clusterAddr: "redis-cluster-0:6379,redis-cluster-1:6379,redis-cluster-2:6379"
   masterName: "mymaster"
+  database: 0
+  username: ""
+  password: ""
 
 # apiglobal settings
 apiglobal:
@@ -185,7 +189,6 @@ ports:
   etcd: 2379
   zeppelin: 8080
   hdfs: 8020
-  redis: 26379  # keep same as the port of redis cluster (Sentinel-Mode)
 
   apiglobal: 8001
   apiserver: 9001

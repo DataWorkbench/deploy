@@ -112,7 +112,7 @@ type Config struct {
 	Redis *RedisConfig `yaml:"redisCluster"`
 
 	// dataomnis version
-	Dataomnis *DataomnisConfig `yaml:"dataomnis"`
+	Dataomnis *Dataomnis `yaml:"dataomnis"`
 }
 
 func (c *Config) Read(file string, logger glog.Logger) error {
