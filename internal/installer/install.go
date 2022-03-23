@@ -134,6 +134,8 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
+	logger.Debug().Any("chart values", chart).Fire()
+
 	if err = chart.initLocalPvHome(); err != nil {
 		logger.Error().Error("init local pv home error", err).Fire()
 		return err

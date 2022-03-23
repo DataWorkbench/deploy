@@ -7,7 +7,7 @@ metadata:
   name: {{ $fullname }}-sc
 provisioner: kubernetes.io/no-provisioner
 volumeBindingMode: WaitForFirstConsumer
-{{- range $node := .Values.persistent.localPv.nodes }}
+{{- range $node := $.Values.persistent.localPv.nodes }}
 ---
 apiVersion: v1
 kind: PersistentVolume
@@ -15,13 +15,13 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-pv01
 spec:
   capacity:
-    storage: {{ .Values.persistent.size }}
+    storage: {{ $.Values.persistent.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ .Values.persistent.localPv.reclaimPolicy }}
+  persistentVolumeReclaimPolicy: {{ $.Values.persistent.localPv.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ .Values.persistent.localPv.home }}/{{ $.Release.Name }}/01
+    path: {{ $.Values.persistent.localPv.home }}/{{ $.Release.Name }}/01
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -37,13 +37,13 @@ metadata:
   name: {{ $fullname }}-{{ $node }}-pv02
 spec:
   capacity:
-    storage: {{ .Values.persistent.size }}
+    storage: {{ $.Values.persistent.size }}
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ .Values.persistent.localPv.reclaimPolicy }}
+  persistentVolumeReclaimPolicy: {{ $.Values.persistent.localPv.reclaimPolicy }}
   storageClassName: {{ $fullname }}-sc
   local:
-    path: {{ .Values.persistent.localPv.home }}/{{ .Release.Name }}/02
+    path: {{ $.Values.persistent.localPv.home }}/{{ $.Release.Name }}/02
   nodeAffinity:
     required:
       nodeSelectorTerms:

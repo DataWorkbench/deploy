@@ -18,7 +18,7 @@ spec:
   {{- end }}
   storage:
     type: persistent-claim
-    size: {{ .Values.storageSpec.size }}
+    size: {{ .Values.persistent.size }}
     class: {{ include "redis-cluster.fullname" . }}-sc
     deleteClaim: true
   config:

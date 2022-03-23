@@ -29,8 +29,8 @@ type RedisChart struct {
 	values *RedisConfig
 }
 
-// update each field value from global Config if that is ZERO
-func (r *RedisChart) updateConfig(c Config) error {
+// update each field value from global Config
+func (r *RedisChart) updateFromConfig(c Config) error {
 	if c.Redis != nil {
 		r.values = c.Redis
 	}
@@ -61,6 +61,7 @@ func (r *RedisChart) initLocalPvHome() error {
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
+
 		if err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
@@ -76,6 +77,12 @@ func (r *RedisChart) parseValues() (Values, error) {
 	}
 	err = json.Unmarshal(bytes, &v)
 	return v, err
+}
+
+func (r *RedisChart) getLabels() map[string]string {
+	return map[string]string{
+		RedisInstanceLabelKey: r.ReleaseName,
+	}
 }
 
 func NewRedisChart(release string, c Config) *RedisChart {

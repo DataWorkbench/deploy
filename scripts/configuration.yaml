@@ -103,22 +103,13 @@ hdfsCluster:
         nodes:
 
 redisCluster:
-  redis:
-    resources:
-      requests:
-        cpu:
-        memory:
-      limits:
-        cpu:
-        memory:
-
-    persistent:
-      size: 50Gi
-      localPv:
-        nodes:
-          - worker-s001
-          - worker-s002
-          - worker-s003
+  persistent:
+    size: 50Gi
+    localPv:
+      nodes:
+        - worker-s001
+        - worker-s002
+        - worker-s003
 
 etcdCluster:
   persistent:
