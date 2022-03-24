@@ -144,6 +144,11 @@ func (c *Config) Read(file string, logger glog.Logger) error {
 	}
 
 	logger.Debug().Any("Configuration", c).Fire()
+	logger.Debug().String("HdfsClusterConfig", fmt.Sprintf("%+v", c.Hdfs)).Fire()
+	logger.Debug().String("RedisClusterConfig", fmt.Sprintf("%+v", c.Redis)).Fire()
+	logger.Debug().String("EtcdClusterConfig", fmt.Sprintf("%+v", c.Etcd)).Fire()
+	logger.Debug().String("MysqlClusterConfig", fmt.Sprintf("%+v", c.Mysql)).Fire()
+	logger.Debug().String("DataomnisConfig", fmt.Sprintf("%+v", c.Dataomnis)).Fire()
 	// validate
 	logger.Info().Msg("validate Config..").Fire()
 	if err = validator.New().Struct(c); err != nil {

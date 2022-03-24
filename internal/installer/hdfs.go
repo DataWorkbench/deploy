@@ -20,10 +20,12 @@ func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) err
 			return LeastNodeErr
 		}
 
-		if role == RoleNameNode {
-			node.Storage.LocalPv.Nodes = c.Nodes
-		} else {
-			node.Storage.LocalPv.Nodes = c.Nodes[:2]
+		if len(node.Storage.LocalPv.Nodes) < 1 {
+			if role == RoleNameNode {
+				node.Storage.LocalPv.Nodes = c.Nodes[:2]
+			} else {
+				node.Storage.LocalPv.Nodes = c.Nodes
+			}
 		}
 	}
 	return nil

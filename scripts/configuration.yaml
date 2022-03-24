@@ -170,7 +170,7 @@ redisCluster:
       cpu: 100m
       memory: 50Mi
   persistent:
-    size: 50Gi
+    size: 30Gi
     localPv:
       nodes:
         - worker-s001
@@ -190,7 +190,7 @@ etcdCluster:
       cpu: 100m
       memory: 100Mi
   persistent:
-    size: 50Gi
+    size: 30Gi
     localPv:
       nodes:
         - worker-s001
@@ -228,6 +228,6 @@ hdfsCluster:
 
   zookeeper:
     persistent:
-      size: 20Gi
+      size: 10Gi
       localPv:
         nodes:

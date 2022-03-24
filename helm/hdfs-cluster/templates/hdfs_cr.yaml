@@ -9,17 +9,17 @@ spec:
   namenode:
     name: namenode
     storageClass: {{ include "hdfs.fullname" . }}-namenode-sc
-    capacity: 10Gi
+    capacity: {{ .Values.namenode.storage.size }}
     replicas: 2
   journalnode:
     name: journalnode
     storageClass: {{ include "hdfs.fullname" . }}-journalnode-sc
-    capacity: 10Gi
+    capacity: {{ .Values.journalnode.storage.size }}
     replicas: {{ include "journalnode.length" . }}
   datanode:
     name: datanode
     storageClass: {{ include "hdfs.fullname" . }}-datanode-sc
-    capacity: 10Gi
+    capacity: {{ .Values.datanode.storage.size }}
     datadirs:
       - dn1    #  k8s节点多目录
       - dn2
