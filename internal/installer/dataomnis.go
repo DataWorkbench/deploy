@@ -23,7 +23,7 @@ type Service struct {
 	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"  yaml:"grpcLog,omitempty"`
 	Metrics   *Metrics `json:"metrics,omitempty"  yaml:"metrics,omitempty"`
 
-	WorkloadConfig `json:",omitempty,inline" yaml:",omitempty,inline"`
+	Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
 
 	Envs map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
 }
@@ -224,14 +224,14 @@ type Dataomnis struct {
 	Port   string `json:"port"    yaml:"port,omitempty"`
 
 	// global configurations for all service as default
-	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
+	Image *Image `json:"image,omitempty" yaml:"image,omitempty"`
 
 	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
 	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
 	RedisClient *RedisClient `json:"redis" yaml:"redisCluster,omitempty"`
 
-	WorkloadConfig `json:",inline" yaml:"-"`
+	Persistent Persistent `json:"persistent" yaml:"-"`
 
 	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
@@ -247,7 +247,7 @@ type Dataomnis struct {
 	Spacemanager    *Service         `json:"spacemanager"    yaml:"spacemanager"`
 	Developer       *Service         `json:"developer"       yaml:"developer"`
 
-	Jaeger         *WorkloadConfig `json:"jaeger"         yaml:"jaeger"`
+	Jaeger         *Workload       `json:"jaeger"         yaml:"jaeger"`
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor" yaml:"serviceMonitor"`
 }
 
@@ -261,7 +261,7 @@ type DataomnisChart struct {
 func (d *DataomnisChart) updateFromConfig(c Config) error {
 	if c.Image != nil {
 		if d.values.Image == nil {
-			d.values.Image = &ImageConfig{}
+			d.values.Image = &Image{}
 		}
 		d.values.Image.updateFromConfig(c.Image)
 	}

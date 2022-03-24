@@ -7,10 +7,9 @@ import (
 )
 
 type EtcdConfig struct {
-	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
+	Image *Image `json:"image,omitempty" yaml:"image,omitempty"`
 
-	// TODO: support resource configurations
-	WorkloadConfig `json:",inline" yaml:",inline"`
+	Workload `json:",inline" yaml:",inline"`
 }
 
 // EtcdChart for etcd-cluster, implement Chart
@@ -27,7 +26,7 @@ func (e *EtcdChart) updateFromConfig(c Config) error {
 
 	if c.Image != nil {
 		if e.values.Image == nil {
-			e.values.Image = &ImageConfig{}
+			e.values.Image = &Image{}
 			e.values.Image.updateFromConfig(c.Image)
 		}
 	}

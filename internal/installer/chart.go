@@ -13,7 +13,7 @@ type ChartMeta struct {
 
 	WaitingReady bool
 
-	values *MetaConfig `json:",omitempty"`
+	values *Meta `json:",omitempty"`
 }
 
 func (m *ChartMeta) updateFromConfig(c Config) error {
@@ -22,10 +22,10 @@ func (m *ChartMeta) updateFromConfig(c Config) error {
 	}
 
 	if m.values == nil {
-		m.values = &MetaConfig{}
+		m.values = &Meta{}
 	}
 	if m.values.Image == nil {
-		m.values.Image = &ImageConfig{}
+		m.values.Image = &Image{}
 	}
 	m.values.Image.updateFromConfig(c.Image)
 	return nil
@@ -71,6 +71,6 @@ func (m ChartMeta) getTimeoutSecond() int {
 	return DefaultTimeoutSecond
 }
 
-type MetaConfig struct {
-	Image *ImageConfig `json:"image,omitempty"`
+type Meta struct {
+	Image *Image `json:"image,omitempty"`
 }

@@ -8,11 +8,9 @@ import (
 
 //TODO: add backup-config
 type MysqlConfig struct {
-	TimeoutSecond int `json:"-" yaml:"timeoutSecond,omitempty"`
-
-	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
-
-	Pxc *WorkloadConfig `json:"pxc" yaml:"pxc"`
+	TimeoutSecond int       `json:"-" yaml:"timeoutSecond,omitempty"`
+	Image         *Image    `json:"image,omitempty" yaml:"image,omitempty"`
+	Pxc           *Workload `json:"pxc" yaml:"pxc"`
 }
 
 // MysqlChart for etcd-cluster, implement Chart
@@ -30,7 +28,7 @@ func (m *MysqlChart) updateFromConfig(c Config) error {
 
 	if c.Image != nil {
 		if m.values.Image == nil {
-			m.values.Image = &ImageConfig{}
+			m.values.Image = &Image{}
 			m.values.Image.updateFromConfig(c.Image)
 		}
 	}

@@ -11,7 +11,7 @@ const RoleNameNode = "namenode"
 // common config for datanode / journalnode / namenode / zookeeper
 type HdfsNodeConfig struct {
 	// alias for Persistent, updated from configuration
-	Storage PersistentConfig `json:"storage,omitempty" yaml:"persistent,omitempty"`
+	Storage Persistent `json:"storage,omitempty" yaml:"persistent,omitempty"`
 }
 
 func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) error {
@@ -33,15 +33,15 @@ func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) err
 type HdfsConfig struct {
 	TimeoutSecond int `json:"-" yaml:"timeoutSecond,omitempty"`
 
-	Image    *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
-	Nodes    []string     `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-	HdfsHome string       `json:"hdfsHome" yaml:"-"`
+	Image    *Image   `json:"image,omitempty" yaml:"image,omitempty"`
+	Nodes    []string `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
+	HdfsHome string   `json:"hdfsHome"        yaml:"-"`
 
-	Namenode    *HdfsNodeConfig `json:"namenode,omitempty" yaml:"namenode" validate:"eq=0|eq=2"`
-	Datanode    *HdfsNodeConfig `json:"datanode,omitempty" yaml:"datanode" validate:"eq=0|min=3"`
+	Namenode    *HdfsNodeConfig `json:"namenode,omitempty"    yaml:"namenode"    validate:"eq=0|eq=2"`
+	Datanode    *HdfsNodeConfig `json:"datanode,omitempty"    yaml:"datanode"    validate:"eq=0|min=3"`
 	Journalnode *HdfsNodeConfig `json:"journalnode,omitempty" yaml:"journalnode" validate:"eq=0|min=3"`
 
-	Zookeeper *HdfsNodeConfig `json:"zookeeper,omitempty" yaml:"zookeeper" validate:"eq=0|min=3"`
+	Zookeeper *HdfsNodeConfig `json:"zookeeper,omitempty"     yaml:"zookeeper"   validate:"eq=0|min=3"`
 }
 
 // TODO: validate the yaml and nodes == 2 of namenode
@@ -53,7 +53,6 @@ func (v HdfsConfig) validate() error {
 // HdfsChart for hdfs-cluster, implement Chart
 type HdfsChart struct {
 	ChartMeta
-
 	values *HdfsConfig
 }
 
@@ -65,7 +64,7 @@ func (h HdfsChart) updateFromConfig(c Config) error {
 
 	if c.Image != nil {
 		if h.values.Image == nil {
-			h.values.Image = &ImageConfig{}
+			h.values.Image = &Image{}
 			h.values.Image.updateFromConfig(c.Image)
 		}
 	}

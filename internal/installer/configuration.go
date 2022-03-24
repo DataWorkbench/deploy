@@ -22,7 +22,7 @@ var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
 //                                       --docker-username=<your-name>
 //                                       --docker-password=<your-pword>
 //                                       --docker-email=<your-email>
-type ImageConfig struct {
+type Image struct {
 	// TODO: check pull secrets
 	Registry    string   `json:"registry,omitempty" yaml:"registry,omitempty"`
 	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecrets,omitempty"`
@@ -32,7 +32,7 @@ type ImageConfig struct {
 }
 
 // update echo field-value from Config
-func (i *ImageConfig) updateFromConfig(source *ImageConfig) {
+func (i *Image) updateFromConfig(source *Image) {
 	if source == nil {
 		return
 	}
@@ -52,34 +52,34 @@ type Resource struct {
 	Memory string `json:"memory,omitempty" yaml:"memory,omitempty"`
 }
 
-type ResourceConfig struct {
+type Resources struct {
 	Limits   Resource `json:"limits,omitempty"   yaml:"limits,omitempty"`
 	Requests Resource `json:"requests,omitempty" yaml:"requests,omitempty"`
 }
 
 // k8s workload(a deployment / statefulset / .. in a Chart) configurations
-type WorkloadConfig struct {
+type Workload struct {
 	Replicas       int8   `json:"replicas,omitempty"       yaml:"replicas,omitempty"`
 	UpdateStrategy string `json:"updateStrategy,omitempty" yaml:"updateStrategy,omitempty"`
 	TimeoutSecond  int    `json:"-"                        yaml:"timeoutSecond,omitempty"`
 
-	Resource   *ResourceConfig   `json:"resources,omitempty"  yaml:"resources,omitempty"`
-	Persistent *PersistentConfig `json:"persistent,omitempty" yaml:"persistent,omitempty"`
+	Resources  *Resources  `json:"resources,omitempty"  yaml:"resources,omitempty"`
+	Persistent *Persistent `json:"persistent,omitempty" yaml:"persistent,omitempty"`
 }
 
-type LocalPvConfig struct {
+type LocalPv struct {
 	Nodes []string `json:"nodes" yaml:"nodes"`
 	Home  string   `json:"home"  yaml:"-"`
 }
 
-type PersistentConfig struct {
+type Persistent struct {
 	// for local pv, eg: 10Gi
-	Size     string         `json:"size,omitempty" yaml:"size"`
-	HostPath string         `json:"hostPath"  yaml:"-"`
-	LocalPv  *LocalPvConfig `json:"localPv,omitempty" yaml:"localPv"`
+	Size     string   `json:"size,omitempty"    yaml:"size"`
+	HostPath string   `json:"hostPath"          yaml:"-"`
+	LocalPv  *LocalPv `json:"localPv,omitempty" yaml:"localPv"`
 }
 
-func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) error {
+func (p *Persistent) updateLocalPv(localPvHome string, nodes []string) error {
 	// TODO: check if localPv exist and start with localPvHome
 	p.LocalPv.Home = fmt.Sprintf(LocalHomeFmt, localPvHome)
 
@@ -104,7 +104,7 @@ type Config struct {
 	// Local PV home
 	LocalPVHome string `yaml:"localPvHome" validate:"required"`
 
-	Image *ImageConfig `yaml:"image"`
+	Image *Image `yaml:"image"`
 
 	// dependent service
 	Etcd  *EtcdConfig  `yaml:"etcdCluster"`

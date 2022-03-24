@@ -6,14 +6,12 @@ import (
 	"github.com/pkg/errors"
 )
 
-
 // RedisConfig for hdfs-cluster
 type RedisConfig struct {
-	Image *ImageConfig `json:"image,omitempty" yaml:"image,omitempty"`
+	MasterSize int    `json:"masterSize"      yaml:"-"`
+	Image      *Image `json:"image,omitempty" yaml:"image,omitempty"`
 
-	WorkloadConfig `json:",inline" yaml:",inline"`
-
-	MasterSize int `json:"masterSize,omitempty" yaml:"-"`
+	Workload `json:",inline" yaml:",inline"`
 }
 
 // TODO: validate the yaml and nodes == 3 by default
@@ -25,7 +23,6 @@ func (v RedisConfig) validate() error {
 // RedisChart for hdfs-cluster, implement Chart
 type RedisChart struct {
 	ChartMeta
-
 	values *RedisConfig
 }
 
@@ -37,7 +34,7 @@ func (r *RedisChart) updateFromConfig(c Config) error {
 
 	if c.Image != nil {
 		if r.values.Image == nil {
-			r.values.Image = &ImageConfig{}
+			r.values.Image = &Image{}
 			r.values.Image.updateFromConfig(c.Image)
 		}
 	}
