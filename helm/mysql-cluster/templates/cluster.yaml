@@ -111,7 +111,7 @@ spec:
     {{- if not $pxc.persistent.enabled }}
       emptyDir: {}
     {{- else }}
-    {{- if hasKey $pxc.persistent "hostPath" }}
+    {{- if $pxc.persistent.hostPath }}
       hostPath:
         path: {{ $pxc.persistent.hostPath }}
         type: Directory
@@ -264,7 +264,7 @@ spec:
     {{- if not $proxysql.persistent.enabled }}
       emptyDir: {}
     {{- else }}
-    {{- if hasKey $proxysql.persistent "hostPath" }}
+    {{- if $proxysql.persistent.hostPath }}
       hostPath:
         path: {{ $proxysql.persistent.hostPath }}
         type: Directory
