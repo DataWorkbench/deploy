@@ -2,10 +2,10 @@ package installer
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/DataWorkbench/glog"
 	hc "github.com/mittwald/go-helm-client"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,6 +20,8 @@ const (
 	DefaultHelmRepositoryCacheFmt  = "%s/.cache/helm/repository"
 
 	DefaultDurationSec = 20
+
+	ReleaseNotFoundErr = "release: not found"
 )
 
 // **************************************************
@@ -210,4 +212,15 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 		}
 	}
 	return true, nil
+}
+
+func (p *Proxy) exist(releaseName string) (bool, error) {
+	_, err := p.client.GetRelease(releaseName)
+	if err != nil {
+		if errors.Cause(err).Error() == ReleaseNotFoundErr { // release not found
+			return false, nil
+		}
+		return false, err
+	}
+	return true, err
 }

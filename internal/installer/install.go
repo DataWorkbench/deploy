@@ -57,6 +57,7 @@ func Install(configFile string, debug bool, services *[]string) error {
 			if err = installOperator(ctx, service, *conf, logger, debug); err != nil{
 				return err
 			}
+			logger.Info().Msg("**************************************************************").Fire()
 		}
 	}
 
@@ -66,12 +67,14 @@ func Install(configFile string, debug bool, services *[]string) error {
 			if err = installDependencyService(ctx, service, *conf, logger, debug); err != nil{
 				return err
 			}
+			logger.Info().Msg("**************************************************************").Fire()
 		}
 	}
 
 	// install dataomnis
 	if StrContains(*services, DataomnisSystemName) {
-		return installDataomnis(ctx, DataomnisSystemName, *conf, logger, debug)
+		err = installDataomnis(ctx, DataomnisSystemName, *conf, logger, debug)
+		logger.Info().Msg("**************************************************************").Fire()
 	}
 	return nil
 }
@@ -84,6 +87,17 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 	if helm, err = NewProxy(ctx, DefaultOperatorNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
+	}
+
+	var installed bool
+	installed, err = helm.exist(name)
+	if err != nil {
+		logger.Debug().Error("get release error", err).Fire()
+		return err
+	}
+	if installed {
+		logger.Warn().String("operator", name).Msg("was installed, ignore.").Fire()
+		return nil
 	}
 
 	var chart Chart
@@ -104,7 +118,6 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 		return err
 	}
 	logger.Info().String("install operator", name).Msg(", done.").Fire()
-	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 
@@ -116,6 +129,17 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
+	}
+
+	var installed bool
+	installed, err = helm.exist(name)
+	if err != nil {
+		logger.Debug().Error("get release error", err).Fire()
+		return err
+	}
+	if installed {
+		logger.Warn().String("dependency service", name).Msg("was installed, ignore.").Fire()
+		return nil
 	}
 
 	var chart Chart
@@ -131,6 +155,7 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 	default:
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
+
 	if err = chart.updateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
@@ -146,7 +171,6 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		return err
 	}
 	logger.Info().String("install dependency service", name).Msg(", done.").Fire()
-	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 
@@ -158,6 +182,17 @@ func installDataomnis(ctx context.Context, name string, c Config, logger *glog.L
 	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
+	}
+
+	var installed bool
+	installed, err = helm.exist(name)
+	if err != nil {
+		logger.Debug().Error("get release error", err).Fire()
+		return err
+	}
+	if installed {
+		logger.Warn().Msg("dataomnis-system service was installed, ignore.").Fire()
+		return nil
 	}
 
 	chart := NewDataomnisChart(name, c)
@@ -174,7 +209,6 @@ func installDataomnis(ctx context.Context, name string, c Config, logger *glog.L
 		return err
 	}
 	logger.Info().Msg("install dataomnis, done.").Fire()
-	logger.Info().Msg("**************************************************************").Fire()
 	return nil
 }
 
