@@ -25,7 +25,7 @@ type Service struct {
 
 	WorkloadConfig `json:",omitempty,inline" yaml:",omitempty,inline"`
 
-	Envs []map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
+	Envs map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
 }
 
 type Webservice struct {
@@ -204,7 +204,7 @@ type RedisClient struct {
 	Password     string `json:"password,omitempty"     yaml:"password,omitempty"`
 }
 
-func (r *RedisClient) generateAddr(releaseName string, size int)  {
+func (r *RedisClient) generateAddr(releaseName string, size int) {
 	var addrs []string
 	if r.Mode == "cluster" && r.ClusterAddr == "" {
 		if releaseName == RedisClusterChartName {
@@ -231,9 +231,11 @@ type Dataomnis struct {
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
 	RedisClient *RedisClient `json:"redis" yaml:"redisCluster,omitempty"`
 
+	WorkloadConfig `json:",inline" yaml:"-"`
+
 	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
-	Common *Service `json:"common,inline" yaml:",inline"`
+	Common *Service `json:"common" yaml:"global"`
 
 	WebService      *Webservice      `json:"webservice"      yaml:"webservice"`
 	Apiglobal       *Apiglobal       `json:"apiglobal"       yaml:"apiGlobal"`
@@ -270,13 +272,17 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)
 	d.values.RedisClient.generateAddr(RedisClusterName, 3)
 
+	// update hostPath for log-dir
+	d.values.Persistent.HostPath = fmt.Sprintf(DataomnisHostPathFmt, c.LocalPVHome, d.getReleaseName())
+	d.values.Persistent.LocalPv = nil
+
 	d.values.Apiglobal.updateRegion()
 	d.values.Apiglobal.updateAuthentication()
 	return nil
 }
 
 func (d *DataomnisChart) initHostPathDir(c Config) error {
-	localPvHome := fmt.Sprintf("%s/%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler, spacemanager}", c.LocalPVHome, DataomnisSystemName)
+	localPvHome := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager}", d.values.Persistent.HostPath)
 	var host *Host
 	var conn *Connection
 	var err error

@@ -1,6 +1,9 @@
 package installer
 
-const LocalHomeFmt = "%s/dataomnis"
+const (
+	LocalHomeFmt = "%s/dataomnis"
+	DataomnisHostPathFmt = "%s/dataomnis/%s"
+)
 
 const (
 	// operators:

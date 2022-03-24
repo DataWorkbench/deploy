@@ -74,8 +74,9 @@ type LocalPvConfig struct {
 
 type PersistentConfig struct {
 	// for local pv, eg: 10Gi
-	Size    string         `json:"size,omitempty" yaml:"size"`
-	LocalPv *LocalPvConfig `json:"localPv,omitempty" yaml:"localPv"`
+	Size     string         `json:"size,omitempty" yaml:"size"`
+	HostPath string         `json:"hostPath"  yaml:"-"`
+	LocalPv  *LocalPvConfig `json:"localPv,omitempty" yaml:"localPv"`
 }
 
 func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) error {
