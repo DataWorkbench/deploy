@@ -7,6 +7,14 @@ image:
   etcd: bitnami/etcd:3.5.1-debian-10-r88
   pullPolicy: IfNotPresent
 
+resources:
+  limits:
+    cpu: 500m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 100Mi
+
 persistent:
   size: 10Gi
   reclaimPolicy: Retain

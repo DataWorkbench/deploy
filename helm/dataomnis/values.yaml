@@ -28,6 +28,7 @@ image:
 common:
   replicas: 1
   strategy: RollingUpdate
+
   logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
   logOutput: "file" # "console" or "file"
   grpcLog:
@@ -37,11 +38,11 @@ common:
     enabled: true
     urlPath: "/metrics"
   livenessProbe:
-    initialDelaySeconds: 10
-    periodSeconds: 15
-  readinessProbe:
-    periodSeconds: 10
     initialDelaySeconds: 20
+    periodSeconds: 30
+  readinessProbe:
+    initialDelaySeconds: 20
+    periodSeconds: 10
 
 persistent:
   hostPath: /data/dataomnis/dataomnis
@@ -79,6 +80,13 @@ redis:
 # apiglobal settings
 apiglobal:
   enabled: true
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   httpServer:
     readTimeout: 30s
     writeTimeout: 30s
@@ -109,6 +117,13 @@ apiglobal:
 
 # apiserver configuration
 apiserver:
+  resources:
+    limits:
+      cpu: 2048m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   httpServer:
     readTimeout: 30s
     writeTimeout: 30s
@@ -119,12 +134,27 @@ apiserver:
 
 # account configuration
 account:
+  resources:
+    limits:
+      cpu: 2048m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   source: "qingcloud"
   envs: {}
 
 
 # enginemanager configuration
 enginemanager:
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
   helm:
     repoConfig: "/root/.config/helm/repositories.yaml"
     repoCachePath: "/root/.cache/helm/repository"
@@ -140,6 +170,13 @@ enginemanager:
 
 # resourcemanager configuration
 resourcemanager:
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   storage:
     background: "hdfs"
     hadoopConfDir: "/etc/hadoop/conf"
@@ -152,14 +189,36 @@ resourcemanager:
 
 # scheduler configuration
 scheduler:
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+
   etcdDialTimeout: 5s
   envs: {}
 
 # spacemanager configuration
 spacemanager:
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   envs: {}
 
 developer:
+  resources:
+    limits:
+      cpu: 1024m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
   envs:
     DEVELOPER_SPACE_MANAGER_SERVER_ENABLEKEEPALIVE: true
     DEVELOPER_SPACE_MANAGER_SERVER_KEEPALIVEWITHOUTCALLS: true
@@ -194,10 +253,8 @@ ports:
   apiserver: 9001
   spacemanager: 9101
   scheduler: 9103
-  jobmanager: 9105
   account: 9110
   resourcemanager: 9111
-  notifier: 9113
   enginemanager: 9114
   developer: 9119
   developerHttp: 9219
@@ -213,7 +270,7 @@ metricsPorts:
   enginemanager: 9214
 
 serviceMonitor:
-  enabled: true
+  enabled: false
   defaults:
     labels:
       project: dataomnis
@@ -223,6 +280,13 @@ serviceMonitor:
 
 webservice:
   enabled: false
+  resources:
+    limits:
+      cpu: 2048m
+      memory: 4096Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
 
 filebeat:
   enabled: true

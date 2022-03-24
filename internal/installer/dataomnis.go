@@ -239,11 +239,11 @@ type Dataomnis struct {
 	Apiglobal       *Apiglobal       `json:"apiglobal"       yaml:"apiGlobal"`
 	Apiserver       *Apiserver       `json:"apiserver"       yaml:"apiserver"`
 	Account         *Account         `json:"account"         yaml:"account"`
-	Developer       *Service         `json:"developer"       yaml:"developer"`
 	Enginemanager   *Enginemanager   `json:"enginemanager"   yaml:"enginemanager"`
 	Resourcemanager *Resourcemanager `json:"resourcemanager" yaml:"resourcemanager"`
 	Scheduler       *Scheduler       `json:"scheduler"       yaml:"scheduler"`
 	Spacemanager    *Service         `json:"spacemanager"    yaml:"spacemanager"`
+	Developer       *Service         `json:"developer"       yaml:"developer"`
 
 	Jaeger         *WorkloadConfig `json:"jaeger"         yaml:"jaeger"`
 	ServiceMonitor *ServiceMonitor `json:"serviceMonitor" yaml:"serviceMonitor"`

@@ -46,6 +46,8 @@ spec:
               {{- else }}
               value: {{ printf "global.%s" .Values.domain }}
               {{- end }}
+          resources:
+            {{- toYaml .Values.spacemanager.resources | nindent 12 }}
           readinessProbe:
             httpGet:
               port: 80

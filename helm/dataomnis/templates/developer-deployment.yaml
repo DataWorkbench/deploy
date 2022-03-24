@@ -68,6 +68,8 @@ spec:
           - name: DEVELOPER_{{ $ename }}
             value: {{ $evalue | quote }}
           {{- end }}
+        resources:
+            {{- toYaml .Values.developer.resources | nindent 12 }}
         readinessProbe:
           httpGet:
             path: /actuator/health

@@ -13,7 +13,7 @@ spec:
       targetPort: service
       protocol: TCP
     - name: httpService
-      port: {{ .Values.metricsPorts.developer }}
+      port: {{ .Values.ports.developerHttp }}
       targetPort: httpService
       protocol: HTTP
   selector:

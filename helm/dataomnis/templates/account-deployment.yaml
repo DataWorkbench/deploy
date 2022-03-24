@@ -129,6 +129,8 @@ spec:
             - name: {{ $ename }}
               value: {{ $evalue | quote }}
             {{- end }}
+          resources:
+            {{- toYaml .Values.account.resources | nindent 12 }}
           readinessProbe:
             exec:
               command: ["grpc_health_probe", "-addr=:{{ .Values.ports.account }}"]

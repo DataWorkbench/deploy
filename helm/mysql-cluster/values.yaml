@@ -53,8 +53,8 @@ pxc:
     log_bin_index=/var/lib/mysql/mysql-bin/mysql-bin.index
   resources:
     requests:
-      cpu: 1000m
-      memory: 2Gi
+      cpu: 100m
+      memory: 500Mi
     limits:
       cpu: 4000m
       memory: 8Gi
@@ -121,8 +121,8 @@ haproxy:
   livenessDelaySec: 300
   resources:
     requests:
-      memory: 1Gi
-      cpu: 500m
+      cpu: 100m
+      memory: 100Mi
     limits:
       memory: 4Gi
       cpu: 2000m

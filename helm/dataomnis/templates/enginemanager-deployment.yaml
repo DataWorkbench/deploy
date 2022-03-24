@@ -140,6 +140,8 @@ spec:
             - name: log
               mountPath: /opt/dataomnis/log
             {{- end }}
+          resources:
+            {{- toYaml .Values.enginemanager.resources | nindent 12 }}
           readinessProbe:
             exec:
               command: ["grpc_health_probe", "-addr=:{{ .Values.ports.enginemanager }}"]

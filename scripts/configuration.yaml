@@ -1,6 +1,6 @@
-
 # the home path of local pv to storage data, recommend：the path that mount a disk;
 localPvHome: /data
+
 
 # if config pullSecrets, create docker registry secret in namespace dataomnis-operator/dataomnis-system by kubectl:
 # kubectl -n dataomnis-operator create secret docker-registry
@@ -13,17 +13,24 @@ localPvHome: /data
 # pullSecrets:
 #   - my-docker-registry-secret
 image:
-  registry: dockerhub.qingcloud.com
-  pullSecrets:
-    - my-docker-regisrty-secret
+  registry: docker.io
+  pullSecrets: []
   pullPolicy:
 
+
+# All Nodes Of K8S
+nodes: []
+
+
+################################################
+#### Dataomnis-System Service Configuration ####
+################################################
 dataomnis:
   version: dev
   domain: dataomnis.192.168.27.90.nip.io
   port:
 
-  timeoutSecond: 600
+  timeoutSecond: 1200
 
   mysql:
     maxIdleConn: 16
@@ -43,29 +50,104 @@ dataomnis:
       enabled: true
       urlPath: "/metrics"
 
-  webservice:
-    enabled: false
-
   apiglobal:
-    enabled: false
+    enabled: false  # if the webservice need to deploy, set true
     regions:
       - hosts: http://api.dataomnis.192.168.27.90.nip.io
         enUsName: testing
         zhCnName: 测试区
-    envs:
+    envs: {}
 
+  enginemanager:
+    resources:
+      limits:
+        cpu: 1024m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    helm:
+      debug: false
+    flink:
+      ingressClass: "nginx"
+      enableMultus: false
+    envs: {}
+
+  resourcemanager:
+    resources:
+      limits:
+        cpu: 1024m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    storage:
+      background: "hdfs"
+      hadoopConfDir: "/etc/hadoop/conf"
+      s3:
+        endpoint: ""
+        region: ""
+        bucket: ""
+    envs: {}
+
+  scheduler:
+    resources:
+      limits:
+        cpu: 1024m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    etcdDialTimeout: 5s
+    envs: {}
+
+  # spacemanager configuration
+  spacemanager:
+    resources:
+      limits:
+        cpu: 1024m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+    envs: {}
+
+  developer:
+    resources:
+      limits:
+        cpu: 1024m
+        memory: 2048Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+  webservice:
+    enabled: false
+    resources:
+      limits:
+        cpu: 2048m
+        memory: 4096Mi
+      requests:
+        cpu: 100m
+        memory: 100Mi
+
+  # IAAS api configuration
   iaas:
 
+
+#####################################
+#### Mysql-Cluster Configuration ####
+#####################################
 mysqlCluster:
   timeoutSecond: 1200
   pxc:
     resources:
       requests:
-        cpu:
-        memory:
+        cpu: 100m
+        memory: 500Mi
       limits:
-        cpu:
-        memory:
+        cpu: 4000m
+        memory: 8Gi
 
     persistent:
       size: 50Gi
@@ -75,6 +157,50 @@ mysqlCluster:
           - worker-s002
           - worker-s003
 
+
+#####################################
+#### Redis-Cluster Configuration ####
+#####################################
+redisCluster:
+  resources:
+    limits:
+      cpu: 400m
+      memory: 300Mi
+    requests:
+      cpu: 100m
+      memory: 50Mi
+  persistent:
+    size: 50Gi
+    localPv:
+      nodes:
+        - worker-s001
+        - worker-s002
+        - worker-s003
+
+
+####################################
+#### Etcd-Cluster Configuration ####
+####################################
+etcdCluster:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  persistent:
+    size: 50Gi
+    localPv:
+      nodes:
+        - worker-s001
+        - worker-s002
+        - worker-s003
+
+
+####################################
+#### Hdfs-Cluster Configuration ####
+####################################
 hdfsCluster:
   timeoutSecond: 1200
   nodes:
@@ -105,23 +231,3 @@ hdfsCluster:
       size: 20Gi
       localPv:
         nodes:
-
-redisCluster:
-  timeoutSecond: 900
-  persistent:
-    size: 50Gi
-    localPv:
-      nodes:
-        - worker-s001
-        - worker-s002
-        - worker-s003
-
-etcdCluster:
-  timeoutSecond: 600
-  persistent:
-    size: 50Gi
-    localPv:
-      nodes:
-        - worker-s001
-        - worker-s002
-        - worker-s003

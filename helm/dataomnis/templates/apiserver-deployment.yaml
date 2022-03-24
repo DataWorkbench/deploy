@@ -113,6 +113,8 @@ spec:
             periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
             {{- end }}
+          resources:
+            {{- toYaml .Values.apiserver.resources | nindent 12 }}
           livenessProbe:
             tcpSocket:
               port: service

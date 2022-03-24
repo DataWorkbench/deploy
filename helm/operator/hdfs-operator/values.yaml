@@ -5,3 +5,11 @@ image:
   pullSecrets: []
   operator: dataomnis/hadoop-operator:0.0.1
   rbac: dataomnis/kube-rbac-proxy:v0.8.0
+
+resources: {}
+#  limits:
+#    cpu: 500m
+#    memory: 1024Mi
+#  requests:
+#    cpu: 100m
+#    memory: 100Mi

@@ -124,6 +124,8 @@ spec:
             periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
             initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
             {{- end }}
+          resources:
+            {{- toYaml .Values.scheduler.resources | nindent 12 }}
           livenessProbe:
             exec:
               command: ["grpc_health_probe", "-addr=:{{ .Values.ports.scheduler }}"]

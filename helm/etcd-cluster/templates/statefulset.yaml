@@ -103,7 +103,8 @@ spec:
             periodSeconds: 10
             successThreshold: 1
             timeoutSeconds: 5
-          resources: {}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
           securityContext:
             runAsNonRoot: true
             runAsUser: 1001

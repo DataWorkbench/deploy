@@ -41,7 +41,7 @@ const (
 	RedisClusterAddrFmt   = "%s-%d:%d"
 )
 
-const DefaultTimeoutSecond = 1200
+const DefaultTimeoutSecond = 600
 
 const (
 	DefaultOperatorNamespace = "dataomnis-operator"

@@ -16,6 +16,8 @@ spec:
     - name: {{ . }}
     {{- end }}
   {{- end }}
+  resources:
+    {{- toYaml .Values.resources | nindent 4 }}
   storage:
     type: persistent-claim
     size: {{ .Values.persistent.size }}

@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "redis-cluster-operator.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.operator.replicas }}
+  replicas: {{ .Values.replicas }}
   selector:
     matchLabels:
 {{ include "redis-cluster-operator.selectorLabels" . | indent 6 }}
@@ -14,9 +14,9 @@ spec:
       labels:
 {{ include "redis-cluster-operator.labels" . | indent 8 }}
     spec:
-      serviceAccountName: {{ .Values.operator.service_account_name }}
+      serviceAccountName: {{ .Values.service_account_name }}
       securityContext:
-        {{- .Values.operator.podsecurityContext | toYaml | nindent 8 }}
+        {{- .Values.podsecurityContext | toYaml | nindent 8 }}
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- range .Values.image.pullSecrets }}
@@ -28,18 +28,18 @@ spec:
           # Replace this with the built image name
           image: {{ include "redis-cluster-operator.image" . }}
           securityContext:
-            {{- .Values.operator.containersecurityContext | toYaml | nindent 12 }}
+            {{- .Values.containersecurityContext | toYaml | nindent 12 }}
           command:
           - redis-cluster-operator
           args:
           - --rename-command-path=/etc/redisconf
           - --rename-command-file=redis.conf
-          imagePullPolicy: {{ .Values.operator.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
           resources:
-            {{- .Values.operator.resources | toYaml | nindent 12 }}
+            {{- .Values.resources | toYaml | nindent 12 }}
           env:
             - name: WATCH_NAMESPACE
-              value: {{ .Values.operator.namespace | quote }}
+              value: {{ .Values.namespace | quote }}
             - name: POD_NAME
               valueFrom:
                 fieldRef:

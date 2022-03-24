@@ -8,7 +8,13 @@ image:
 
 masterSize: 3
 clusterReplicas: 1
-
+resources:
+  limits:
+    cpu: 400m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 50Mi
 
 persistent:
   enable: true

@@ -98,7 +98,7 @@ func (p *PersistentConfig) updateLocalPv(localPvHome string, nodes []string) err
 // TODO: save the dataomnis-conf.yaml to k8s as configmap for backup
 type Config struct {
 	// kube nodes from k8s apiserver
-	Nodes []string `yaml:"-"`
+	Nodes []string `yaml:"nodes"`
 
 	// Local PV home
 	LocalPVHome string `yaml:"localPvHome" validate:"required"`
