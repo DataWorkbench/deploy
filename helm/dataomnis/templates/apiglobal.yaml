@@ -69,7 +69,7 @@ spec:
       containers:
         {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-sidecar
-          image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
+          image: {{ .Values.image.registry }}/elastic/filebeat:6.7.0
           imagePullPolicy: IfNotPresent
           args:
             - '-c'

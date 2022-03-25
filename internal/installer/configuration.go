@@ -28,7 +28,7 @@ type Image struct {
 	PullSecrets []string `json:"pullSecrets,omitempty" yaml:"pullSecrets,omitempty"`
 	PullPolicy  string   `json:"pullPolicy,omitempty" yaml:"pullPolicy,omitempty"`
 
-	Tag string `json:",omitempty" yaml:"-"`
+	Tag string `json:"tag,omitempty" yaml:"-"`
 }
 
 // update echo field-value from Config
