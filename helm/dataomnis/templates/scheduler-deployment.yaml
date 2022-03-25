@@ -50,7 +50,8 @@ spec:
           image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
-        - name: envsubst
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-envsubst
           image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
           args:
             - sh
@@ -67,8 +68,9 @@ spec:
               name: filebeat-config
             - mountPath: /etc/logsidecar
               name: injected-config
+        {{- end }}
       containers:
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-sidecar
           image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
           imagePullPolicy: IfNotPresent
@@ -157,7 +159,7 @@ spec:
             path: {{ .Values.persistent.hostPath }}/log/scheduler
             type: Directory
         {{- end  }}
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-config
           configMap:
             name: filebeat-config

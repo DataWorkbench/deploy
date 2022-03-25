@@ -52,7 +52,7 @@ spec:
         ports:
           - name: service
             containerPort: {{ .Values.ports.developer }}
-          - name: httpService
+          - name: http
             containerPort: {{ .Values.ports.developerHttp }}
         env:
           - name: DEVELOPER_HTTP_PORT

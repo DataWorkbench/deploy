@@ -1,3 +1,16 @@
+{{- if eq .Values.resourcemanager.storage.background "s3" }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-resourcemanager-s3-secret
+  labels:
+  {{ include "dataomnis.labels" . | indent 4 }}
+data:
+  access-key-id: {{ .Values.resourcemanager.storage.s3.accessKeyId | b64enc }}
+  secret-access-key: {{ .Values.resourcemanager.storage.s3.secretAccessKey | b64enc }}
+{{- end }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -46,7 +59,8 @@ spec:
           image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
-        - name: envsubst
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-envsubst
           image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
           args:
             - sh
@@ -63,8 +77,9 @@ spec:
               name: filebeat-config
             - mountPath: /etc/logsidecar
               name: injected-config
+        {{- end }}
       containers:
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-sidecar
           image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
           imagePullPolicy: IfNotPresent
@@ -109,13 +124,13 @@ spec:
             - name: RESOURCE_MANAGER_STORAGE_S3_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: dataomnis-iaas-secret
-                  key: access_key_id
+                  name: {{ include "dataomnis.fullname" . }}-resourcemanager-s3-secret
+                  key: access-key-id
             - name: RESOURCE_MANAGER_STORAGE_S3_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: dataomnis-iaas-secret
-                  key: secret_access_key
+                  name: {{ include "dataomnis.fullname" . }}-resourcemanager-s3-secret
+                  key: secret-access-key
             {{- end }}
             {{- range $ename, $evalue := .Values.resourcemanager.envs }}
             - name: {{ $ename }}
@@ -179,7 +194,7 @@ spec:
             path: {{ .Values.persistent.hostPath }}/log/resourcemanager
             type: Directory
         {{- end  }}
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-config
           configMap:
             name: filebeat-config

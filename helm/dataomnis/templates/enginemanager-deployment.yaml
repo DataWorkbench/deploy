@@ -51,7 +51,8 @@ spec:
           image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
           imagePullPolicy: IfNotPresent
           command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
-        - name: envsubst
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-envsubst
           image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
           args:
             - sh
@@ -68,8 +69,9 @@ spec:
               name: filebeat-config
             - mountPath: /etc/logsidecar
               name: injected-config
+        {{- end }}
       containers:
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-sidecar
           image: {{ .Values.image.registry }}/dataomnis/filebeat:6.7.0
           imagePullPolicy: IfNotPresent
@@ -104,16 +106,18 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.mysql.secretName }}
                   key: root
+            {{- if .Values.iaas.zone }}
             - name: ENGINE_MANAGER_IAAS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: dataomnis-iaas-secret
-                  key: access_key_id
+                  name: {{ include "dataomnis.fullname" . }}-iaas-secret
+                  key: access-key-id
             - name: ENGINE_MANAGER_IAAS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: dataomnis-iaas-secret
-                  key: secret_access_key
+                  name: {{ include "dataomnis.fullname" . }}-iaas-secret
+                  key: secret-access-key
+            {{- end }}
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -185,7 +189,7 @@ spec:
             path: {{ .Values.persistent.hostPath }}/log/enginemanager
             type: Directory
         {{- end  }}
-        {{- if .Values.filebeat.enabled }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
         - name: filebeat-config
           configMap:
             name: filebeat-config

@@ -18,10 +18,10 @@ type GrpcLog struct {
 }
 
 type Service struct {
-	LogLevel  int8     `json:"logLevel,omitempty" yaml:"logLevel"`
-	LogOutput string   `json:"logOutput"          yaml:"logOutput"`
-	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"  yaml:"grpcLog,omitempty"`
-	Metrics   *Metrics `json:"metrics,omitempty"  yaml:"metrics,omitempty"`
+	LogLevel  int8     `json:"logLevel,omitempty"  yaml:"logLevel"`
+	LogOutput string   `json:"logOutput,omitempty" yaml:"logOutput"`
+	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"   yaml:"grpcLog,omitempty"`
+	Metrics   *Metrics `json:"metrics,omitempty"   yaml:"metrics,omitempty"`
 
 	Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
 
@@ -38,30 +38,31 @@ type Apiglobal struct {
 	Enabled    bool       `json:"enabled" yaml:"enabled" yaml:"enabled"`
 	HttpServer HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
 
-	Regions      []Region                 `json:"-"       yaml:"regions,flow,omitempty"`
-	RegionValues []map[string]RegionValue `json:"regions" yaml:"-"`
+	Regions      []Region               `json:"-"       yaml:"regions,flow,omitempty"`
+	RegionsValue map[string]RegionValue `json:"regions" yaml:"-"`
 
 	// Authentication: for helm values.yaml
 	// IdentityProviders: for user configuration
-	Authentication    *Authentication    `json:"authentication"      yaml:"-"`
-	IdentityProviders []IdentityProvider `json:"-"                   yaml:"identityProviders"`
-	HttpProxy         string             `json:"httpProxy,omitempty" yaml:"httpProxy"`
+	Authentication    *Authentication    `json:"authentication,omitempty" yaml:"-"`
+	IdentityProviders []IdentityProvider `json:"-"                        yaml:"identityProviders,flow,omitempty"`
+	HttpProxy         string             `json:"httpProxy,omitempty"      yaml:"httpProxy"`
 
 	Service `json:",omitempty,inline" yaml:",inline"`
 }
 
 func (a *Apiglobal) updateRegion() {
-	for _, r := range a.Regions {
-		rv := RegionValue{
-			Host: r.Host,
-			Name: Names{
-				ZhCn: r.ZhCn,
-				EnUs: r.EnUs,
-			},
+	if len(a.Regions) > 0 {
+		a.RegionsValue = map[string]RegionValue{}
+		for _, r := range a.Regions {
+			rv := RegionValue{
+				Host: r.Host,
+				Name: Names{
+					ZhCn: r.ZhCn,
+					EnUs: r.EnUs,
+				},
+			}
+			a.RegionsValue[r.EnUs] = rv
 		}
-		a.RegionValues = append(a.RegionValues, map[string]RegionValue{
-			r.EnUs: rv,
-		})
 	}
 }
 
@@ -229,7 +230,7 @@ type Dataomnis struct {
 	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
 	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
-	RedisClient *RedisClient `json:"redis" yaml:"redisCluster,omitempty"`
+	RedisClient *RedisClient `json:"redis" yaml:"redisClient,omitempty"`
 
 	Persistent Persistent `json:"persistent" yaml:"-"`
 
@@ -237,18 +238,18 @@ type Dataomnis struct {
 
 	Common *Service `json:"common" yaml:"global"`
 
-	WebService      *Webservice      `json:"webservice"      yaml:"webservice"`
-	Apiglobal       *Apiglobal       `json:"apiglobal"       yaml:"apiGlobal"`
-	Apiserver       *Apiserver       `json:"apiserver"       yaml:"apiserver"`
-	Account         *Account         `json:"account"         yaml:"account"`
-	Enginemanager   *Enginemanager   `json:"enginemanager"   yaml:"enginemanager"`
-	Resourcemanager *Resourcemanager `json:"resourcemanager" yaml:"resourcemanager"`
-	Scheduler       *Scheduler       `json:"scheduler"       yaml:"scheduler"`
-	Spacemanager    *Service         `json:"spacemanager"    yaml:"spacemanager"`
-	Developer       *Service         `json:"developer"       yaml:"developer"`
+	WebService      *Webservice      `json:"webservice"                yaml:"webservice"`
+	Apiglobal       *Apiglobal       `json:"apiglobal"                 yaml:"apiglobal"`
+	Apiserver       *Apiserver       `json:"apiserver,omitempty"       yaml:"apiserver,omitempty"`
+	Account         *Account         `json:"account,omitempty"         yaml:"account,omitempty"`
+	Enginemanager   *Enginemanager   `json:"enginemanager"             yaml:"enginemanager"`
+	Resourcemanager *Resourcemanager `json:"resourcemanager,omitempty" yaml:"resourcemanager,omitempty"`
+	Scheduler       *Scheduler       `json:"scheduler,omitempty"       yaml:"scheduler,omitempty"`
+	Spacemanager    *Service         `json:"spacemanager,omitempty"    yaml:"spacemanager,omitempty"`
+	Developer       *Service         `json:"developer,omitempty"       yaml:"developer,omitempty"`
 
-	Jaeger         *Workload       `json:"jaeger"         yaml:"jaeger"`
-	ServiceMonitor *ServiceMonitor `json:"serviceMonitor" yaml:"serviceMonitor"`
+	Jaeger         *Workload       `json:"jaeger,omitempty" yaml:"jaeger,omitempty"`
+	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"   yaml:"serviceMonitor"`
 }
 
 type DataomnisChart struct {
@@ -267,17 +268,33 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 	}
 	d.values.Image.Tag = d.values.Version
 
+	if d.values.MysqlClient == nil {
+		d.values.MysqlClient = &MysqlClient{}
+	}
 	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
-	d.values.EtcdClient.Endpoint = EtcdClusterName
-	d.values.HdfsClient.ConfigmapName = fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName)
+	d.values.MysqlClient.SecretName = fmt.Sprintf(MysqlSecretNameFmt, MysqlClusterName)
+
+	if d.values.RedisClient == nil {
+		d.values.RedisClient = &RedisClient{}
+	}
 	d.values.RedisClient.generateAddr(RedisClusterName, 3)
+
+	d.values.EtcdClient = &EtcdClient{
+		Endpoint: EtcdClusterName,
+	}
+
+	d.values.HdfsClient = &HdfsClient{
+		ConfigmapName: fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName),
+	}
 
 	// update hostPath for log-dir
 	d.values.Persistent.HostPath = fmt.Sprintf(DataomnisHostPathFmt, c.LocalPVHome, d.getReleaseName())
 	d.values.Persistent.LocalPv = nil
 
-	d.values.Apiglobal.updateRegion()
-	d.values.Apiglobal.updateAuthentication()
+	if d.values.Apiglobal.Enabled {
+		d.values.Apiglobal.updateRegion()
+		d.values.Apiglobal.updateAuthentication()
+	}
 	return nil
 }
 

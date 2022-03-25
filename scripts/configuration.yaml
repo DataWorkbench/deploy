@@ -42,10 +42,13 @@ dataomnis:
   global:
     replicas: 1
     strategy: RollingUpdate
+
     logLevel: 1  # 1=>"debug", 2=>"info", 3=>"warn", 4=>"error", 5=>"fatal"
+    logOutput: "file" # "console" or "file"
     grpcLog:
-      level: 2  #  1 => info, 2 => waring, 3 => error, 4 => fatal
+      level: 1  #  1 => info, 2 => waring, 3 => error, 4 => fatal
       verbosity: 99
+
     metrics:
       enabled: true
       urlPath: "/metrics"
@@ -56,6 +59,11 @@ dataomnis:
       - hosts: http://api.dataomnis.192.168.27.90.nip.io
         enUsName: testing
         zhCnName: 测试区
+    identityProviders: []
+    envs: {}
+
+  account:
+    source: ""
     envs: {}
 
   enginemanager:
@@ -74,13 +82,6 @@ dataomnis:
     envs: {}
 
   resourcemanager:
-    resources:
-      limits:
-        cpu: 1024m
-        memory: 2048Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
     storage:
       background: "hdfs"
       hadoopConfDir: "/etc/hadoop/conf"
@@ -91,25 +92,11 @@ dataomnis:
     envs: {}
 
   scheduler:
-    resources:
-      limits:
-        cpu: 1024m
-        memory: 2048Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
     etcdDialTimeout: 5s
     envs: {}
 
   # spacemanager configuration
   spacemanager:
-    resources:
-      limits:
-        cpu: 1024m
-        memory: 2048Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
     envs: {}
 
   developer:
@@ -123,13 +110,10 @@ dataomnis:
 
   webservice:
     enabled: false
-    resources:
-      limits:
-        cpu: 2048m
-        memory: 4096Mi
-      requests:
-        cpu: 100m
-        memory: 100Mi
+
+  serviceMonitor:
+    enabled: false
+    interval: 60s
 
   # IAAS api configuration
   iaas:

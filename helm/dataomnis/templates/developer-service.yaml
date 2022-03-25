@@ -12,10 +12,10 @@ spec:
       port: {{ .Values.ports.developer }}
       targetPort: service
       protocol: TCP
-    - name: httpService
+    - name: http
       port: {{ .Values.ports.developerHttp }}
-      targetPort: httpService
-      protocol: HTTP
+      targetPort: http
+      protocol: TCP
   selector:
     app.kubernetes.io/name: {{ .Chart.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}

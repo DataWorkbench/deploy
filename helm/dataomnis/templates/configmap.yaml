@@ -56,12 +56,9 @@ data:
 
     # iaas api configuration
     iaas:
-      zone: {{ .Values.iaas.zone }}
-      protocol: {{ .Values.iaas.protocol }}
-      host: {{ .Values.iaas.host }}
-      port: {{ .Values.iaas.port }}
-      uri: {{ .Values.iaas.uri }}
-      timeout: {{ .Values.iaas.timeout }}
+      {{- if .Values.iaas.zone }}
+      {{- toYaml .Values.iaas | nindent 6 }}
+      {{- end }}
 
     source: "{{ .Values.account.source }}"
 
@@ -198,7 +195,9 @@ data:
 
     # iaas api configuration
     iaas:
+      {{- if .Values.iaas.zone }}
       {{- toYaml .Values.iaas | nindent 6 }}
+      {{- end }}
 
 
   resourcemanager.yaml: |
@@ -332,4 +331,6 @@ data:
 
     # iaas api configuration
     iaas:
+      {{- if .Values.iaas.zone }}
       {{- toYaml .Values.iaas | nindent 6 }}
+      {{- end }}

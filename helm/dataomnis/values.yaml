@@ -2,14 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# for apiserver and flink web
+# for api and flink web
 domain: dataomnis.192.168.27.90.nip.io
 port:
-
-# the host info for pod
-# qingcloudApiIP: the ip of api.qingcloud.com
-dns:
-  qingcloudApiIP: 172.31.60.141
 
 image:
   # kubectl -n dataomnis create secret docker-registry docker-registry-secret --docker-server=dockerhub.qingcloud.com --docker-username=push-dataomnis --docker-password=<your-pword>
@@ -37,6 +32,7 @@ common:
   metrics:
     enabled: true
     urlPath: "/metrics"
+
   livenessProbe:
     initialDelaySeconds: 20
     periodSeconds: 30
@@ -184,6 +180,8 @@ resourcemanager:
       endpoint: "s3.gd2.qingstor.com"
       region: "gd2" # us-west-2
       bucket: "demo-yu-gd2-15"
+      accessKeyId: ""
+      secretAccessKey: ""
 
   envs: {}
 
@@ -230,15 +228,15 @@ jaeger:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
 # iaas configuration
-iaas:
-  zone: "testing"
-  protocol: "http"
-  host: "172.31.60.141"
-  port: "7777"
-  uri: "/iaas/"
-  timeout: 600
-  access_key_id: "LTMJGBXPHSEZRNVKKPHU"
-  secret_access_key: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+iaas: {}
+#  zone: "testing"
+#  protocol: "http"
+#  host: "172.31.60.141"
+#  port: "7777"
+#  uri: "/iaas/"
+#  timeout: 600
+#  accessKeyId: "LTMJGBXPHSXXXXXXXXXX"
+#  secretAccessKey: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
 
 # serviceName: port
 ports:

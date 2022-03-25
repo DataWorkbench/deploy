@@ -31,12 +31,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: logbackup-secret
-                  key: access_key_id
+                  key: access-key-id
             - name: LOG_BACKUP_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
                   name: logbackup-secret
-                  key: secret_access_key
+                  key: secret-access-key
           ports:
             - name: logprobe
               containerPort: {{ .Values.ports.logbackup }}
