@@ -184,7 +184,7 @@ data:
 
     flink:
       image_repo: "{{ .Values.image.registry }}/dataomnis/flink"
-      image_pull_secret: {{ .Values.image.pullSecret }}
+      image_pull_secret: {{ .Values.image.pullSecrets }}
       hdfs_configmap_name: "{{ .Values.hdfs.configmapName }}"
       hdfs_configmap_namespace: "{{ .Release.Namespace }}"
       ingress_class: "{{ .Values.enginemanager.flink.ingressClass }}"

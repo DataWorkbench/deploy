@@ -16,9 +16,9 @@ spec:
         app.kubernetes.io/instance: {{ .Release.Name }}
         component: db-ctrl-job
     spec:
-      {{- if .Values.image.pullSecret }}
+      {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- range .Values.image.pullSecret }}
+        {{- range .Values.image.pullSecrets }}
         - name: {{ . }}
         {{- end }}
       {{- end }}

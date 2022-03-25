@@ -39,9 +39,9 @@ spec:
                     values:
                       - account
               topologyKey: 'kubernetes.io/hostname'
-      {{- if .Values.image.pullSecret }}
+      {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- range .Values.image.pullSecret }}
+        {{- range .Values.image.pullSecrets }}
         - name: {{ . }}
         {{- end }}
       {{- end }}
