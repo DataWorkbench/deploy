@@ -55,10 +55,10 @@ data:
       {{- end }}
 
     # iaas api configuration
+    {{- if .Values.iaas.zone }}
     iaas:
-      {{- if .Values.iaas.zone }}
       {{- toYaml .Values.iaas | nindent 6 }}
-      {{- end }}
+    {{- end }}
 
     source: "{{ .Values.account.source }}"
 
@@ -194,10 +194,10 @@ data:
       enable_multus: {{ .Values.enginemanager.flink.enableMultus }}
 
     # iaas api configuration
+    {{- if .Values.iaas.zone }}
     iaas:
-      {{- if .Values.iaas.zone }}
       {{- toYaml .Values.iaas | nindent 6 }}
-      {{- end }}
+    {{- end }}
 
 
   resourcemanager.yaml: |
@@ -330,7 +330,7 @@ data:
         rest_service_name_fmt: {{ .Values.enginemanager.flink.restServiceNameFmt | quote }}
 
     # iaas api configuration
+    {{- if .Values.iaas.zone }}
     iaas:
-      {{- if .Values.iaas.zone }}
       {{- toYaml .Values.iaas | nindent 6 }}
-      {{- end }}
+    {{- end }}

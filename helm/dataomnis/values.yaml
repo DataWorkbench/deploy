@@ -228,15 +228,15 @@ jaeger:
     COLLECTOR_ZIPKIN_HTTP_PORT: 9411
 
 # iaas configuration
-iaas: {}
-#  zone: "testing"
-#  protocol: "http"
-#  host: "172.31.60.141"
-#  port: "7777"
-#  uri: "/iaas/"
-#  timeout: 600
-#  accessKeyId: "LTMJGBXPHSXXXXXXXXXX"
-#  secretAccessKey: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
+iaas:
+  zone: "testing"
+  protocol: "http"
+  host: "172.31.60.141"
+  port: 7777
+  uri: "/iaas/"
+  timeout: 600
+  accessKeyId: "LTMJGBXPHSXXXXXXXXXX"
+  secretAccessKey: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
 
 # serviceName: port
 ports:
