@@ -33,6 +33,10 @@ Service Addresses For ApiServer
 {{ include "dataomnis.fullname" . }}-developer:{{ .Values.ports.developer }}
 {{- end -}}
 
+{{- define "service.notifier" -}}
+{{ include "dataomnis.fullname" . }}-notifier:{{ .Values.ports.notifier }}
+{{- end -}}
+
 {{- define "apiglobal.link.services" -}}
 - name: API_GLOBAL_ACCOUNT_SERVER_ADDRESS
   value: '{{ include "service.account" . }}'
@@ -49,6 +53,8 @@ Service Addresses For ApiServer
   value: '{{- include "service.scheduler" . }}'
 - name: API_SERVER_DEVELOPER_ADDRESS
   value: '{{ include "service.developer" . }}'
+- name: API_SERVER_NOTIFIER_ADDRESS
+  value: '{{ include "service.notifier" . }}'
 {{- end -}}
 
 

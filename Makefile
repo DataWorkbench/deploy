@@ -28,7 +28,7 @@ comma:= ,
 empty:=
 space:= $(empty) $(empty)
 # the service that need to format/compile/build.., default all.
-service=apiglobal,apiserver,spacemanager,scheduler,resourcemanager,account,enginemanager
+service=apiglobal,apiserver,spacemanager,scheduler,resourcemanager,account,enginemanager,notifier
 SERVICE_ARRAY=$(subst ${comma},${space},$(service))
 COMPOSE_DB_CTRL=dataomnis-db-ctrl
 

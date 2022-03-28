@@ -299,7 +299,7 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 }
 
 func (d *DataomnisChart) initHostPathDir(c Config) error {
-	localPvHome := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager}", d.values.Persistent.HostPath)
+	localPvHome := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager,notifier}", d.values.Persistent.HostPath)
 	var host *Host
 	var conn *Connection
 	var err error

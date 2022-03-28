@@ -209,6 +209,26 @@ spacemanager:
       memory: 100Mi
   envs: {}
 
+# notifier configuration
+notifier:
+  nfConfig:
+    sdk_config:
+      access_key_id: "IKSMDBWVIECPIVNDYZAB"
+      secret_access_key: "JnEco2qZ6EvXt89mJpCVdkBoc5AwPA0unrkFkOxq"
+      host: "api.alphacloud.com"
+      port: 7777
+      protocol: "http"
+      uri: "/iaas"
+    smtp_config:
+      host: "smtp.163.com"
+      port: 25
+      user_name: "xiaobai417sos@163.com"
+      password: "82717785"
+
+  platform: iaas
+
+  envs: {}
+
 developer:
   resources:
     limits:
@@ -253,6 +273,7 @@ ports:
   scheduler: 9103
   account: 9110
   resourcemanager: 9111
+  notifier: 9113
   enginemanager: 9114
   developer: 9119
   developerHttp: 9219
@@ -265,6 +286,7 @@ metricsPorts:
   jobmanager: 9205
   account: 9210
   resourcemanager: 9211
+  notifier: 9213
   enginemanager: 9214
 
 serviceMonitor:

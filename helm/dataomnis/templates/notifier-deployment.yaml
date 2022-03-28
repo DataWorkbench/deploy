@@ -1,0 +1,170 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dataomnis.fullname" . }}-notifier
+  labels:
+{{ include "dataomnis.labels" . | indent 4 }}
+    component: notifier
+annotations:
+  {{- range $key, $value := .Values.notifier.annotations }}
+  {{ $key | quote }}: {{ $value | quote }}
+  {{- end }}
+spec:
+  replicas: {{ coalesce .Values.notifier.replicas .Values.common.replicas }}
+  strategy:
+    type: {{ coalesce .Values.notifier.strategy .Values.common.strategy }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ .Chart.Name }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      component: notifier
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Chart.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        component: notifier
+      annotations:
+      {{- range $key, $value := .Values.notifier.podAnnotations }}
+      {{ $key | quote }}: {{ $value | quote }}
+      {{- end }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: component
+                    operator: In
+                    values:
+                      - notifier
+              topologyKey: 'kubernetes.io/hostname'
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+        {{- end }}
+      {{- end }}
+      initContainers:
+        - name: wait-mysql
+          image: {{ .Values.image.registry }}/library/{{- .Values.image.busybox }}
+          imagePullPolicy: IfNotPresent
+          command: ['/bin/sh', '-c', '{{ include "mysql.waiting.cmd" . }}']
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-envsubst
+          image: {{ .Values.image.registry }}/dataomnis/envsubst:latest
+          args:
+            - sh
+            - -c
+            - cat /data/filebeat.yaml | envsubst > /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - mountPath: /data
+              name: filebeat-config
+            - mountPath: /etc/logsidecar
+              name: injected-config
+        {{- end }}
+      containers:
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-sidecar
+          image: {{ .Values.image.registry }}/elastic/filebeat:6.7.0
+          imagePullPolicy: IfNotPresent
+          args:
+            - '-c'
+            - /etc/logsidecar/filebeat.yaml
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: log
+              mountPath: /logs
+            - name: injected-config
+              mountPath: /etc/logsidecar
+              readOnly: true
+        {{- end }}
+        - name: notifier
+          image: {{ .Values.image.registry }}/dataomnis/notifier:{{- .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["sh", "-c", "notifier start -c /opt/dataomnis/conf/notifier.yaml"]
+          ports:
+            - name: service
+              containerPort: {{ .Values.ports.notifier }}
+            - name: metrics
+              containerPort: {{ .Values.metricsPorts.notifier }}
+          env:
+            - name: SCHEDULER_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.mysql.secretName }}
+                  key: root
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: SCHEDULER_LOG_FILE_PATH
+              value: "/opt/dataomnis/log/$(POD_NAME).log"
+            {{- range $ename, $evalue := .Values.notifier.envs }}
+            - name: {{ $ename }}
+              value: {{ $evalue | quote }}
+            {{- end }}
+          readinessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
+            {{- if .Values.notifier.readinessProbe }}
+            periodSeconds: {{ .Values.notifier.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.notifier.readinessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.readinessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.readinessProbe.initialDelaySeconds }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.notifier.resources | nindent 12 }}
+          livenessProbe:
+            exec:
+              command: ["grpc_health_probe", "-addr=:{{ .Values.ports.notifier }}"]
+            {{- if .Values.notifier.livenessProbe }}
+            periodSeconds: {{ .Values.notifier.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.notifier.livenessProbe.initialDelaySeconds }}
+            {{- else }}
+            periodSeconds: {{ .Values.common.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.common.livenessProbe.initialDelaySeconds }}
+            {{- end }}
+          volumeMounts:
+            - name: config
+              mountPath: /opt/dataomnis/conf
+              readOnly: true
+            {{- if eq .Values.common.logOutput "file" }}
+            - name: log
+              mountPath: /opt/dataomnis/log
+            {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: dataomnis-config
+            items:
+              - key: notifier.yaml
+                path: notifier.yaml
+        {{- if eq .Values.common.logOutput "file" }}
+        - name: log
+          hostPath:
+            path: {{ .Values.persistent.hostPath }}/log/notifier
+            type: Directory
+        {{- end  }}
+        {{- if and (eq .Values.common.logOutput "file" ) .Values.filebeat.enabled }}
+        - name: filebeat-config
+          configMap:
+            name: filebeat-config
+            items:
+              - key: filebeat.yaml
+                path: filebeat.yaml
+        - name: injected-config
+          emptyDir: {}
+        {{- end  }}

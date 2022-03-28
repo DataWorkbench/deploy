@@ -334,3 +334,32 @@ data:
     iaas:
       {{- toYaml .Values.iaas | nindent 6 }}
     {{- end }}
+
+
+  notifier.yaml: |
+    log:
+      level: {{ coalesce .Values.spacemanager.logLevel .Values.common.logLevel }}
+      output: {{ coalesce .Values.spacemanager.logOutput .Values.common.logOutput | quote }}
+      file:
+        path: "/opt/dataomnis/log/spacemanager/spacemanager.log"
+        max_size: 128 # In MB.
+        max_age: 0
+        max_backups: 0
+        compress: false
+
+    grpc_server:
+      address: "0.0.0.0:{{- .Values.ports.notifier }}"
+
+    grpc_log:
+      level: {{ .Values.common.grpcLog.level }}
+      verbosity: {{ .Values.common.grpcLog.verbosity }}
+
+    metrics_server:
+      enabled: {{ .Values.common.metrics.enabled }}
+      url_path: {{ .Values.common.metrics.urlPath }}
+      address: "0.0.0.0:{{- .Values.metricsPorts.spacemanager }}"
+
+    platform: {{ .Values.notifier.platform }}
+    nf_config:
+      {{- toYaml .Values.notifier.nfConfig | nindent 6 }}
+
