@@ -626,10 +626,12 @@ CREATE TABLE IF NOT EXISTS `sync_job` (
 
     -- Timestamp of create time
     `created` BIGINT(20) UNSIGNED NOT NULL,
-
     -- Timestamp of update time, Update when some changed, default value should be same as "created"
     `updated` BIGINT(20) UNSIGNED NOT NULL,
-
+    -- sync source type
+    `source_type` TINYINT(2) UNSIGNED DEFAULT 1 NOT NULL,
+    -- sync target description
+    `target_type` TINYINT(2) UNSIGNED DEFAULT 1 NOT NULL,
     PRIMARY KEY (`id`, `version`),
     UNIQUE KEY unique_job_name (`space_id`, `version`, `name`)
 

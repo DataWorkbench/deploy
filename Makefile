@@ -48,7 +48,7 @@ compile:
 
 .PHONY: build-flyway
 build-flyway: ## Build flyway image for database migration
-	cd .. && docker build -t $(FLYWAY_IMAGE) -f ./deploy/build/db/Dockerfile .
+	cd ./build/db && docker build -t $(FLYWAY_IMAGE) .
 
 .PHONY: build-zeppelin
 build-zeppelin: ## zeppelin, set perNote to isolate perUser to '', download lib from QingStor
