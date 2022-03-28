@@ -190,23 +190,19 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 	// get PodLists
 	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
 	if err != nil {
-		p.logger.Error().Error("list pod error", err).Fire()
 		return false, err
 	}
 	for _, pod := range pods.Items {
-		p.logger.Debug().Any("container status", pod.Status).Fire()
-		if pod.Status.Phase == corev1.PodPending {
-			p.logger.Warn().String("the status of pod", pod.GetName()).Msg("is pending").Fire()
-			return false, nil
+		if pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodSucceeded {
+			return true, nil
 		}
 
-		for _, cond := range pod.Status.Conditions {
-			if cond.Type == corev1.ContainersReady && cond.Status == corev1.ConditionTrue {
-				break
-			} else if cond.Status != corev1.ConditionTrue {
-				p.logger.Debug().String("pod", pod.GetName()).
-					String("is not ready, state", string(cond.Type)).
-					String(", reason", cond.Reason).Fire()
+		p.logger.Info().String("pod", pod.GetName()).Any("is not ready, status phase", pod.Status.Phase).Fire()
+		for _, condition := range pod.Status.Conditions {
+			if condition.Status != corev1.ConditionTrue {
+				p.logger.Info().String("status of conditionType", string(condition.Type)).
+					String("is not true, reason", condition.Reason).
+					String("message", condition.Message).Fire()
 				return false, nil
 			}
 		}
