@@ -3,47 +3,50 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 )
 
 //TODO: add backup-config
 type MysqlConfig struct {
-	TimeoutSecond int       `json:"-" yaml:"timeoutSecond,omitempty"`
-	Image         *Image    `json:"image,omitempty" yaml:"image,omitempty"`
-	Pxc           *Workload `json:"pxc" yaml:"pxc"`
+	TimeoutSecond int              `json:"-" yaml:"timeoutSecond,omitempty"`
+	Image         *common.Image    `json:"image,omitempty" yaml:"image,omitempty"`
+	Pxc           *common.Workload `json:"pxc" yaml:"pxc"`
 }
 
 // MysqlChart for etcd-cluster, implement Chart
 type MysqlChart struct {
-	ChartMeta `json:",inline" yaml:",inline"`
+	helm.ChartMeta `json:",inline" yaml:",inline"`
 
-	values *MysqlConfig `json:"config,omitempty" yaml:"config,omitempty"`
+	Conf *MysqlConfig `json:"config,omitempty" yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO
-func (m *MysqlChart) updateFromConfig(c Config) error {
+func (m *MysqlChart) UpdateFromConfig(c common.Config) error {
 	if c.Mysql != nil {
-		m.values = c.Mysql
+		m.Conf = c.Mysql
 	}
 
 	if c.Image != nil {
-		if m.values.Image == nil {
-			m.values.Image = &Image{}
-			m.values.Image.updateFromConfig(c.Image)
+		if m.Conf.Image == nil {
+			m.Conf.Image = &common.Image{}
+			m.Conf.Image.Copy(c.Image)
 		}
 	}
 
-	return m.values.Pxc.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes)
+	return m.Conf.Pxc.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
-func (m *MysqlChart) initLocalPvHome() error {
-	localPvHome := fmt.Sprintf("%s/%s/{data,log,mysql-bin}", m.values.Pxc.Persistent.LocalPv.Home, MysqlClusterName)
-	var host *Host
-	var conn *Connection
+func (m *MysqlChart) InitLocalPvDir() error {
+	localPvHome := fmt.Sprintf("%s/%s/{data,log,mysql-bin}", m.Conf.Pxc.Persistent.LocalPv.Home, common.MysqlClusterName)
+	var host *ssh.Host
+	var conn *ssh.Connection
 	var err error
-	for _, node := range m.values.Pxc.Persistent.LocalPv.Nodes {
-		host = &Host{Address: node}
-		conn, err = NewConnection(host)
+	for _, node := range m.Conf.Pxc.Persistent.LocalPv.Nodes {
+		host = &ssh.Host{Address: node}
+		conn, err = ssh.NewConnection(host)
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
@@ -54,9 +57,9 @@ func (m *MysqlChart) initLocalPvHome() error {
 	return nil
 }
 
-func (m *MysqlChart) parseValues() (Values, error) {
-	var v Values = map[string]interface{}{}
-	bytes, err := json.Marshal(m.values)
+func (m *MysqlChart) ParseValues() (helm.Values, error) {
+	var v helm.Values = map[string]interface{}{}
+	bytes, err := json.Marshal(m.Conf)
 	if err != nil {
 		return v, err
 	}
@@ -64,29 +67,29 @@ func (m *MysqlChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func (m *MysqlChart) getLabels() map[string]string {
+func (m *MysqlChart) GetLabels() map[string]string {
 	return map[string]string{
-		InstanceLabelKey: fmt.Sprintf(MysqlInstanceLabelValueFmt, m.ReleaseName),
+		common.InstanceLabelKey: fmt.Sprintf(common.MysqlInstanceLabelValueFmt, m.ReleaseName),
 	}
 }
 
-func (m *MysqlChart) getTimeoutSecond() int {
-	if m.values.TimeoutSecond == 0 {
-		return m.ChartMeta.getTimeoutSecond()
+func (m *MysqlChart) GetTimeoutSecond() int {
+	if m.Conf.TimeoutSecond == 0 {
+		return m.ChartMeta.GetTimeoutSecond()
 	}
-	return m.values.TimeoutSecond
+	return m.Conf.TimeoutSecond
 }
 
-func NewMysqlChart(release string, c Config) *MysqlChart {
+func NewMysqlChart(release string, c common.Config) *MysqlChart {
 	m := &MysqlChart{}
-	m.ChartName = MysqlClusterChart
+	m.ChartName = common.MysqlClusterChart
 	m.ReleaseName = release
-	m.WaitingReady = true
+	m.Waiting = true
 
 	if c.Mysql != nil {
-		m.values = c.Mysql
+		m.Conf = c.Mysql
 	} else {
-		m.values = &MysqlConfig{}
+		m.Conf = &MysqlConfig{}
 	}
 	return m
 }
@@ -105,6 +108,6 @@ type MysqlClient struct {
 }
 
 func (c *MysqlClient) update(releaseName string)  {
-	c.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, releaseName)
-	c.SecretName = fmt.Sprintf(MysqlSecretNameFmt, releaseName)
+	c.ExternalHost = fmt.Sprintf(common.MysqlExternalHostFmt, releaseName)
+	c.SecretName = fmt.Sprintf(common.MysqlSecretNameFmt, releaseName)
 }

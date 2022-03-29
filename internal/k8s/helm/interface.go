@@ -1,49 +1,55 @@
-package installer
+package helm
 
-import v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+import (
+	"github.com/DataWorkbench/deploy/internal/common"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
 
 // Chart is the proxy of helm chart that with the Values Configuration.
 // helm chart interface
 type Chart interface {
 	// update each field value from global Config if that is ZERO
-	updateFromConfig(Config) error
+	UpdateFromConfig(common.Config) error
 
 	// parse the field-values to Values for helm release
-	parseValues() (Values, error)
+	ParseValues() (Values, error)
 
 	// return chart name
-	getChartName() string
+	GetChartName() string
 
 	// return relase name
-	getReleaseName() string
+	GetReleaseName() string
 
-	getLabels() map[string]string
+	GetLabels() map[string]string
 
 	// whether to wait release ready
-	waitingReady() bool
-	getTimeoutSecond() int
+	WaitingReady() bool
+	GetTimeoutSecond() int
 
-	initLocalPvHome() error
+	InitLocalPvDir() error
 }
 
 // helm client interface for dataomnis-service
 type Helm interface {
 	// install Chart to k8s as a Release
-	install(*Chart) error
+	Install(*Chart) error
 
 	// waiting a release ready
 	// param:
 	//   releaseName
 	//   timeoutSec to waiting
 	//   durationSec for checking if release is ready
-	waitingReady(string, int64, int64) error
+	WaitingReady(string, int64, int64) error
 
 	// check if a release is ready
-	isReady(v1.ListOptions) (bool, error)
+	IsReady(v1.ListOptions) (bool, error)
 
 	// upgrade a release with Chart
-	upgrade(*Chart) error
+	Upgrade(*Chart) error
 
 	// delete a release by name(string)
-	delete(string) error
+	Delete(string) error
+
+	// delete a release by name(string)
+	Exist(string) (bool, error)
 }

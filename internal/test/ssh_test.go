@@ -1,18 +1,18 @@
 package test
 
 import (
-	"github.com/DataWorkbench/deploy/internal/installer"
+	"github.com/DataWorkbench/deploy/internal/ssh"
 	"testing"
 )
 
 const TestHostAddress = "worker-p004"
 
 func TestSsh(t *testing.T) {
-	host := &installer.Host{
+	host := &ssh.Host{
 		Address: TestHostAddress,
 	}
 
-	sshConn, err := installer.NewConnection(host)
+	sshConn, err := ssh.NewConnection(host)
 	if err != nil {
 		t.Fatalf("new ssh connection error: %+v", err)
 	}

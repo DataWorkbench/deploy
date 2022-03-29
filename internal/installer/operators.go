@@ -1,17 +1,22 @@
 package installer
 
+import (
+	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+)
+
 // ***************************************************************
 // ChartMeta Zone
 // ***************************************************************
 // implement Chart interface
 
 type HdfsOperatorChart struct {
-	ChartMeta
+	helm.ChartMeta
 }
 
-func NewHdfsOperatorChart(releaseName string, c Config) *HdfsOperatorChart {
+func NewHdfsOperatorChart(releaseName string, c common.Config) *HdfsOperatorChart {
 	h := &HdfsOperatorChart{}
-	h.ChartName = HdfsOptChart
+	h.ChartName = common.HdfsOptChart
 	h.ReleaseName = releaseName
 	h.WaitingReady = true
 
@@ -21,12 +26,12 @@ func NewHdfsOperatorChart(releaseName string, c Config) *HdfsOperatorChart {
 
 
 type MysqlOperatorChart struct {
-	ChartMeta
+	helm.ChartMeta
 }
 
-func NewMysqlOperatorChart(releaseName string, c Config) *MysqlOperatorChart {
+func NewMysqlOperatorChart(releaseName string, c common.Config) *MysqlOperatorChart {
 	m := &MysqlOperatorChart{}
-	m.ChartName = MysqlOptChart
+	m.ChartName = common.MysqlOptChart
 	m.ReleaseName = releaseName
 	m.WaitingReady = true
 	_ = m.updateFromConfig(c)
@@ -35,12 +40,12 @@ func NewMysqlOperatorChart(releaseName string, c Config) *MysqlOperatorChart {
 
 
 type RedisOperatorChart struct {
-	ChartMeta
+	helm.ChartMeta
 }
 
-func NewRedisOperatorChart(releaseName string, c Config) *RedisOperatorChart {
+func NewRedisOperatorChart(releaseName string, c common.Config) *RedisOperatorChart {
 	r := &RedisOperatorChart{}
-	r.ChartName = RedisOptChart
+	r.ChartName = common.RedisOptChart
 	r.ReleaseName = releaseName
 	r.WaitingReady = true
 	_ = r.updateFromConfig(c)

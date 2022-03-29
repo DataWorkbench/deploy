@@ -4,20 +4,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm"
 	"github.com/DataWorkbench/glog"
 )
 
 var Operators = []string{
-	HdfsOptName,
-	MysqlOptName,
-	RedisOptName,
+	common.HdfsOptName,
+	common.MysqlOptName,
+	common.RedisOptName,
 }
 
 var DependencyServices = []string{
-	EtcdClusterName,
-	MysqlClusterName,
-	RedisClusterName,
-	HdfsClusterName,
+	common.EtcdClusterName,
+	common.MysqlClusterName,
+	common.RedisClusterName,
+	common.HdfsClusterName,
 }
 
 var AllServices []string
@@ -25,7 +27,7 @@ var AllServices []string
 func init() {
 	AllServices = append(AllServices, Operators...)
 	AllServices = append(AllServices, DependencyServices...)
-	AllServices = append(AllServices, DataomnisSystemName)
+	AllServices = append(AllServices, common.DataomnisSystemName)
 }
 
 func Install(configFile string, services *[]string, debug, dryRun bool) error {
@@ -37,14 +39,14 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 
 	// check
 	for _, s := range *services {
-		if !StrContains(AllServices, s) {
+		if !common.StrSliceContains(AllServices, s) {
 			msg := fmt.Sprintf("The service:%s cat not be installed.", s)
 			logger.Error().Msg(msg).Fire()
 			return errors.New(msg)
 		}
 	}
 
-	conf := &Config{Debug: debug}
+	conf := &common.Config{Debug: debug}
 	err := conf.Read(configFile, *logger)
 	if err != nil {
 		return err
@@ -53,7 +55,7 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 
 	// install operators
 	for _, service := range *services {
-		if StrContains(Operators, service) {
+		if common.StrSliceContains(Operators, service) {
 			if err = installOperator(ctx, service, *conf, logger, debug, dryRun); err != nil{
 				return err
 			}
@@ -63,7 +65,7 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 
 	// install dependency service
 	for _, service := range *services {
-		if StrContains(DependencyServices, service) {
+		if common.StrSliceContains(DependencyServices, service) {
 			if err = installDependencyService(ctx, service, *conf, logger, debug, dryRun); err != nil{
 				return err
 			}
@@ -72,25 +74,25 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 	}
 
 	// install dataomnis
-	if StrContains(*services, DataomnisSystemName) {
-		err = installDataomnis(ctx, DataomnisSystemName, *conf, logger, debug, dryRun)
+	if common.StrSliceContains(*services, common.DataomnisSystemName) {
+		err = installDataomnis(ctx, common.DataomnisSystemName, *conf, logger, debug, dryRun)
 		logger.Info().Msg("**************************************************************").Fire()
 	}
 	return nil
 }
 
 
-func installOperator(ctx context.Context, name string, c Config, logger *glog.Logger, debug, dryRun bool) error {
-	var helm *Proxy
+func installOperator(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+	var proxy *helm.Proxy
 	var err error
-	logger.Info().String("new helm proxy with namespace", DefaultOperatorNamespace).Fire()
-	if helm, err = NewProxy(ctx, DefaultOperatorNamespace, logger, debug, dryRun); err != nil {
+	logger.Info().String("new helm proxy with namespace", common.DefaultOperatorNamespace).Fire()
+	if proxy, err = helm.NewProxy(ctx, common.DefaultOperatorNamespace, logger, debug, dryRun); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
 
 	var installed bool
-	installed, err = helm.exist(name)
+	installed, err = proxy.Exist(name)
 	if err != nil {
 		logger.Debug().Error("get release error", err).Fire()
 		return err
@@ -100,20 +102,20 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 		return nil
 	}
 
-	var chart Chart
+	var chart helm.Chart
 	switch name {
-	case HdfsOptName:
+	case common.HdfsOptName:
 		chart = NewHdfsOperatorChart(name, c)
-	case MysqlOptName:
+	case common.MysqlOptName:
 		chart = NewMysqlOperatorChart(name, c)
-	case RedisOptName:
+	case common.RedisOptName:
 		chart = NewRedisOperatorChart(name, c)
 	default:
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
 	logger.Info().String("install operator", name).Msg("..").Fire()
-	if err = helm.install(chart); err != nil {
+	if err = proxy.Install(chart); err != nil {
 		logger.Error().Error("install operator error", err).Fire()
 		return err
 	}
@@ -122,17 +124,17 @@ func installOperator(ctx context.Context, name string, c Config, logger *glog.Lo
 }
 
 
-func installDependencyService(ctx context.Context, name string, c Config, logger *glog.Logger, debug, dryRun bool) error {
-	var helm *Proxy
+func installDependencyService(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+	var proxy *helm.Proxy
 	var err error
 	logger.Info().String("install dependency service", name).Msg("..").Fire()
-	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug, dryRun); err != nil {
+	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger, debug, dryRun); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
 
 	var installed bool
-	installed, err = helm.exist(name)
+	installed, err = proxy.Exist(name)
 	if err != nil {
 		logger.Debug().Error("get release error", err).Fire()
 		return err
@@ -142,31 +144,31 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 		return nil
 	}
 
-	var chart Chart
+	var chart helm.Chart
 	switch name {
-	case EtcdClusterName:
+	case common.EtcdClusterName:
 		chart = NewEtcdChart(name, c)
-	case HdfsClusterName:
+	case common.HdfsClusterName:
 		chart = NewHdfsChart(name, c)
-	case MysqlClusterName:
+	case common.MysqlClusterName:
 		chart = NewMysqlChart(name, c)
-	case RedisClusterName:
+	case common.RedisClusterName:
 		chart = NewRedisChart(name, c)
 	default:
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
-	if err = chart.updateFromConfig(c); err != nil {
+	if err = chart.UpdateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
 	logger.Debug().Any("chart values", chart).Fire()
 
-	if err = chart.initLocalPvHome(); err != nil {
+	if err = chart.InitLocalPvDir(); err != nil {
 		logger.Error().Error("init local pv home error", err).Fire()
 		return err
 	}
-	if err = helm.install(chart); err != nil {
+	if err = proxy.Install(chart); err != nil {
 		logger.Error().Error("helm install dependency service error", err).Fire()
 		return err
 	}
@@ -175,17 +177,17 @@ func installDependencyService(ctx context.Context, name string, c Config, logger
 }
 
 
-func installDataomnis(ctx context.Context, name string, c Config, logger *glog.Logger, debug, dryRun bool) error {
-	var helm *Proxy
+func installDataomnis(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+	var proxy *helm.Proxy
 	var err error
 	logger.Info().Msg("install dataomnis ..").Fire()
-	if helm, err = NewProxy(ctx, DefaultSystemNamespace, logger, debug, dryRun); err != nil {
+	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger, debug, dryRun); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
 
 	var installed bool
-	installed, err = helm.exist(name)
+	installed, err = proxy.Exist(name)
 	if err != nil {
 		logger.Debug().Error("get release error", err).Fire()
 		return err
@@ -204,20 +206,10 @@ func installDataomnis(ctx context.Context, name string, c Config, logger *glog.L
 		logger.Error().Error("init hostPath dir error", err).Fire()
 		return err
 	}
-	if err = helm.install(chart); err != nil {
+	if err = proxy.Install(chart); err != nil {
 		logger.Error().Error("helm install dataomnis error", err).Fire()
 		return err
 	}
 	logger.Info().Msg("install dataomnis, done.").Fire()
 	return nil
-}
-
-
-func StrContains(ss []string, s string) bool {
-	for _, _s := range ss {
-		if _s == s {
-			return true
-		}
-	}
-	return false
 }

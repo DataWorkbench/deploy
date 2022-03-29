@@ -3,16 +3,19 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 	"strings"
 )
 
 // RedisConfig for hdfs-cluster
 type RedisConfig struct {
-	MasterSize int    `json:"masterSize"      yaml:"-"`
-	Image      *Image `json:"image,omitempty" yaml:"image,omitempty"`
+	MasterSize int           `json:"masterSize"      yaml:"-"`
+	Image      *common.Image `json:"image,omitempty" yaml:"image,omitempty"`
 
-	Workload `json:",inline" yaml:",inline"`
+	common.Workload `json:",inline" yaml:",inline"`
 }
 
 // TODO: validate the yaml and nodes == 3 by default
@@ -23,39 +26,39 @@ func (v RedisConfig) validate() error {
 // ********************************************
 // RedisChart for hdfs-cluster, implement Chart
 type RedisChart struct {
-	ChartMeta
-	values *RedisConfig
+	helm.ChartMeta
+	Conf *RedisConfig
 }
 
 // update each field value from global Config
-func (r *RedisChart) updateFromConfig(c Config) error {
+func (r *RedisChart) UpdateFromConfig(c common.Config) error {
 	if c.Redis != nil {
-		r.values = c.Redis
+		r.Conf = c.Redis
 	}
 
 	if c.Image != nil {
-		if r.values.Image == nil {
-			r.values.Image = &Image{}
-			r.values.Image.updateFromConfig(c.Image)
+		if r.Conf.Image == nil {
+			r.Conf.Image = &common.Image{}
+			r.Conf.Image.Copy(c.Image)
 		}
 	}
 
-	if err := r.values.Persistent.updateLocalPv(c.LocalPVHome, c.Nodes); err != nil {
+	if err := r.Conf.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes); err != nil {
 		return err
 	}
 
-	r.values.MasterSize = len(r.values.Persistent.LocalPv.Nodes)
+	r.Conf.MasterSize = len(r.Conf.Persistent.LocalPv.Nodes)
 	return nil
 }
 
-func (r *RedisChart) initLocalPvHome() error {
-	localPvHome := fmt.Sprintf("%s/%s/{01,02}", r.values.Persistent.LocalPv.Home, RedisClusterName)
-	var host *Host
-	var conn *Connection
+func (r RedisChart) InitLocalPvDir() error {
+	localPvHome := fmt.Sprintf("%s/%s/{01,02}", r.Conf.Persistent.LocalPv.Home, common.RedisClusterName)
+	var host *ssh.Host
+	var conn *ssh.Connection
 	var err error
-	for _, node := range r.values.Persistent.LocalPv.Nodes {
-		host = &Host{Address: node}
-		conn, err = NewConnection(host)
+	for _, node := range r.Conf.Persistent.LocalPv.Nodes {
+		host = &ssh.Host{Address: node}
+		conn, err = ssh.NewConnection(host)
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
@@ -67,9 +70,9 @@ func (r *RedisChart) initLocalPvHome() error {
 	return nil
 }
 
-func (r *RedisChart) parseValues() (Values, error) {
-	var v Values = map[string]interface{}{}
-	bytes, err := json.Marshal(r.values)
+func (r RedisChart) ParseValues() (helm.Values, error) {
+	var v helm.Values = map[string]interface{}{}
+	bytes, err := json.Marshal(r.Conf)
 	if err != nil {
 		return v, err
 	}
@@ -77,29 +80,29 @@ func (r *RedisChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func (r *RedisChart) getLabels() map[string]string {
+func (r RedisChart) GetLabels() map[string]string {
 	return map[string]string{
-		RedisInstanceLabelKey: r.ReleaseName,
+		common.RedisInstanceLabelKey: r.ReleaseName,
 	}
 }
 
-func (r *RedisChart) getTimeoutSecond() int {
-	if r.values.TimeoutSecond == 0 {
-		return r.ChartMeta.getTimeoutSecond()
+func (r RedisChart) GetTimeoutSecond() int {
+	if r.Conf.TimeoutSecond == 0 {
+		return r.ChartMeta.GetTimeoutSecond()
 	}
-	return r.values.TimeoutSecond
+	return r.Conf.TimeoutSecond
 }
 
-func NewRedisChart(release string, c Config) *RedisChart {
+func NewRedisChart(release string, c common.Config) *RedisChart {
 	r := &RedisChart{}
-	r.ChartName = RedisClusterChart
+	r.ChartName = common.RedisClusterChart
 	r.ReleaseName = release
-	r.WaitingReady = true
+	r.Waiting = true
 
 	if c.Redis != nil {
-		r.values = c.Redis
+		r.Conf = c.Redis
 	} else {
-		r.values = &RedisConfig{}
+		r.Conf = &RedisConfig{}
 	}
 	return r
 }
@@ -118,9 +121,9 @@ type RedisClient struct {
 
 func (r *RedisClient) generateAddr(releaseName string, size int) {
 	var addrs []string
-	if r.Mode == RedisClusterModeCluster && r.ClusterAddr == "" { // internal redis-cluster
+	if r.Mode == common.RedisClusterModeCluster && r.ClusterAddr == "" { // internal redis-cluster
 		for i := 0; i < size; i++ {
-			addrs = append(addrs, fmt.Sprintf(RedisClusterAddrFmt, releaseName, i, RedisClusterPort))
+			addrs = append(addrs, fmt.Sprintf(common.RedisClusterAddrFmt, releaseName, i, common.RedisClusterPort))
 		}
 		r.ClusterAddr = strings.Join(addrs, ",")
 	}

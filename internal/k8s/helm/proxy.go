@@ -1,12 +1,12 @@
-package installer
+package helm
 
 import (
 	"context"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/k8s"
 	"github.com/DataWorkbench/glog"
 	hc "github.com/mittwald/go-helm-client"
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -24,23 +24,6 @@ const (
 	ReleaseNotFoundErr = "release: not found"
 )
 
-// **************************************************
-// the type Values used for helm when install release
-// **************************************************
-type Values map[string]interface{}
-
-func (v Values) parse() (string, error) {
-	valueBytes, err := yaml.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(valueBytes), nil
-}
-
-func (v Values) isEmpty() bool {
-	return len(v) == 0
-}
-
 // ******************************************************************
 // helm client proxy to handle helm release, implement Helm interface
 // ******************************************************************
@@ -51,7 +34,7 @@ type Proxy struct {
 	repositoryCache string
 	client          hc.Client // helm client
 	logger          *glog.Logger
-	kclient         *KClient
+	kclient         *k8s.KClient
 }
 
 func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug, dryRun bool) (*Proxy, error) {
@@ -63,7 +46,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug,
 			logger.Debug().Msg(fmt.Sprintf(format, v)).Fire()
 		}
 	}
-	kubeConfPath := fmt.Sprintf(DefaultKubeConfFmt, os.Getenv("HOME"))
+	kubeConfPath := fmt.Sprintf(k8s.DefaultKubeConfFmt, os.Getenv("HOME"))
 	HelmRepoConf := fmt.Sprintf(DefaultHelmRepositoryConfigFmt, os.Getenv("HOME"))
 	HelmRepoCache := fmt.Sprintf(DefaultHelmRepositoryCacheFmt, os.Getenv("HOME"))
 	opts := &hc.Options{
@@ -97,11 +80,11 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug,
 	return nil, err
 }
 
-func (p *Proxy) install(chart Chart) error {
-	var name = chart.getReleaseName()
-	var chartName = chart.getChartName()
+func (p Proxy) Install(chart Chart) error {
+	var name = chart.GetReleaseName()
+	var chartName = chart.GetChartName()
 
-	values, err := chart.parseValues()
+	values, err := chart.ParseValues()
 	if err != nil {
 		p.logger.Error().String("chart with name", chartName).Error("parse values error", err).Fire()
 		return err
@@ -116,7 +99,7 @@ func (p *Proxy) install(chart Chart) error {
 	}
 
 	p.logger.Info().String("create namespace", p.namespace).Fire()
-	if p.kclient, err = NewKClient(); err != nil {
+	if p.kclient, err = k8s.NewKClient(); err != nil {
 		p.logger.Error().Error("new kube client error", err).Fire()
 		return err
 	}
@@ -141,37 +124,37 @@ func (p *Proxy) install(chart Chart) error {
 		return err
 	}
 
-	if chart.waitingReady() {
-		err = p.waitingReady(chart)
+	if chart.WaitingReady() {
+		err = p.WaitingReady(chart)
 	}
 	return err
 }
 
-func (p *Proxy) waitingReady(chart Chart) error {
-	name := chart.getReleaseName()
+func (p Proxy) WaitingReady(chart Chart) error {
+	name := chart.GetReleaseName()
 	p.logger.Info().String("waiting release", name).Msg("ready..").Fire()
 
-	labelMap := chart.getLabels()
+	labelMap := chart.GetLabels()
 	ops := v1.ListOptions{
 		LabelSelector: labels.SelectorFromSet(labelMap).String(),
 	}
 
 	ready := false
 	var err error
-	p.kclient, err = NewKClient()
+	p.kclient, err = k8s.NewKClient()
 	if err != nil {
 		p.logger.Error().Error("new kube client error", err).Fire()
 		return err
 	}
 
-	timeoutSec := chart.getTimeoutSecond()
+	timeoutSec := chart.GetTimeoutSecond()
 	duration := time.Duration(DefaultDurationSec) * time.Second
 	spendSecs := 0
 	for spendSecs < timeoutSec {
 		time.Sleep(duration)
 		spendSecs += DefaultDurationSec
 
-		ready, err = p.isReady(ops)
+		ready, err = p.IsReady(ops)
 		if err != nil {
 			p.logger.Error().Error("check status ready error", err).Fire()
 			return err
@@ -188,7 +171,7 @@ func (p *Proxy) waitingReady(chart Chart) error {
 }
 
 // Note: need to init p.kubeClient before
-func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
+func (p Proxy) IsReady(ops v1.ListOptions) (bool, error) {
 	// get PodLists
 	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
 	if err != nil {
@@ -212,7 +195,7 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 	return true, nil
 }
 
-func (p *Proxy) exist(releaseName string) (bool, error) {
+func (p Proxy) Exist(releaseName string) (bool, error) {
 	_, err := p.client.GetRelease(releaseName)
 	if err != nil {
 		if errors.Cause(err).Error() == ReleaseNotFoundErr { // release not found

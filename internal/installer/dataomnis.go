@@ -3,6 +3,9 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
@@ -23,7 +26,7 @@ type Service struct {
 	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"   yaml:"grpcLog,omitempty"`
 	Metrics   *Metrics `json:"metrics,omitempty"   yaml:"metrics,omitempty"`
 
-	Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
+	common.Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
 
 	Envs map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
 }
@@ -198,14 +201,14 @@ type Dataomnis struct {
 	Port   string `json:"port"    yaml:"port,omitempty"`
 
 	// global configurations for all service as default
-	Image *Image `json:"image,omitempty" yaml:"image,omitempty"`
+	Image *common.Image `json:"image,omitempty" yaml:"image,omitempty"`
 
 	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
 	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
 	RedisClient *RedisClient `json:"redis" yaml:"redisClient,omitempty"`
 
-	Persistent Persistent `json:"persistent" yaml:"-"`
+	Persistent common.Persistent `json:"persistent" yaml:"-"`
 
 	Iaas *IaasApiConfig `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
@@ -221,46 +224,46 @@ type Dataomnis struct {
 	Spacemanager    *Service         `json:"spacemanager,omitempty"    yaml:"spacemanager,omitempty"`
 	Developer       *Service         `json:"developer,omitempty"       yaml:"developer,omitempty"`
 
-	Jaeger         *Workload       `json:"jaeger,omitempty" yaml:"jaeger,omitempty"`
-	ServiceMonitor *ServiceMonitor `json:"serviceMonitor"   yaml:"serviceMonitor"`
+	Jaeger         *common.Workload `json:"jaeger,omitempty" yaml:"jaeger,omitempty"`
+	ServiceMonitor *ServiceMonitor  `json:"serviceMonitor"   yaml:"serviceMonitor"`
 }
 
 type DataomnisChart struct {
-	ChartMeta
+	helm.ChartMeta
 
 	values *Dataomnis
 }
 
 // update each field value from global Config if that is ZERO
-func (d *DataomnisChart) updateFromConfig(c Config) error {
+func (d *DataomnisChart) updateFromConfig(c common.Config) error {
 	if c.Image != nil {
 		if d.values.Image == nil {
-			d.values.Image = &Image{}
+			d.values.Image = &common.Image{}
 		}
-		d.values.Image.updateFromConfig(c.Image)
+		d.values.Image.UpdateFromConfig(c.Image)
 	}
 	d.values.Image.Tag = d.values.Version
 
 	if d.values.MysqlClient == nil {
 		d.values.MysqlClient = &MysqlClient{}
 	}
-	d.values.MysqlClient.update(MysqlClusterName)
+	d.values.MysqlClient.update(common.MysqlClusterName)
 
 	if d.values.RedisClient == nil {
-		d.values.RedisClient = &RedisClient{Mode: RedisClusterModeCluster}
+		d.values.RedisClient = &RedisClient{Mode: common.RedisClusterModeCluster}
 	}
-	d.values.RedisClient.generateAddr(RedisClusterName, 3)
+	d.values.RedisClient.generateAddr(common.RedisClusterName, 3)
 
 	d.values.EtcdClient = &EtcdClient{
-		Endpoint: EtcdClusterName,
+		Endpoint: common.EtcdClusterName,
 	}
 
 	d.values.HdfsClient = &HdfsClient{
-		ConfigmapName: fmt.Sprintf(HdfsConfigMapFmt, HdfsClusterName),
+		ConfigmapName: fmt.Sprintf(common.HdfsConfigMapFmt, common.HdfsClusterName),
 	}
 
 	// update hostPath for log-dir
-	d.values.Persistent.HostPath = fmt.Sprintf(DataomnisHostPathFmt, c.LocalPVHome, d.getReleaseName())
+	d.values.Persistent.HostPath = fmt.Sprintf(common.DataomnisHostPathFmt, c.LocalPVHome, d.GetReleaseName())
 	d.values.Persistent.LocalPv = nil
 
 	if d.values.Apiglobal.Enabled {
@@ -273,20 +276,20 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 		if err != nil {
 			return err
 		}
-		return ioutil.WriteFile(TmpValuesFile, data, 0777)
+		return ioutil.WriteFile(common.TmpValuesFile, data, 0777)
 	}
 
 	return nil
 }
 
-func (d *DataomnisChart) initHostPathDir(c Config) error {
+func (d *DataomnisChart) initHostPathDir(c common.Config) error {
 	localPvHome := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager,notifier}", d.values.Persistent.HostPath)
-	var host *Host
-	var conn *Connection
+	var host *ssh.Host
+	var conn *ssh.Connection
 	var err error
 	for _, node := range c.Nodes {
-		host = &Host{Address: node}
-		conn, err = NewConnection(host)
+		host = &ssh.Host{Address: node}
+		conn, err = ssh.NewConnection(host)
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
@@ -297,8 +300,8 @@ func (d *DataomnisChart) initHostPathDir(c Config) error {
 	return nil
 }
 
-func (d *DataomnisChart) parseValues() (Values, error) {
-	var v Values = map[string]interface{}{}
+func (d *DataomnisChart) parseValues() (helm.Values, error) {
+	var v helm.Values = map[string]interface{}{}
 	bytes, err := json.Marshal(d.values)
 	if err != nil {
 		return v, err
@@ -307,9 +310,9 @@ func (d *DataomnisChart) parseValues() (Values, error) {
 	return v, err
 }
 
-func NewDataomnisChart(release string, c Config) *DataomnisChart {
+func NewDataomnisChart(release string, c common.Config) *DataomnisChart {
 	d := &DataomnisChart{}
-	d.ChartName = DataomnisSystemChart
+	d.ChartName = common.DataomnisSystemChart
 	d.ReleaseName = release
 	d.WaitingReady = true
 

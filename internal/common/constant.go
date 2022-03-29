@@ -1,4 +1,4 @@
-package installer
+package common
 
 const (
 	LocalHomeFmt         = "%s/dataomnis"

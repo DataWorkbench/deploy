@@ -1,8 +1,9 @@
-package installer
+package common
 
 import (
 	"errors"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/installer"
 	"github.com/DataWorkbench/glog"
 	"github.com/go-playground/validator/v10"
 	"gopkg.in/yaml.v3"
@@ -32,7 +33,7 @@ type Image struct {
 }
 
 // update echo field-value from Config
-func (i *Image) updateFromConfig(source *Image) {
+func (i *Image) Copy(source *Image) {
 	if source == nil {
 		return
 	}
@@ -79,7 +80,7 @@ type Persistent struct {
 	LocalPv  *LocalPv `json:"localPv,omitempty" yaml:"localPv"`
 }
 
-func (p *Persistent) updateLocalPv(localPvHome string, nodes []string) error {
+func (p *Persistent) UpdateLocalPv(localPvHome string, nodes []string) error {
 	// TODO: check if localPv exist and start with localPvHome
 	p.LocalPv.Home = fmt.Sprintf(LocalHomeFmt, localPvHome)
 
@@ -109,13 +110,13 @@ type Config struct {
 	Image *Image `yaml:"image"`
 
 	// dependent service
-	Etcd  *EtcdConfig  `yaml:"etcdCluster"`
-	Hdfs  *HdfsConfig  `yaml:"hdfsCluster"`
-	Mysql *MysqlConfig `yaml:"mysqlCluster"`
-	Redis *RedisConfig `yaml:"redisCluster"`
+	Etcd  *installer.EtcdConfig  `yaml:"etcdCluster"`
+	Hdfs  *installer.HdfsConfig  `yaml:"hdfsCluster"`
+	Mysql *installer.MysqlConfig `yaml:"mysqlCluster"`
+	Redis *installer.RedisConfig `yaml:"redisCluster"`
 
 	// dataomnis version
-	Dataomnis *Dataomnis `yaml:"dataomnis"`
+	Dataomnis *installer.Dataomnis `yaml:"dataomnis"`
 }
 
 func (c *Config) Read(file string, logger glog.Logger) error {
