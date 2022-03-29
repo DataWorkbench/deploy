@@ -89,15 +89,14 @@ func (c *Connection) session() (*ssh.Session, error) {
 	return sess, nil
 }
 
-func (c *Connection) Mkdir(dir string) error {
+func (c *Connection) Mkdir(dir string) ([]byte, error) {
 	session, err := c.session()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	cmd := fmt.Sprintf("mkdir -p %s", dir)
-	_, err = session.CombinedOutput(cmd)
-	return err
+	return session.CombinedOutput(cmd)
 }
 
 func NewConnection(host *Host)(*Connection, error) {

@@ -47,7 +47,7 @@ func (m *MysqlChart) initLocalPvHome() error {
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
-		if err := conn.Mkdir(localPvHome); err != nil {
+		if _, err := conn.Mkdir(localPvHome); err != nil {
 			return err
 		}
 	}

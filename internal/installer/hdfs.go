@@ -22,9 +22,9 @@ func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) err
 
 		if len(node.Storage.LocalPv.Nodes) < 1 {
 			if role == RoleNameNode {
-				node.Storage.LocalPv.Nodes = c.Nodes[:2]
+				node.Storage.LocalPv.Nodes = c.Nodes[len(c.Nodes)-2:]
 			} else {
-				node.Storage.LocalPv.Nodes = c.Nodes
+				node.Storage.LocalPv.Nodes = c.Nodes[:3]
 			}
 		}
 	}
@@ -90,17 +90,50 @@ func (h HdfsChart) updateFromConfig(c Config) error {
 }
 
 func (h HdfsChart) initLocalPvHome() error {
-	localPvHome := fmt.Sprintf("%s/%s/{namenode,datanode,journalnode,zookeeper}", h.values.HdfsHome, HdfsClusterName)
+	dnLocalPvDir := fmt.Sprintf("%s/%s/datanode", h.values.HdfsHome, HdfsClusterName)
+	jnLocalPvDir := fmt.Sprintf("%s/%s/journalnode", h.values.HdfsHome, HdfsClusterName)
+	nnLocalPvDir := fmt.Sprintf("%s/%s/namenode", h.values.HdfsHome, HdfsClusterName)
+	zkLocalPvDir := fmt.Sprintf("%s/%s/zookeeper", h.values.HdfsHome, HdfsClusterName)
 	var host *Host
 	var conn *Connection
 	var err error
-	for _, node := range h.values.Nodes {
+	for _, node := range h.values.Datanode.Storage.LocalPv.Nodes {
 		host = &Host{Address: node}
 		conn, err = NewConnection(host)
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
-		if err := conn.Mkdir(localPvHome); err != nil {
+		if _, err := conn.Mkdir(dnLocalPvDir); err != nil {
+			return err
+		}
+	}
+	for _, node := range h.values.Journalnode.Storage.LocalPv.Nodes {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if _, err := conn.Mkdir(jnLocalPvDir); err != nil {
+			return err
+		}
+	}
+	for _, node := range h.values.Namenode.Storage.LocalPv.Nodes {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if _, err := conn.Mkdir(nnLocalPvDir); err != nil {
+			return err
+		}
+	}
+	for _, node := range h.values.Zookeeper.Storage.LocalPv.Nodes {
+		host = &Host{Address: node}
+		conn, err = NewConnection(host)
+		if err != nil {
+			return errors.Wrap(err, "new connection failed")
+		}
+		if _, err := conn.Mkdir(zkLocalPvDir); err != nil {
 			return err
 		}
 	}

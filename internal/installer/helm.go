@@ -199,6 +199,7 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 
 		p.logger.Info().String("pod", pod.GetName()).Any("is not ready, status phase", pod.Status.Phase).Fire()
 		for _, condition := range pod.Status.Conditions {
+
 			if condition.Status != corev1.ConditionTrue {
 				p.logger.Info().String("status of conditionType", string(condition.Type)).
 					String("is not true, reason", condition.Reason).
