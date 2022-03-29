@@ -30,7 +30,7 @@ const (
 	MysqlClusterName = "mysql-cluster"
 
 	// dataomnis
-	DataomnisSystemChart = "dataomnis-1.0.0.tgz"
+	DataomnisSystemChart = "dataomnis-0.8.0.tgz"
 	DataomnisSystemName  = "dataomnis"
 )
 
@@ -55,6 +55,6 @@ const (
 
 	InstanceLabelKey           = "app.kubernetes.io/instance"
 	MysqlInstanceLabelValueFmt = "%s-pxc-db"
-	HdfsInstanceLabelKey       = "qy.dataworkbench.com/cluster-name"
+	HdfsInstanceLabelKey       = "dataomnis.io/cluster-name"
 	RedisInstanceLabelKey      = "redis.kun/name"
 )
