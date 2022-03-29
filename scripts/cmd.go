@@ -11,7 +11,7 @@ const DefaultConfigFile = "/etc/dataomnis/configuration.yaml"
 
 func main() {
 	var configFile *string
-	var debug *bool
+	var debug, dryRun *bool
 	var services *[]string
 
 	app := kingpin.New("ds", "The command to operate dataomnis services on k8s")
@@ -19,11 +19,11 @@ func main() {
 	initCmd := app.Command("init", "Initialize configuration file of dataomnis")
 
 	// installer
+	serviceHelper := fmt.Sprintf("The services%s to install, default: all services of dataomnis.", installer.AllServices)
 	installCmd := app.Command("install", "Install dataomnis service")
 	debug = installCmd.Flag("debug", "Enable debug mode").Bool()
+	dryRun = installCmd.Flag("dry-run", "if enable dry run install release for helm").Bool()
 	configFile = installCmd.Flag("file", "The configuration file with full-path of dataomnis").Short('f').Default(DefaultConfigFile).String()
-
-	serviceHelper := fmt.Sprintf("The services%s to install, default: all services of dataomnis.", installer.AllServices)
 	services = installCmd.Flag("services", serviceHelper).Short('s').Default(installer.AllServices...).Strings()
 
 	app.HelpFlag.Short('h')
@@ -32,6 +32,6 @@ func main() {
 	case initCmd.FullCommand():
 		installer.InitConfiguration()
 	case installCmd.FullCommand():
-		_ = installer.Install(*configFile, *debug, services)
+		_ = installer.Install(*configFile, services, *debug, *dryRun)
 	}
 }

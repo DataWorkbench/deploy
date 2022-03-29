@@ -46,6 +46,7 @@ func (v Values) isEmpty() bool {
 // ******************************************************************
 type Proxy struct {
 	ctx             context.Context
+	dryRun          bool
 	namespace       string
 	repositoryCache string
 	client          hc.Client // helm client
@@ -53,8 +54,7 @@ type Proxy struct {
 	kclient         *KClient
 }
 
-func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug bool) (*Proxy, error) {
-
+func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug, dryRun bool) (*Proxy, error) {
 	debugLog := func(format string, v ...interface{}) {
 		// Change this to your own logger. Default is 'log.Printf(format, v...)'.
 	}
@@ -87,6 +87,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug 
 	if c, err = hc.NewClientFromRestConf(restConfopts); err == nil {
 		return &Proxy{
 			ctx:             ctx,
+			dryRun:          dryRun,
 			namespace:       namespace,
 			repositoryCache: HelmRepoCache,
 			client:          c,
@@ -130,6 +131,7 @@ func (p *Proxy) install(chart Chart) error {
 		ReleaseName: name,
 		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
 		Namespace:   p.namespace,
+		DryRun:      p.dryRun,
 		ValuesYaml:  valuesStr,
 		Recreate:    true,
 	}

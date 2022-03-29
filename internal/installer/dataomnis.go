@@ -153,9 +153,9 @@ type Resourcemanager struct {
 }
 
 type Storage struct {
-	Background    string `json:"background,omitempty"    yaml:"background,omitempty"`
-	HadoopConfDir string `json:"hadoopConfDir,omitempty" yaml:"hadoopConfDir,omitempty"`
-	S3            *S3    `json:"s3,omitempty"            yaml:"s3,omitempty" validate:"required_if=Background s3"`
+	Background    string `json:"background,omitempty"    yaml:"background,omitempty"    validate:"oneof=s3 hdfs"`
+	HadoopConfDir string `json:"hadoopConfDir,omitempty" yaml:"hadoopConfDir,omitempty" validate:"required_if=Background hdfs"`
+	S3            *S3    `json:"s3,omitempty"            yaml:"s3,omitempty"            validate:"required_if=Background s3"`
 }
 
 type S3 struct {
