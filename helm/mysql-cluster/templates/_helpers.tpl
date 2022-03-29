@@ -69,7 +69,7 @@ This filters the backup.storages hash for S3 credentials. If we detect them, the
 Functions returns image URI according to parameters set
 */}}
 {{- define "pxc-db.pxc-image" -}}
-{{- if .Values.imageRegistry }}
+{{- if .Values.image.registry }}
 {{- printf "%s/%s" .Values.image.registry .Values.pxc.image }}
 {{- else }}
 {{- .Values.pxc.image }}

@@ -4,5 +4,3 @@ appVersion: 5.0.4-alpine
 name: redis-cluster
 type: application
 description: A Helm chart for Redis cluster deployment
-
-

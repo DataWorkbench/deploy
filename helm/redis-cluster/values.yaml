@@ -3,7 +3,7 @@ image:
   registry: docker.io
   pullPolicy: IfNotPresent
   pullSecrets: []
-  redis: redis
+  redis: library/redis
 
 
 masterSize: 3
