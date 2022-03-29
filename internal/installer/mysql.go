@@ -90,3 +90,21 @@ func NewMysqlChart(release string, c Config) *MysqlChart {
 	}
 	return m
 }
+
+
+// ***********************************************************
+type MysqlClient struct {
+	ExternalHost string `json:"externalHost" yaml:"-"`
+	SecretName   string `json:"secretName" yaml:"-"`
+
+	LogLevel        int8   `json:"logLevel,omitempty"        yaml:"logLevel,omitempty"`
+	MaxIdleConn     int32  `json:"maxIdleConn,omitempty"     yaml:"maxIdleConn,omitempty"`
+	MaxOpenConn     int32  `json:"maxOpenConn,omitempty"     yaml:"maxOpenConn,omitempty"`
+	ConnMaxLifetime string `json:"connMaxLifetime,omitempty" yaml:"connMaxLifetime,omitempty"`
+	SlowThreshold   string `json:"slowThreshold,omitempty"   yaml:"slowThreshold,omitempty"`
+}
+
+func (c *MysqlClient) update(releaseName string)  {
+	c.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, releaseName)
+	c.SecretName = fmt.Sprintf(MysqlSecretNameFmt, releaseName)
+}

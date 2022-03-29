@@ -176,3 +176,9 @@ func NewHdfsChart(release string, c Config) *HdfsChart {
 	}
 	return h
 }
+
+
+// ***********************************************************
+type HdfsClient struct {
+	ConfigmapName string `json:"configmapName" yaml:"-"`
+}

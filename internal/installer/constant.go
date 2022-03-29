@@ -1,7 +1,7 @@
 package installer
 
 const (
-	LocalHomeFmt = "%s/dataomnis"
+	LocalHomeFmt         = "%s/dataomnis"
 	DataomnisHostPathFmt = "%s/dataomnis/%s"
 )
 
@@ -39,9 +39,9 @@ const (
 	MysqlSecretNameFmt   = "%s-pxc-db"
 	HdfsConfigMapFmt     = "%s-common-config"
 
-	RedisClusterChartName = "redis-cluster"
-	RedisClusterPort      = 6379
-	RedisClusterAddrFmt   = "%s-%d:%d"
+	RedisClusterPort        = 6379
+	RedisClusterAddrFmt     = "%s-%d:%d"
+	RedisClusterModeCluster = "cluster"
 )
 
 const DefaultTimeoutSecond = 600
@@ -58,3 +58,5 @@ const (
 	HdfsInstanceLabelKey       = "dataomnis.io/cluster-name"
 	RedisInstanceLabelKey      = "redis.kun/name"
 )
+
+const TmpValuesFile = "/tmp/dataomnis-values.yaml"

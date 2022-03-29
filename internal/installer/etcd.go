@@ -82,3 +82,9 @@ func NewEtcdChart(release string, c Config) *EtcdChart {
 	}
 	return e
 }
+
+
+// ***********************************************************
+type EtcdClient struct {
+	Endpoint string `json:"endpoint" yaml:"-"`
+}

@@ -55,10 +55,10 @@ dataomnis:
 
   apiglobal:
     enabled: false  # if the webservice need to deploy, set true
-    regions:
-      - hosts: http://api.dataomnis.192.168.27.90.nip.io
-        enUsName: testing
-        zhCnName: 测试区
+    regions: []
+#      - hosts: http://api.dataomnis.192.168.27.90.nip.io
+#        enUsName: testing
+#        zhCnName: 测试区
     identityProviders: []
     envs: {}
 
@@ -86,9 +86,11 @@ dataomnis:
       background: "hdfs"
       hadoopConfDir: "/etc/hadoop/conf"
       s3:
-        endpoint: ""
-        region: ""
-        bucket: ""
+#        endpoint: ""
+#        region: ""
+#        bucket: ""
+#        accessKeyId: ""
+#        secretAccessKey: ""
     envs: {}
 
   scheduler:
@@ -117,6 +119,14 @@ dataomnis:
 
   # IAAS api configuration
   iaas:
+#    zone: "testing"
+#    protocol: "http"
+#    host: "api.ks.qingcloud.com"
+#    port: 7777
+#    uri: "/iaas/"
+#    timeout: 600
+#    accessKeyId: "LTMJGBXPHSXXXXXXXXXX"
+#    secretAccessKey: "7GvVuGAx2iB8NA9n8NtczH8BJnTkDGwGm9N6DYBo"
 
 
 #####################################

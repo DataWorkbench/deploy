@@ -98,6 +98,8 @@ func (p *Persistent) updateLocalPv(localPvHome string, nodes []string) error {
 
 // TODO: save the dataomnis-conf.yaml to k8s as configmap for backup
 type Config struct {
+	Debug bool
+
 	// kube nodes from k8s apiserver
 	Nodes []string `yaml:"nodes"`
 

@@ -3,9 +3,9 @@ package installer
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/DataWorkbench/common/lib/iaas"
 	"github.com/pkg/errors"
-	"strings"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
 )
 
 type Metrics struct {
@@ -35,8 +35,8 @@ type Webservice struct {
 // TODO: update from webservice enable
 // TODO: generate default region
 type Apiglobal struct {
-	Enabled    bool       `json:"enabled" yaml:"enabled" yaml:"enabled"`
-	HttpServer HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
+	Enabled    bool        `json:"enabled" yaml:"enabled" yaml:"enabled"`
+	HttpServer *HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
 
 	Regions      []Region               `json:"-"       yaml:"regions,flow,omitempty"`
 	RegionsValue map[string]RegionValue `json:"regions" yaml:"-"`
@@ -118,7 +118,7 @@ type Authentication struct {
 // ***********************************************************
 type Apiserver struct {
 	Service    `json:",omitempty,inline" yaml:",inline"`
-	HttpServer HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
+	HttpServer *HttpServer `json:"httpServer,omitempty"   yaml:"httpServer,omitempty"`
 }
 
 // ***********************************************************
@@ -131,12 +131,12 @@ type Account struct {
 type Enginemanager struct {
 	Service `json:",omitempty,inline" yaml:",inline"`
 	Helm    *HelmClient `json:"helm,omitempty"   yaml:"helm,omitempty"`
-	Flink   Flink       `json:"flink,omitempty"   yaml:"flink,omitempty"`
+	Flink   *Flink      `json:"flink,omitempty"   yaml:"flink,omitempty"`
 }
 
 type HelmClient struct {
 	RepoCachePath string `json:"repoCachePath,omitempty"   yaml:"RepoCachePath,omitempty"`
-	Debug         bool   `json:"debug,omitempty"   yaml:"debug,omitempty"`
+	Debug         bool   `json:"debug,omitempty"           yaml:"debug,omitempty"`
 }
 
 type Flink struct {
@@ -155,13 +155,15 @@ type Resourcemanager struct {
 type Storage struct {
 	Background    string `json:"background,omitempty"    yaml:"background,omitempty"`
 	HadoopConfDir string `json:"hadoopConfDir,omitempty" yaml:"hadoopConfDir,omitempty"`
-	S3            *S3    `json:"s3,omitempty"            yaml:"s3,omitempty"`
+	S3            *S3    `json:"s3,omitempty"            yaml:"s3,omitempty" validate:"required_if=Background s3"`
 }
 
 type S3 struct {
-	Endpoint string `json:"endpoint,omitempty"   yaml:"endpoint,omitempty"`
-	Region   string `json:"region,omitempty"   yaml:"region,omitempty"`
-	Bucket   string `json:"bucket,omitempty"   yaml:"bucket,omitempty"`
+	Endpoint        string `json:"endpoint"        yaml:"endpoint"        validate:"required"`
+	Region          string `json:"region"          yaml:"region"          validate:"required"`
+	Bucket          string `json:"bucket"          yaml:"bucket"          validate:"required"`
+	AccessKeyId     string `json:"accessKeyId"     yaml:"accessKeyId"     validate:"required"`
+	SecretAccessKey string `json:"secretAccessKey" yaml:"secretAccessKey" validate:"required"`
 }
 
 // ***********************************************************
@@ -176,50 +178,21 @@ type ServiceMonitor struct {
 	Interval string `json:"interval" yaml:"interval"`
 }
 
-type MysqlClient struct {
-	ExternalHost string `json:"externalHost" yaml:"-"`
-	SecretName   string `json:"secretName" yaml:"-"`
-
-	LogLevel        int8   `json:"logLevel,omitempty"        yaml:"logLevel,omitempty"`
-	MaxIdleConn     int32  `json:"maxIdleConn,omitempty"     yaml:"maxIdleConn,omitempty"`
-	MaxOpenConn     int32  `json:"maxOpenConn,omitempty"     yaml:"maxOpenConn,omitempty"`
-	ConnMaxLifetime string `json:"connMaxLifetime,omitempty" yaml:"connMaxLifetime,omitempty"`
-	SlowThreshold   string `json:"slowThreshold,omitempty"   yaml:"slowThreshold,omitempty"`
-}
-
-type EtcdClient struct {
-	Endpoint string `json:"endpoint" yaml:"-"`
-}
-
-type HdfsClient struct {
-	ConfigmapName string `json:"configmapName" yaml:"-"`
-}
-
-type RedisClient struct {
-	Mode         string `json:"mode,omitempty"         yaml:"mode,omitempty"`
-	SentinelAddr string `json:"sentinelAddr,omitempty" yaml:"sentinelAddr,omitempty"`
-	ClusterAddr  string `json:"clusterAddr,omitempty"  yaml:"clusterAddr,omitempty"`
-	MasterName   string `json:"masterName,omitempty"   yaml:"masterName,omitempty"`
-	Database     string `json:"database,omitempty"     yaml:"database,omitempty"`
-	Username     string `json:"username,omitempty"     yaml:"username,omitempty"`
-	Password     string `json:"password,omitempty"     yaml:"password,omitempty"`
-}
-
-func (r *RedisClient) generateAddr(releaseName string, size int) {
-	var addrs []string
-	if r.Mode == "cluster" && r.ClusterAddr == "" {
-		if releaseName == RedisClusterChartName {
-			for i := 0; i < size; i++ {
-				addrs = append(addrs, fmt.Sprintf(RedisClusterAddrFmt, releaseName, i, RedisClusterPort))
-			}
-		}
-		r.ClusterAddr = strings.Join(addrs, ",")
-	}
+// ***********************************************************
+type IaasApiConfig struct {
+	Zone            string `json:"zone"            yaml:"zone"            validate:"required"`
+	Host            string `json:"host"            yaml:"host"            validate:"required"`
+	Port            int    `json:"port"            yaml:"port"            validate:"required"`
+	Protocol        string `json:"protocol"        yaml:"protocol"        validate:"required"`
+	Timeout         int    `json:"timeout"         yaml:"timeout"         validate:"required"`
+	Uri             string `json:"uri"             yaml:"uri"             validate:"required"`
+	AccessKeyId     string `json:"accessKeyId"     yaml:"accessKeyId"     validate:"required"`
+	SecretAccessKey string `json:"secretAccessKey" yaml:"secretAccessKey" validate:"required"`
 }
 
 type Dataomnis struct {
 	// dataomnis version
-	Version string `json:"version" yaml:"version"`
+	Version string `json:"-" yaml:"version"`
 
 	Domain string `json:"domain"  yaml:"domain"`
 	Port   string `json:"port"    yaml:"port,omitempty"`
@@ -234,7 +207,7 @@ type Dataomnis struct {
 
 	Persistent Persistent `json:"persistent" yaml:"-"`
 
-	Iaas *iaas.Config `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
+	Iaas *IaasApiConfig `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
 	Common *Service `json:"common" yaml:"global"`
 
@@ -271,11 +244,10 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 	if d.values.MysqlClient == nil {
 		d.values.MysqlClient = &MysqlClient{}
 	}
-	d.values.MysqlClient.ExternalHost = fmt.Sprintf(MysqlExternalHostFmt, MysqlClusterName)
-	d.values.MysqlClient.SecretName = fmt.Sprintf(MysqlSecretNameFmt, MysqlClusterName)
+	d.values.MysqlClient.update(MysqlClusterName)
 
 	if d.values.RedisClient == nil {
-		d.values.RedisClient = &RedisClient{}
+		d.values.RedisClient = &RedisClient{Mode: RedisClusterModeCluster}
 	}
 	d.values.RedisClient.generateAddr(RedisClusterName, 3)
 
@@ -295,6 +267,15 @@ func (d *DataomnisChart) updateFromConfig(c Config) error {
 		d.values.Apiglobal.updateRegion()
 		d.values.Apiglobal.updateAuthentication()
 	}
+
+	if c.Debug {
+		data, err := yaml.Marshal(d.values)
+		if err != nil {
+			return err
+		}
+		return ioutil.WriteFile(TmpValuesFile, data, 0777)
+	}
+
 	return nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"strings"
 )
 
 // RedisConfig for hdfs-cluster
@@ -101,4 +102,26 @@ func NewRedisChart(release string, c Config) *RedisChart {
 		r.values = &RedisConfig{}
 	}
 	return r
+}
+
+
+// *************************************************************************************
+type RedisClient struct {
+	Mode         string `json:"mode,omitempty"         yaml:"mode,omitempty"`
+	SentinelAddr string `json:"sentinelAddr,omitempty" yaml:"sentinelAddr,omitempty"`
+	ClusterAddr  string `json:"clusterAddr,omitempty"  yaml:"clusterAddr,omitempty"`
+	MasterName   string `json:"masterName,omitempty"   yaml:"masterName,omitempty"`
+	Database     string `json:"database,omitempty"     yaml:"database,omitempty"`
+	Username     string `json:"username,omitempty"     yaml:"username,omitempty"`
+	Password     string `json:"password,omitempty"     yaml:"password,omitempty"`
+}
+
+func (r *RedisClient) generateAddr(releaseName string, size int) {
+	var addrs []string
+	if r.Mode == RedisClusterModeCluster && r.ClusterAddr == "" { // internal redis-cluster
+		for i := 0; i < size; i++ {
+			addrs = append(addrs, fmt.Sprintf(RedisClusterAddrFmt, releaseName, i, RedisClusterPort))
+		}
+		r.ClusterAddr = strings.Join(addrs, ",")
+	}
 }

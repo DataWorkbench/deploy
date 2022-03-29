@@ -44,7 +44,7 @@ func Install(configFile string, debug bool, services *[]string) error {
 		}
 	}
 
-	conf := &Config{}
+	conf := &Config{Debug: debug}
 	err := conf.Read(configFile, *logger)
 	if err != nil {
 		return err
