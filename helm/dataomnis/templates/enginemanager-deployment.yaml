@@ -39,7 +39,7 @@ spec:
                     values:
                       - enginemanager
               topologyKey: 'kubernetes.io/hostname'
-      serviceAccountName: {{ .Release.Name }}-engine-manager
+      serviceAccountName: {{ .Release.Name }}-enginemanager
       {{- if .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- range .Values.image.pullSecrets }}

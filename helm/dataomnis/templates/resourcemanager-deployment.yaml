@@ -1,16 +1,3 @@
-{{- if eq .Values.resourcemanager.storage.background "s3" }}
-apiVersion: v1
-kind: Secret
-metadata:
-  name: {{ include "dataomnis.fullname" . }}-resourcemanager-s3-secret
-  labels:
-  {{ include "dataomnis.labels" . | indent 4 }}
-data:
-  access-key-id: {{ .Values.resourcemanager.storage.s3.accessKeyId | b64enc }}
-  secret-access-key: {{ .Values.resourcemanager.storage.s3.secretAccessKey | b64enc }}
-{{- end }}
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
