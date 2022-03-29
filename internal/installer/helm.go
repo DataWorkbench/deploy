@@ -194,7 +194,7 @@ func (p *Proxy) isReady(ops v1.ListOptions) (bool, error) {
 	}
 	for _, pod := range pods.Items {
 		if pod.Status.Phase == corev1.PodSucceeded {
-			return true, nil
+			continue
 		}
 
 		for _, condition := range pod.Status.Conditions {
