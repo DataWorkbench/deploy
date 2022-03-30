@@ -1,21 +1,24 @@
-package common
+package config
 
 import (
-	"errors"
 	"fmt"
-	"github.com/DataWorkbench/deploy/internal/installer"
+	"github.com/DataWorkbench/deploy/internal/common"
 	"github.com/DataWorkbench/glog"
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"os"
 )
 
-var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
+
 // ***************************************************************
-// Global Config Var
+// Global Configuration Var
 // ***************************************************************
-var Debug, DryRun bool
+var (
+	DryRun bool
+	Debug  bool
+)
 
 
 // ***************************************************************
@@ -85,17 +88,13 @@ type Persistent struct {
 	LocalPv  *LocalPv `json:"localPv,omitempty" yaml:"localPv"`
 }
 
-func (p *Persistent) UpdateLocalPv(localPvHome string, nodes []string) error {
+func (p *Persistent) UpdateLocalPv(localPvHome string, nodes []string) {
 	// TODO: check if localPv exist and start with localPvHome
-	p.LocalPv.Home = fmt.Sprintf(LocalHomeFmt, localPvHome)
+	p.LocalPv.Home = fmt.Sprintf(common.LocalHomeFmt, localPvHome)
 
 	if len(p.LocalPv.Nodes) == 0 {
-		if len(nodes) < 3 {
-			return LeastNodeErr
-		}
 		p.LocalPv.Nodes = nodes
 	}
-	return nil
 }
 
 // ***************************************************************
@@ -104,7 +103,7 @@ func (p *Persistent) UpdateLocalPv(localPvHome string, nodes []string) error {
 
 // TODO: save the dataomnis-conf.yaml to k8s as configmap for backup
 type Config struct {
-	// kube nodes from k8s apiserver
+	// all kube nodes from k8s apiserver
 	Nodes []string `yaml:"nodes"`
 
 	// Local PV home
@@ -113,13 +112,13 @@ type Config struct {
 	Image *Image `yaml:"image"`
 
 	// dependent service
-	Etcd  *installer.EtcdConfig  `yaml:"etcdCluster"`
-	Hdfs  *installer.HdfsConfig  `yaml:"hdfsCluster"`
-	Mysql *installer.MysqlConfig `yaml:"mysqlCluster"`
-	Redis *installer.RedisConfig `yaml:"redisCluster"`
+	Etcd  *EtcdConfig  `yaml:"etcdCluster"  validate:"required"`
+	Hdfs  *HdfsConfig  `yaml:"hdfsCluster"  validate:"required"`
+	Mysql *MysqlConfig `yaml:"mysqlCluster" validate:"required"`
+	Redis *RedisConfig `yaml:"redisCluster" validate:"required"`
 
 	// dataomnis version
-	Dataomnis *installer.Dataomnis `yaml:"dataomnis"`
+	Dataomnis *DataomnisConfig `yaml:"dataomnis" validate:"required"`
 }
 
 func (c *Config) Read(file string, logger glog.Logger) error {
@@ -128,10 +127,8 @@ func (c *Config) Read(file string, logger glog.Logger) error {
 	_, err = os.Stat(file)
 	if err != nil {
 		if os.IsNotExist(err) {
-			msg := fmt.Sprintf("the configuration file: %s not exist!", file)
-			logger.Error().Msg(msg).Fire()
-			err = errors.New(msg)
-			return err
+			logger.Error().Msg("the configuration file not exist").Fire()
+			return errors.Errorf("the configuration file: %s not exist", file)
 		}
 		err = nil
 	}

@@ -1,41 +1,35 @@
-package installer
+package chart
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/DataWorkbench/deploy/internal/common"
-	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/config"
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 	"time"
 )
 
-type EtcdConfig struct {
-	Image *common.Image `json:"image,omitempty" yaml:"image,omitempty"`
-
-	common.Workload `json:",inline" yaml:",inline"`
-}
 
 // EtcdChart for etcd-cluster, implement Chart
 type EtcdChart struct {
-	helm.ChartMeta `json:",inline" yaml:",inline"`
-	Conf           *EtcdConfig `yaml:"config,omitempty"`
+	ChartMeta `json:",inline" yaml:",inline"`
+	Conf      *config.EtcdConfig `yaml:"config,omitempty"`
 }
 
 // update each field value from global Config if that is ZERO
-func (e *EtcdChart) UpdateFromConfig(c common.Config) error {
-	if c.Etcd != nil {
-		e.Conf = c.Etcd
-	}
+func (e *EtcdChart) UpdateFromConfig(c config.Config) error {
+	e.Conf = c.Etcd
 
 	if c.Image != nil {
 		if e.Conf.Image == nil {
-			e.Conf.Image = &common.Image{}
+			e.Conf.Image = &config.Image{}
 			e.Conf.Image.Copy(c.Image)
 		}
 	}
 
-	return e.Conf.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes)
+	e.Conf.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes[:3])
+	return e.Conf.Validate(e.ReleaseName)
 }
 
 func (e EtcdChart) InitLocalDir() error {
@@ -56,8 +50,8 @@ func (e EtcdChart) InitLocalDir() error {
 	return nil
 }
 
-func (e EtcdChart) ParseValues() (helm.Values, error) {
-	var v helm.Values = map[string]interface{}{}
+func (e EtcdChart) ParseValues() (Values, error) {
+	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(e.Conf)
 	if err != nil {
 		return v, err
@@ -73,21 +67,10 @@ func (e EtcdChart) GetTimeoutSecond() time.Duration {
 	return time.Duration(e.Conf.TimeoutSecond) * time.Second
 }
 
-func NewEtcdChart(release string, c common.Config) *EtcdChart {
+func NewEtcdChart(release string) *EtcdChart {
 	e := &EtcdChart{}
 	e.ChartName = common.EtcdClusterChart
 	e.ReleaseName = release
 	e.Waiting = true
-
-	if c.Etcd != nil {
-		e.Conf = c.Etcd
-	} else {
-		e.Conf = &EtcdConfig{}
-	}
 	return e
-}
-
-// ***********************************************************
-type EtcdClient struct {
-	Endpoint string `json:"endpoint" yaml:"-"`
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/DataWorkbench/deploy/internal/installer"
+	"github.com/DataWorkbench/deploy/internal/action"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"os"
 )
@@ -22,19 +22,19 @@ func main() {
 	initCmd := app.Command("init", "Initialize configuration file of dataomnis")
 
 	// installer
-	serviceHelper := fmt.Sprintf("The services%s to install, default: all services of dataomnis.", installer.AllServices)
+	serviceHelper := fmt.Sprintf("The services%s to install, default: all services of dataomnis.", action.AllServices)
 	installCmd := app.Command("install", "Install dataomnis service")
 	debug = installCmd.Flag("debug", "Enable debug mode").Bool()
 	dryRun = installCmd.Flag("dry-run", "if enable dry run install release for helm").Bool()
 	configFile = installCmd.Flag("file", "The configuration file with full-path of dataomnis").Short('f').Default(DefaultConfigFile).String()
-	services = installCmd.Flag("services", serviceHelper).Short('s').Default(installer.AllServices...).Strings()
+	services = installCmd.Flag("services", serviceHelper).Short('s').Default(action.AllServices...).Strings()
 
 	app.HelpFlag.Short('h')
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case initCmd.FullCommand():
-		installer.InitConfiguration()
+		action.InitConfiguration()
 	case installCmd.FullCommand():
-		_ = installer.Install(ctx, *configFile, services, *debug, *dryRun)
+		_ = action.Install(ctx, *configFile, services, *debug, *dryRun)
 	}
 }

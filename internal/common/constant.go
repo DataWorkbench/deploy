@@ -1,8 +1,19 @@
 package common
 
 const (
+	DefaultHelmRepoConfigFmt = "%s/.config/helm/repositories.yaml"
+	DefaultHelmRepoCacheFmt  = "%s/.cache/helm/repository"
+
+	DefaultOperatorNamespace = "dataomnis-operator"
+	DefaultSystemNamespace   = "dataomnis-system"
+
 	LocalHomeFmt         = "%s/dataomnis"
 	DataomnisHostPathFmt = "%s/dataomnis/%s"
+
+	DefaultTimeoutSecond = 600
+
+	// flink helm chart name
+	FlinkChart = "flink-0.1.6.tgz"
 )
 
 const (
@@ -42,16 +53,6 @@ const (
 	RedisClusterPort        = 6379
 	RedisClusterAddrFmt     = "%s-%d:%d"
 	RedisClusterModeCluster = "cluster"
-)
-
-const DefaultTimeoutSecond = 600
-
-const (
-	DefaultOperatorNamespace = "dataomnis-operator"
-	DefaultSystemNamespace   = "dataomnis-system"
-
-	// flink helm chart name
-	FlinkChart = "flink-0.1.6.tgz"
 
 	InstanceLabelKey           = "app.kubernetes.io/instance"
 	MysqlInstanceLabelValueFmt = "%s-pxc-db"
@@ -60,3 +61,9 @@ const (
 )
 
 const TmpValuesFile = "/tmp/dataomnis-values.yaml"
+
+// Error Fmt
+const (
+	OnlyNodeNumFmt    = "only %d nodes are required for %s local-pv"
+	AtLeaseNodeNumFmt = "at lease %d nodes are required for %s local-pv"
+)

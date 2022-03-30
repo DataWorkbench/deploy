@@ -1,15 +1,5 @@
-package installer
+package config
 
-import (
-	"encoding/json"
-	"fmt"
-	"github.com/DataWorkbench/deploy/internal/common"
-	"github.com/DataWorkbench/deploy/internal/k8s/helm"
-	"github.com/DataWorkbench/deploy/internal/ssh"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
-	"io/ioutil"
-)
 
 type Metrics struct {
 	Enabled bool `json:"enabled,omitempty" yaml:"enabled,omitempty"`
@@ -26,7 +16,7 @@ type Service struct {
 	GrpcLog   *GrpcLog `json:"grpcLog,omitempty"   yaml:"grpcLog,omitempty"`
 	Metrics   *Metrics `json:"metrics,omitempty"   yaml:"metrics,omitempty"`
 
-	common.Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
+	Workload `json:",omitempty,inline" yaml:",omitempty,inline"`
 
 	Envs map[string]string `json:"envs,omitempty" yaml:"envs,flow"`
 }
@@ -53,7 +43,7 @@ type Apiglobal struct {
 	Service `json:",omitempty,inline" yaml:",inline"`
 }
 
-func (a *Apiglobal) updateRegion() {
+func (a *Apiglobal) UpdateRegion() {
 	if len(a.Regions) > 0 {
 		a.RegionsValue = map[string]RegionValue{}
 		for _, r := range a.Regions {
@@ -69,7 +59,7 @@ func (a *Apiglobal) updateRegion() {
 	}
 }
 
-func (a *Apiglobal) updateAuthentication() {
+func (a *Apiglobal) UpdateAuthentication() {
 	if len(a.IdentityProviders) > 0 {
 		pMap := map[string]IdentityProvider{}
 		for _, p := range a.IdentityProviders {
@@ -193,7 +183,7 @@ type IaasApiConfig struct {
 	SecretAccessKey string `json:"secretAccessKey" yaml:"secretAccessKey" validate:"required"`
 }
 
-type Dataomnis struct {
+type DataomnisConfig struct {
 	// dataomnis version
 	Version string `json:"-" yaml:"version"`
 
@@ -201,14 +191,16 @@ type Dataomnis struct {
 	Port   string `json:"port"    yaml:"port,omitempty"`
 
 	// global configurations for all service as default
-	Image *common.Image `json:"image,omitempty" yaml:"image,omitempty"`
+	Image *Image `json:"image,omitempty" yaml:"image,omitempty"`
 
 	MysqlClient *MysqlClient `json:"mysql" yaml:"mysql"`
 	EtcdClient  *EtcdClient  `json:"etcd"  yaml:"-"`
 	HdfsClient  *HdfsClient  `json:"hdfs"  yaml:"-"`
 	RedisClient *RedisClient `json:"redis" yaml:"redisClient,omitempty"`
 
-	Persistent common.Persistent `json:"persistent" yaml:"-"`
+	Persistent *Persistent `json:"persistent" yaml:"-"`
+	// all kube nodes from k8s apiserver to mkdir log-dir / helm-repo-cache
+	Nodes []string `yaml:"nodes"`
 
 	Iaas *IaasApiConfig `json:"iaas,omitempty" yaml:"iaas,omitempty" validate:"omitempty"`
 
@@ -224,102 +216,6 @@ type Dataomnis struct {
 	Spacemanager    *Service         `json:"spacemanager,omitempty"    yaml:"spacemanager,omitempty"`
 	Developer       *Service         `json:"developer,omitempty"       yaml:"developer,omitempty"`
 
-	Jaeger         *common.Workload `json:"jaeger,omitempty" yaml:"jaeger,omitempty"`
+	Jaeger         *Workload `json:"jaeger,omitempty" yaml:"jaeger,omitempty"`
 	ServiceMonitor *ServiceMonitor  `json:"serviceMonitor"   yaml:"serviceMonitor"`
-}
-
-type DataomnisChart struct {
-	helm.ChartMeta
-
-	Conf *Dataomnis
-}
-
-// update each field value from global Config if that is ZERO
-func (d *DataomnisChart) UpdateFromConfig(c common.Config) error {
-	if c.Image != nil {
-		if d.Conf.Image == nil {
-			d.Conf.Image = &common.Image{}
-		}
-		d.Conf.Image.Copy(c.Image)
-	}
-	d.Conf.Image.Tag = d.Conf.Version
-
-	if d.Conf.MysqlClient == nil {
-		d.Conf.MysqlClient = &MysqlClient{}
-	}
-	d.Conf.MysqlClient.update(common.MysqlClusterName)
-
-	if d.Conf.RedisClient == nil {
-		d.Conf.RedisClient = &RedisClient{Mode: common.RedisClusterModeCluster}
-	}
-	d.Conf.RedisClient.generateAddr(common.RedisClusterName, 3)
-
-	d.Conf.EtcdClient = &EtcdClient{
-		Endpoint: common.EtcdClusterName,
-	}
-
-	d.Conf.HdfsClient = &HdfsClient{
-		ConfigmapName: fmt.Sprintf(common.HdfsConfigMapFmt, common.HdfsClusterName),
-	}
-
-	// update hostPath for log-dir
-	d.Conf.Persistent.HostPath = fmt.Sprintf(common.DataomnisHostPathFmt, c.LocalPVHome, d.GetReleaseName())
-	d.Conf.Persistent.LocalPv = nil
-
-	if d.Conf.Apiglobal.Enabled {
-		d.Conf.Apiglobal.updateRegion()
-		d.Conf.Apiglobal.updateAuthentication()
-	}
-
-	if common.Debug {
-		data, err := yaml.Marshal(d.Conf)
-		if err != nil {
-			return err
-		}
-		return ioutil.WriteFile(common.TmpValuesFile, data, 0777)
-	}
-
-	return nil
-}
-
-func (d DataomnisChart) InitLocalDir(c common.Config) error {
-	localDir := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager,notifier}", d.Conf.Persistent.HostPath)
-	var host *ssh.Host
-	var conn *ssh.Connection
-	var err error
-	for _, node := range c.Nodes {
-		host = &ssh.Host{Address: node}
-		conn, err = ssh.NewConnection(host)
-		if err != nil {
-			return errors.Wrap(err, "new connection failed")
-		}
-		if _, err := conn.Mkdir(localDir); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (d DataomnisChart) ParseValues() (helm.Values, error) {
-	var v helm.Values = map[string]interface{}{}
-	bytes, err := json.Marshal(d.Conf)
-	if err != nil {
-		return v, err
-	}
-	err = json.Unmarshal(bytes, &v)
-	return v, err
-}
-
-func NewDataomnisChart(release string, c common.Config) *DataomnisChart {
-	d := &DataomnisChart{}
-	d.ChartName = common.DataomnisSystemChart
-	d.ReleaseName = release
-	d.Waiting = true
-
-	if c.Dataomnis != nil {
-		d.Conf = c.Dataomnis
-	} else {
-		d.Conf = &Dataomnis{}
-	}
-	return d
 }

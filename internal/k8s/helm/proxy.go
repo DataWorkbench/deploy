@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/config"
 	"github.com/DataWorkbench/deploy/internal/k8s"
 	"github.com/DataWorkbench/glog"
 	hc "github.com/mittwald/go-helm-client"
@@ -17,9 +18,6 @@ import (
 )
 
 const (
-	DefaultHelmRepositoryConfigFmt = "%s/.config/helm/repositories.yaml"
-	DefaultHelmRepositoryCacheFmt  = "%s/.cache/helm/repository"
-
 	DefaultDurationSec = 20
 
 	ReleaseNotFoundErr = "release: not found"
@@ -36,23 +34,23 @@ type Proxy struct {
 	kclient         *k8s.KClient
 }
 
-func NewProxy(ctx context.Context, namespace string, logger *glog.Logger) (*Proxy, error) {
+func NewProxy(namespace string, logger *glog.Logger) (*Proxy, error) {
 	debugLog := func(format string, v ...interface{}) {
 		// Change this to your own logger. Default is 'log.Printf(format, v...)'.
 	}
-	if common.Debug {
+	if config.Debug {
 		debugLog = func(format string, v ...interface{}) {
 			logger.Debug().Msg(fmt.Sprintf(format, v)).Fire()
 		}
 	}
 	kubeConfPath := fmt.Sprintf(k8s.DefaultKubeConfFmt, os.Getenv("HOME"))
-	HelmRepoConf := fmt.Sprintf(DefaultHelmRepositoryConfigFmt, os.Getenv("HOME"))
-	HelmRepoCache := fmt.Sprintf(DefaultHelmRepositoryCacheFmt, os.Getenv("HOME"))
+	HelmRepoConf := fmt.Sprintf(common.DefaultHelmRepoConfigFmt, os.Getenv("HOME"))
+	HelmRepoCache := fmt.Sprintf(common.DefaultHelmRepoCacheFmt, os.Getenv("HOME"))
 	opts := &hc.Options{
 		Namespace:        namespace, // Change this to the namespace you wish to install the chart in.
 		RepositoryCache:  HelmRepoCache,
 		RepositoryConfig: HelmRepoConf,
-		Debug:            common.Debug,
+		Debug:            config.Debug,
 		Linting:          true, // Change this to false if you don't want linting.
 		DebugLog:         debugLog,
 	}
@@ -87,8 +85,8 @@ func (p Proxy) Install(ctx context.Context, chart Chart) error {
 		return err
 	}
 	var valuesStr string
-	if !values.isEmpty() { // parse values to str
-		valuesStr, err = values.parse()
+	if !values.IsEmpty() { // parse values to str
+		valuesStr, err = values.Parse()
 		if err != nil {
 			p.logger.Error().Error("marshal values to string error", err).Fire()
 			return err
@@ -111,7 +109,7 @@ func (p Proxy) Install(ctx context.Context, chart Chart) error {
 		ReleaseName: name,
 		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
 		Namespace:   p.namespace,
-		DryRun:      common.DryRun,
+		DryRun:      config.DryRun,
 		ValuesYaml:  valuesStr,
 		Recreate:    true,
 	}
@@ -121,7 +119,7 @@ func (p Proxy) Install(ctx context.Context, chart Chart) error {
 		return err
 	}
 
-	if chart.WaitingReady() && !common.DryRun{
+	if chart.WaitingReady() && !config.DryRun {
 		wCtx, cancel := context.WithTimeout(ctx, chart.GetTimeoutSecond())
 		defer cancel()
 		err = p.WaitingReady(wCtx, chart)
@@ -150,6 +148,7 @@ func (p Proxy) WaitingReady(ctx context.Context, chart Chart) error {
 	for {
 		select {
 		case <- time.After(duration):
+			p.logger.Debug().Msg("check ready..").Fire()
 			ready, err = p.IsReady(ctx, ops)
 			if err != nil {
 				p.logger.Error().Error("check status ready error", err).Fire()
@@ -160,9 +159,10 @@ func (p Proxy) WaitingReady(ctx context.Context, chart Chart) error {
 					String("in namespace", p.namespace).Fire()
 				return nil
 			}
+			p.logger.Debug().Msg("not ready..").Fire()
 		case <- ctx.Done():
 			p.logger.Warn().Error("waiting-action been canceled, error", ctx.Err()).Fire()
-			return nil
+			return errors.Errorf("install release=%s timeout", chart.GetReleaseName())
 		}
 	}
 }

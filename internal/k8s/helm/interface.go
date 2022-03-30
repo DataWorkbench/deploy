@@ -1,7 +1,8 @@
 package helm
 
 import (
-	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/config"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm/chart"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
@@ -10,10 +11,10 @@ import (
 // helm chart interface
 type Chart interface {
 	// update each field value from global Config if that is ZERO
-	UpdateFromConfig(common.Config) error
+	UpdateFromConfig(config.Config) error
 
 	// parse the field-values to Values for helm release
-	ParseValues() (Values, error)
+	ParseValues() (chart.Values, error)
 
 	// return chart name
 	GetChartName() string

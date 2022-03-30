@@ -1,11 +1,13 @@
-package installer
+package action
 
 import (
 	"context"
 	"errors"
 	"fmt"
 	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/config"
 	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/k8s/helm/chart"
 	"github.com/DataWorkbench/glog"
 )
 
@@ -31,8 +33,8 @@ func init() {
 }
 
 func Install(ctx context.Context, configFile string, services *[]string, debug, dryRun bool) error {
-	common.Debug = debug
-	common.DryRun = dryRun
+	config.Debug = debug
+	config.DryRun = dryRun
 
 	logger := glog.NewDefault()
 	if debug {
@@ -48,7 +50,7 @@ func Install(ctx context.Context, configFile string, services *[]string, debug, 
 		}
 	}
 
-	conf := &common.Config{}
+	conf := &config.Config{}
 	err := conf.Read(configFile, *logger)
 	if err != nil {
 		return err
@@ -84,11 +86,11 @@ func Install(ctx context.Context, configFile string, services *[]string, debug, 
 }
 
 
-func installOperator(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
+func installOperator(ctx context.Context, name string, c config.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
-	logger.Info().String("new helm proxy with namespace", common.DefaultOperatorNamespace).Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultOperatorNamespace, logger); err != nil {
+	logger.Info().String("install operator", name).Msg("..").Fire()
+	if proxy, err = helm.NewProxy(common.DefaultOperatorNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
@@ -104,22 +106,24 @@ func installOperator(ctx context.Context, name string, c common.Config, logger *
 		return nil
 	}
 
-	var chart helm.Chart
+	var hc helm.Chart
 	switch name {
 	case common.HdfsOptName:
-		chart = NewHdfsOperatorChart(name, c)
+		hc = chart.NewHdfsOperatorChart(name)
 	case common.MysqlOptName:
-		chart = NewMysqlOperatorChart(name, c)
+		hc = chart.NewMysqlOperatorChart(name)
 	case common.RedisOptName:
-		chart = NewRedisOperatorChart(name, c)
+		hc = chart.NewRedisOperatorChart(name)
 	default:
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
-	go proxy.Install(ctx, chart)
-	logger.Info().String("install operator", name).Msg("..").Fire()
-	if err = proxy.Install(ctx, chart); err != nil {
-		logger.Error().Error("install operator error", err).Fire()
+	if err = hc.UpdateFromConfig(c); err != nil {
+		logger.Error().Error("update from config error", err).Fire()
+		return err
+	}
+	if err = proxy.Install(ctx, hc); err != nil {
+		logger.Error().Error("helm install error", err).Fire()
 		return err
 	}
 	logger.Info().String("install operator", name).Msg(", done.").Fire()
@@ -127,11 +131,11 @@ func installOperator(ctx context.Context, name string, c common.Config, logger *
 }
 
 
-func installDependencyService(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
+func installDependencyService(ctx context.Context, name string, c config.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
 	logger.Info().String("install dependency service", name).Msg("..").Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger); err != nil {
+	if proxy, err = helm.NewProxy(common.DefaultSystemNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
@@ -149,31 +153,31 @@ func installDependencyService(ctx context.Context, name string, c common.Config,
 		return nil
 	}
 
-	var chart helm.Chart
+	var hc helm.Chart
 	switch name {
 	case common.EtcdClusterName:
-		chart = NewEtcdChart(name, c)
+		hc = chart.NewEtcdChart(name)
 	case common.HdfsClusterName:
-		chart = NewHdfsChart(name, c)
+		hc = chart.NewHdfsChart(name)
 	case common.MysqlClusterName:
-		chart = NewMysqlChart(name, c)
+		hc = chart.NewMysqlChart(name)
 	case common.RedisClusterName:
-		chart = NewRedisChart(name, c)
+		hc = chart.NewRedisChart(name)
 	default:
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
-	if err = chart.UpdateFromConfig(c); err != nil {
+	if err = hc.UpdateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
-	logger.Debug().Any("chart values", chart).Fire()
+	logger.Debug().Any("chart values", hc).Fire()
 
-	if err = chart.InitLocalDir(); err != nil {
-		logger.Error().Error("init local pv home error", err).Fire()
+	if err = hc.InitLocalDir(); err != nil {
+		logger.Error().Error("init local dir error", err).Fire()
 		return err
 	}
-	if err = proxy.Install(ctx, chart); err != nil {
+	if err = proxy.Install(ctx, hc); err != nil {
 		logger.Error().Error("helm install dependency service error", err).Fire()
 		return err
 	}
@@ -182,11 +186,11 @@ func installDependencyService(ctx context.Context, name string, c common.Config,
 }
 
 
-func installDataomnis(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
+func installDataomnis(ctx context.Context, name string, c config.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
 	logger.Info().Msg("install dataomnis ..").Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger); err != nil {
+	if proxy, err = helm.NewProxy(common.DefaultSystemNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
@@ -202,16 +206,16 @@ func installDataomnis(ctx context.Context, name string, c common.Config, logger 
 		return nil
 	}
 
-	chart := NewDataomnisChart(name, c)
-	if err = chart.updateFromConfig(c); err != nil {
+	hc := chart.NewDataomnisChart(name)
+	if err = hc.UpdateFromConfig(c); err != nil {
 		logger.Error().Error("update values from Config error", err).Fire()
 		return err
 	}
-	if err = chart.initHostPathDir(c); err != nil {
+	if err = hc.InitLocalDir(); err != nil {
 		logger.Error().Error("init hostPath dir error", err).Fire()
 		return err
 	}
-	if err = proxy.Install(ctx, chart); err != nil {
+	if err = proxy.Install(ctx, hc); err != nil {
 		logger.Error().Error("helm install dataomnis error", err).Fire()
 		return err
 	}

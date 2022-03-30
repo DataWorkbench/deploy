@@ -1,8 +1,7 @@
-package installer
+package chart
 
 import (
 	"github.com/DataWorkbench/deploy/internal/common"
-	"github.com/DataWorkbench/deploy/internal/k8s/helm"
 )
 
 // ***************************************************************
@@ -11,43 +10,39 @@ import (
 // implement Chart interface
 
 type HdfsOperatorChart struct {
-	helm.ChartMeta
+	ChartMeta
 }
 
-func NewHdfsOperatorChart(releaseName string, c common.Config) *HdfsOperatorChart {
+func NewHdfsOperatorChart(releaseName string) *HdfsOperatorChart {
 	h := &HdfsOperatorChart{}
 	h.ChartName = common.HdfsOptChart
 	h.ReleaseName = releaseName
 	h.Waiting = true
-
-	_ = h.UpdateFromConfig(c)
 	return h
 }
 
 
 type MysqlOperatorChart struct {
-	helm.ChartMeta
+	ChartMeta
 }
 
-func NewMysqlOperatorChart(releaseName string, c common.Config) *MysqlOperatorChart {
+func NewMysqlOperatorChart(releaseName string) *MysqlOperatorChart {
 	m := &MysqlOperatorChart{}
 	m.ChartName = common.MysqlOptChart
 	m.ReleaseName = releaseName
 	m.Waiting = true
-	_ = m.UpdateFromConfig(c)
 	return m
 }
 
 
 type RedisOperatorChart struct {
-	helm.ChartMeta
+	ChartMeta
 }
 
-func NewRedisOperatorChart(releaseName string, c common.Config) *RedisOperatorChart {
+func NewRedisOperatorChart(releaseName string) *RedisOperatorChart {
 	r := &RedisOperatorChart{}
 	r.ChartName = common.RedisOptChart
 	r.ReleaseName = releaseName
 	r.Waiting = true
-	_ = r.UpdateFromConfig(c)
 	return r
 }

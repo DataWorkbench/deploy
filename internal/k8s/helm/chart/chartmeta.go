@@ -1,8 +1,9 @@
-package helm
+package chart
 
 import (
 	"encoding/json"
 	"github.com/DataWorkbench/deploy/internal/common"
+	"github.com/DataWorkbench/deploy/internal/config"
 	"gopkg.in/yaml.v3"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 // **************************************************
 type Values map[string]interface{}
 
-func (v Values) parse() (string, error) {
+func (v Values) Parse() (string, error) {
 	valueBytes, err := yaml.Marshal(v)
 	if err != nil {
 		return "", err
@@ -20,16 +21,17 @@ func (v Values) parse() (string, error) {
 	return string(valueBytes), nil
 }
 
-func (v Values) isEmpty() bool {
+func (v Values) IsEmpty() bool {
 	return len(v) == 0
 }
+
 
 // ***************************************************************
 // ChartMeta Zone
 // ***************************************************************
 // implement Chart interface
 type Meta struct {
-	Image *common.Image `json:"image,omitempty"`
+	Image *config.Image `json:"image,omitempty"`
 }
 
 type ChartMeta struct {
@@ -42,7 +44,7 @@ type ChartMeta struct {
 	Conf *Meta `json:",omitempty"`
 }
 
-func (m *ChartMeta) UpdateFromConfig(c common.Config) error {
+func (m *ChartMeta) UpdateFromConfig(c config.Config) error {
 	if c.Image == nil {
 		return nil
 	}
@@ -51,7 +53,7 @@ func (m *ChartMeta) UpdateFromConfig(c common.Config) error {
 		m.Conf = &Meta{}
 	}
 	if m.Conf.Image == nil {
-		m.Conf.Image = &common.Image{}
+		m.Conf.Image = &config.Image{}
 	}
 	m.Conf.Image.Copy(c.Image)
 	return nil

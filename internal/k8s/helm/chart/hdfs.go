@@ -1,76 +1,33 @@
-package installer
+package chart
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/DataWorkbench/deploy/internal/common"
-	"github.com/DataWorkbench/deploy/internal/k8s/helm"
+	"github.com/DataWorkbench/deploy/internal/config"
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 	"time"
 )
 
-const RoleNameNode = "namenode"
-
-// common config for datanode / journalnode / namenode / zookeeper
-type HdfsNodeConfig struct {
-	// alias for Persistent, updated from configuration
-	Storage common.Persistent `json:"storage,omitempty" yaml:"persistent,omitempty"`
-}
-
-func (node *HdfsNodeConfig) updateFromHdfsConfig(c *HdfsConfig, role string) error {
-	if len(node.Storage.LocalPv.Nodes) < 3 {
-		if len(c.Nodes) < 3 {
-			return common.LeastNodeErr
-		}
-
-		if len(node.Storage.LocalPv.Nodes) < 1 {
-			if role == RoleNameNode {
-				node.Storage.LocalPv.Nodes = c.Nodes[len(c.Nodes)-2:]
-			} else {
-				node.Storage.LocalPv.Nodes = c.Nodes[:3]
-			}
-		}
-	}
-	return nil
-}
-
-// HdfsConfig for hdfs-cluster
-type HdfsConfig struct {
-	TimeoutSecond int `json:"-" yaml:"timeoutSecond,omitempty"`
-
-	Image    *common.Image `json:"image,omitempty" yaml:"image,omitempty"`
-	Nodes    []string      `json:"nodes,omitempty" yaml:"nodes,omitempty" validate:"eq=0|min=3"`
-	HdfsHome string        `json:"hdfsHome"        yaml:"-"`
-
-	Namenode    *HdfsNodeConfig `json:"namenode,omitempty"    yaml:"namenode"    validate:"eq=0|eq=2"`
-	Datanode    *HdfsNodeConfig `json:"datanode,omitempty"    yaml:"datanode"    validate:"eq=0|min=3"`
-	Journalnode *HdfsNodeConfig `json:"journalnode,omitempty" yaml:"journalnode" validate:"eq=0|min=3"`
-
-	Zookeeper *HdfsNodeConfig `json:"zookeeper,omitempty"     yaml:"zookeeper"   validate:"eq=0|min=3"`
-}
-
-// TODO: validate the yaml and nodes == 2 of namenode
-func (v HdfsConfig) validate() error {
-	return nil
-}
-
 // ********************************************
 // HdfsChart for hdfs-cluster, implement Chart
 type HdfsChart struct {
-	helm.ChartMeta
-	Conf *HdfsConfig
+	ChartMeta
+	Conf *config.HdfsConfig
 }
 
 // update each field value from global Config if that is ZERO
-func (h *HdfsChart) UpdateFromConfig(c common.Config) error {
-	if c.Hdfs != nil {
-		h.Conf = c.Hdfs
-	}
+func (h *HdfsChart) UpdateFromConfig(c config.Config) error {
+	h.Conf = c.Hdfs
+	h.Conf.Namenode.Role = config.RoleNameNode
+	h.Conf.Datanode.Role = config.RoleDataNode
+	h.Conf.Journalnode.Role = config.RoleJournalNode
+	h.Conf.Zookeeper.Role = config.RoleZookeeper
 
 	if c.Image != nil {
 		if h.Conf.Image == nil {
-			h.Conf.Image = &common.Image{}
+			h.Conf.Image = &config.Image{}
 			h.Conf.Image.Copy(c.Image)
 		}
 	}
@@ -80,16 +37,16 @@ func (h *HdfsChart) UpdateFromConfig(c common.Config) error {
 
 	// update datanode / namenode / journalnode / zookeeper conf
 	var err error
-	if err = h.Conf.Datanode.updateFromHdfsConfig(h.Conf, ""); err != nil {
+	if err = h.Conf.Datanode.Update(h.ReleaseName, h.Conf); err != nil {
 		return err
 	}
-	if err = h.Conf.Journalnode.updateFromHdfsConfig(h.Conf, ""); err != nil {
+	if err = h.Conf.Journalnode.Update(h.ReleaseName, h.Conf); err != nil {
 		return err
 	}
-	if err = h.Conf.Namenode.updateFromHdfsConfig(h.Conf, RoleNameNode); err != nil {
+	if err = h.Conf.Namenode.Update(h.ReleaseName, h.Conf); err != nil {
 		return err
 	}
-	err = h.Conf.Zookeeper.updateFromHdfsConfig(h.Conf, "")
+	err = h.Conf.Zookeeper.Update(h.ReleaseName, h.Conf)
 	return err
 }
 
@@ -144,8 +101,8 @@ func (h HdfsChart) InitLocalDir() error {
 	return nil
 }
 
-func (h HdfsChart) ParseValues() (helm.Values, error) {
-	var v helm.Values = map[string]interface{}{}
+func (h HdfsChart) ParseValues() (Values, error) {
+	var v Values = map[string]interface{}{}
 	bytes, err := json.Marshal(h.Conf)
 	if err != nil {
 		return v, err
@@ -167,22 +124,10 @@ func (h HdfsChart) GetTimeoutSecond() time.Duration {
 	return time.Duration(h.Conf.TimeoutSecond) * time.Second
 }
 
-func NewHdfsChart(release string, c common.Config) *HdfsChart {
+func NewHdfsChart(release string) *HdfsChart {
 	h := &HdfsChart{}
 	h.ChartName = common.HdfsClusterChart
 	h.ReleaseName = release
 	h.Waiting = true
-
-	if c.Hdfs != nil {
-		h.Conf = c.Hdfs
-	} else {
-		h.Conf = &HdfsConfig{}
-	}
 	return h
-}
-
-
-// ***********************************************************
-type HdfsClient struct {
-	ConfigmapName string `json:"configmapName" yaml:"-"`
 }
