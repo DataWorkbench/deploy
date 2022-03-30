@@ -10,6 +10,13 @@ spec:
   clusterReplicas: {{ $.Values.redisCluster.clusterReplicas }}
   image: {{ $.Values.redisCluster.image }}
   imagePullPolicy: {{ $.Values.redisCluster.imagePullPolicy }}
+  resources:
+    limits:
+      cpu: {{ $.Values.resources.limitCpu }}
+      memory: {{ $.Values.resources.limitMemory }}
+    requests:
+      cpu: {{ $.Values.resources.requestCpu }}
+      memory: {{ $.Values.resources.requestMemory }}
   storage:
     type: persistent-claim
     size: {{ $.Values.storageSpec.size }}

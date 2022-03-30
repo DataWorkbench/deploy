@@ -5,6 +5,12 @@ redisCluster:
   image: redis:5.0.4-alpine
   imagePullPolicy: IfNotPresent
 
+resources:
+  limitCpu: 2
+  limitMemory: 4Gi
+  requestCpu: 1
+  requestMemory: 2Gi
+
 storageSpec:
   enable: true
   size: 10Gi
