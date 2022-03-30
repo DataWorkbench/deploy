@@ -8,6 +8,7 @@ import (
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
 	"strings"
+	"time"
 )
 
 // RedisConfig for hdfs-cluster
@@ -51,7 +52,7 @@ func (r *RedisChart) UpdateFromConfig(c common.Config) error {
 	return nil
 }
 
-func (r RedisChart) InitLocalPvDir() error {
+func (r RedisChart) InitLocalDir() error {
 	localPvHome := fmt.Sprintf("%s/%s/{01,02}", r.Conf.Persistent.LocalPv.Home, common.RedisClusterName)
 	var host *ssh.Host
 	var conn *ssh.Connection
@@ -86,11 +87,11 @@ func (r RedisChart) GetLabels() map[string]string {
 	}
 }
 
-func (r RedisChart) GetTimeoutSecond() int {
+func (r RedisChart) GetTimeoutSecond() time.Duration {
 	if r.Conf.TimeoutSecond == 0 {
 		return r.ChartMeta.GetTimeoutSecond()
 	}
-	return r.Conf.TimeoutSecond
+	return time.Duration(r.Conf.TimeoutSecond) * time.Second
 }
 
 func NewRedisChart(release string, c common.Config) *RedisChart {

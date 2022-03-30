@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/DataWorkbench/deploy/internal/common"
 	"gopkg.in/yaml.v3"
+	"time"
 )
 
 // **************************************************
@@ -56,7 +57,7 @@ func (m *ChartMeta) UpdateFromConfig(c common.Config) error {
 	return nil
 }
 
-func (m ChartMeta) InitLocalPvDir() error {
+func (m ChartMeta) InitLocalDir() error {
 	return nil
 }
 
@@ -92,6 +93,6 @@ func (m ChartMeta) WaitingReady() bool {
 	return m.Waiting
 }
 
-func (m ChartMeta) GetTimeoutSecond() int {
-	return common.DefaultTimeoutSecond
+func (m ChartMeta) GetTimeoutSecond() time.Duration {
+	return common.DefaultTimeoutSecond * time.Second
 }

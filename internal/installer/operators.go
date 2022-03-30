@@ -18,9 +18,9 @@ func NewHdfsOperatorChart(releaseName string, c common.Config) *HdfsOperatorChar
 	h := &HdfsOperatorChart{}
 	h.ChartName = common.HdfsOptChart
 	h.ReleaseName = releaseName
-	h.WaitingReady = true
+	h.Waiting = true
 
-	_ = h.updateFromConfig(c)
+	_ = h.UpdateFromConfig(c)
 	return h
 }
 
@@ -33,8 +33,8 @@ func NewMysqlOperatorChart(releaseName string, c common.Config) *MysqlOperatorCh
 	m := &MysqlOperatorChart{}
 	m.ChartName = common.MysqlOptChart
 	m.ReleaseName = releaseName
-	m.WaitingReady = true
-	_ = m.updateFromConfig(c)
+	m.Waiting = true
+	_ = m.UpdateFromConfig(c)
 	return m
 }
 
@@ -47,7 +47,7 @@ func NewRedisOperatorChart(releaseName string, c common.Config) *RedisOperatorCh
 	r := &RedisOperatorChart{}
 	r.ChartName = common.RedisOptChart
 	r.ReleaseName = releaseName
-	r.WaitingReady = true
-	_ = r.updateFromConfig(c)
+	r.Waiting = true
+	_ = r.UpdateFromConfig(c)
 	return r
 }

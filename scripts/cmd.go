@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/DataWorkbench/deploy/internal/installer"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -13,6 +14,8 @@ func main() {
 	var configFile *string
 	var debug, dryRun *bool
 	var services *[]string
+
+	ctx := context.Background()
 
 	app := kingpin.New("ds", "The command to operate dataomnis services on k8s")
 
@@ -32,6 +35,6 @@ func main() {
 	case initCmd.FullCommand():
 		installer.InitConfiguration()
 	case installCmd.FullCommand():
-		_ = installer.Install(*configFile, services, *debug, *dryRun)
+		_ = installer.Install(ctx, *configFile, services, *debug, *dryRun)
 	}
 }

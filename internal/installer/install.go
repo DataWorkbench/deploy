@@ -30,8 +30,10 @@ func init() {
 	AllServices = append(AllServices, common.DataomnisSystemName)
 }
 
-func Install(configFile string, services *[]string, debug, dryRun bool) error {
-	ctx := context.Background()
+func Install(ctx context.Context, configFile string, services *[]string, debug, dryRun bool) error {
+	common.Debug = debug
+	common.DryRun = dryRun
+
 	logger := glog.NewDefault()
 	if debug {
 		logger = logger.WithLevel(glog.DebugLevel)
@@ -46,7 +48,7 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 		}
 	}
 
-	conf := &common.Config{Debug: debug}
+	conf := &common.Config{}
 	err := conf.Read(configFile, *logger)
 	if err != nil {
 		return err
@@ -56,7 +58,7 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 	// install operators
 	for _, service := range *services {
 		if common.StrSliceContains(Operators, service) {
-			if err = installOperator(ctx, service, *conf, logger, debug, dryRun); err != nil{
+			if err = installOperator(ctx, service, *conf, logger); err != nil{
 				return err
 			}
 			logger.Info().Msg("**************************************************************").Fire()
@@ -66,7 +68,7 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 	// install dependency service
 	for _, service := range *services {
 		if common.StrSliceContains(DependencyServices, service) {
-			if err = installDependencyService(ctx, service, *conf, logger, debug, dryRun); err != nil{
+			if err = installDependencyService(ctx, service, *conf, logger); err != nil{
 				return err
 			}
 			logger.Info().Msg("**************************************************************").Fire()
@@ -75,18 +77,18 @@ func Install(configFile string, services *[]string, debug, dryRun bool) error {
 
 	// install dataomnis
 	if common.StrSliceContains(*services, common.DataomnisSystemName) {
-		err = installDataomnis(ctx, common.DataomnisSystemName, *conf, logger, debug, dryRun)
+		err = installDataomnis(ctx, common.DataomnisSystemName, *conf, logger)
 		logger.Info().Msg("**************************************************************").Fire()
 	}
 	return nil
 }
 
 
-func installOperator(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+func installOperator(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
 	logger.Info().String("new helm proxy with namespace", common.DefaultOperatorNamespace).Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultOperatorNamespace, logger, debug, dryRun); err != nil {
+	if proxy, err = helm.NewProxy(ctx, common.DefaultOperatorNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy to install operators error", err).Fire()
 		return err
 	}
@@ -114,8 +116,9 @@ func installOperator(ctx context.Context, name string, c common.Config, logger *
 		return errors.New(fmt.Sprintf("the service %s can not be installed", name))
 	}
 
+	go proxy.Install(ctx, chart)
 	logger.Info().String("install operator", name).Msg("..").Fire()
-	if err = proxy.Install(chart); err != nil {
+	if err = proxy.Install(ctx, chart); err != nil {
 		logger.Error().Error("install operator error", err).Fire()
 		return err
 	}
@@ -124,15 +127,17 @@ func installOperator(ctx context.Context, name string, c common.Config, logger *
 }
 
 
-func installDependencyService(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+func installDependencyService(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
 	logger.Info().String("install dependency service", name).Msg("..").Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger, debug, dryRun); err != nil {
+	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
 
+	// check if exist
+	// TODO: support check if ready(make sure exist and ready)
 	var installed bool
 	installed, err = proxy.Exist(name)
 	if err != nil {
@@ -164,11 +169,11 @@ func installDependencyService(ctx context.Context, name string, c common.Config,
 	}
 	logger.Debug().Any("chart values", chart).Fire()
 
-	if err = chart.InitLocalPvDir(); err != nil {
+	if err = chart.InitLocalDir(); err != nil {
 		logger.Error().Error("init local pv home error", err).Fire()
 		return err
 	}
-	if err = proxy.Install(chart); err != nil {
+	if err = proxy.Install(ctx, chart); err != nil {
 		logger.Error().Error("helm install dependency service error", err).Fire()
 		return err
 	}
@@ -177,11 +182,11 @@ func installDependencyService(ctx context.Context, name string, c common.Config,
 }
 
 
-func installDataomnis(ctx context.Context, name string, c common.Config, logger *glog.Logger, debug, dryRun bool) error {
+func installDataomnis(ctx context.Context, name string, c common.Config, logger *glog.Logger) error {
 	var proxy *helm.Proxy
 	var err error
 	logger.Info().Msg("install dataomnis ..").Fire()
-	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger, debug, dryRun); err != nil {
+	if proxy, err = helm.NewProxy(ctx, common.DefaultSystemNamespace, logger); err != nil {
 		logger.Error().Error("create helm proxy error", err).Fire()
 		return err
 	}
@@ -206,7 +211,7 @@ func installDataomnis(ctx context.Context, name string, c common.Config, logger 
 		logger.Error().Error("init hostPath dir error", err).Fire()
 		return err
 	}
-	if err = proxy.Install(chart); err != nil {
+	if err = proxy.Install(ctx, chart); err != nil {
 		logger.Error().Error("helm install dataomnis error", err).Fire()
 		return err
 	}

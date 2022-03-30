@@ -7,6 +7,7 @@ import (
 	"github.com/DataWorkbench/deploy/internal/k8s/helm"
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
+	"time"
 )
 
 const RoleNameNode = "namenode"
@@ -92,7 +93,7 @@ func (h *HdfsChart) UpdateFromConfig(c common.Config) error {
 	return err
 }
 
-func (h HdfsChart) InitLocalPvDir() error {
+func (h HdfsChart) InitLocalDir() error {
 	dnLocalPvDir := fmt.Sprintf("%s/%s/datanode", h.Conf.HdfsHome, common.HdfsClusterName)
 	jnLocalPvDir := fmt.Sprintf("%s/%s/journalnode", h.Conf.HdfsHome, common.HdfsClusterName)
 	nnLocalPvDir := fmt.Sprintf("%s/%s/namenode", h.Conf.HdfsHome, common.HdfsClusterName)
@@ -159,11 +160,11 @@ func (h HdfsChart) GetLabels() map[string]string {
 	}
 }
 
-func (h HdfsChart) GetTimeoutSecond() int {
+func (h HdfsChart) GetTimeoutSecond() time.Duration {
 	if h.Conf.TimeoutSecond == 0 {
 		return h.ChartMeta.GetTimeoutSecond()
 	}
-	return h.Conf.TimeoutSecond
+	return time.Duration(h.Conf.TimeoutSecond) * time.Second
 }
 
 func NewHdfsChart(release string, c common.Config) *HdfsChart {

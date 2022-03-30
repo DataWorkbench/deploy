@@ -3,6 +3,7 @@ package helm
 import (
 	"github.com/DataWorkbench/deploy/internal/common"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"time"
 )
 
 // Chart is the proxy of helm chart that with the Values Configuration.
@@ -24,9 +25,9 @@ type Chart interface {
 
 	// whether to wait release ready
 	WaitingReady() bool
-	GetTimeoutSecond() int
+	GetTimeoutSecond() time.Duration
 
-	InitLocalPvDir() error
+	InitLocalDir() error
 }
 
 // helm client interface for dataomnis-service

@@ -7,6 +7,7 @@ import (
 	"github.com/DataWorkbench/deploy/internal/k8s/helm"
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
+	"time"
 )
 
 //TODO: add backup-config
@@ -39,7 +40,7 @@ func (m *MysqlChart) UpdateFromConfig(c common.Config) error {
 	return m.Conf.Pxc.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
-func (m *MysqlChart) InitLocalPvDir() error {
+func (m MysqlChart) InitLocalDir() error {
 	localPvHome := fmt.Sprintf("%s/%s/{data,log,mysql-bin}", m.Conf.Pxc.Persistent.LocalPv.Home, common.MysqlClusterName)
 	var host *ssh.Host
 	var conn *ssh.Connection
@@ -57,7 +58,7 @@ func (m *MysqlChart) InitLocalPvDir() error {
 	return nil
 }
 
-func (m *MysqlChart) ParseValues() (helm.Values, error) {
+func (m MysqlChart) ParseValues() (helm.Values, error) {
 	var v helm.Values = map[string]interface{}{}
 	bytes, err := json.Marshal(m.Conf)
 	if err != nil {
@@ -67,17 +68,17 @@ func (m *MysqlChart) ParseValues() (helm.Values, error) {
 	return v, err
 }
 
-func (m *MysqlChart) GetLabels() map[string]string {
+func (m MysqlChart) GetLabels() map[string]string {
 	return map[string]string{
 		common.InstanceLabelKey: fmt.Sprintf(common.MysqlInstanceLabelValueFmt, m.ReleaseName),
 	}
 }
 
-func (m *MysqlChart) GetTimeoutSecond() int {
+func (m MysqlChart) GetTimeoutSecond() time.Duration {
 	if m.Conf.TimeoutSecond == 0 {
 		return m.ChartMeta.GetTimeoutSecond()
 	}
-	return m.Conf.TimeoutSecond
+	return time.Duration(m.Conf.TimeoutSecond) * time.Second
 }
 
 func NewMysqlChart(release string, c common.Config) *MysqlChart {

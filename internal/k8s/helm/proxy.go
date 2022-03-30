@@ -3,6 +3,7 @@ package helm
 import (
 	"context"
 	"fmt"
+	"github.com/DataWorkbench/deploy/internal/common"
 	"github.com/DataWorkbench/deploy/internal/k8s"
 	"github.com/DataWorkbench/glog"
 	hc "github.com/mittwald/go-helm-client"
@@ -28,8 +29,6 @@ const (
 // helm client proxy to handle helm release, implement Helm interface
 // ******************************************************************
 type Proxy struct {
-	ctx             context.Context
-	dryRun          bool
 	namespace       string
 	repositoryCache string
 	client          hc.Client // helm client
@@ -37,11 +36,11 @@ type Proxy struct {
 	kclient         *k8s.KClient
 }
 
-func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug, dryRun bool) (*Proxy, error) {
+func NewProxy(ctx context.Context, namespace string, logger *glog.Logger) (*Proxy, error) {
 	debugLog := func(format string, v ...interface{}) {
 		// Change this to your own logger. Default is 'log.Printf(format, v...)'.
 	}
-	if debug {
+	if common.Debug {
 		debugLog = func(format string, v ...interface{}) {
 			logger.Debug().Msg(fmt.Sprintf(format, v)).Fire()
 		}
@@ -53,7 +52,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug,
 		Namespace:        namespace, // Change this to the namespace you wish to install the chart in.
 		RepositoryCache:  HelmRepoCache,
 		RepositoryConfig: HelmRepoConf,
-		Debug:            debug,
+		Debug:            common.Debug,
 		Linting:          true, // Change this to false if you don't want linting.
 		DebugLog:         debugLog,
 	}
@@ -69,8 +68,6 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug,
 	var c hc.Client
 	if c, err = hc.NewClientFromRestConf(restConfopts); err == nil {
 		return &Proxy{
-			ctx:             ctx,
-			dryRun:          dryRun,
 			namespace:       namespace,
 			repositoryCache: HelmRepoCache,
 			client:          c,
@@ -80,7 +77,7 @@ func NewProxy(ctx context.Context, namespace string, logger *glog.Logger, debug,
 	return nil, err
 }
 
-func (p Proxy) Install(chart Chart) error {
+func (p Proxy) Install(ctx context.Context, chart Chart) error {
 	var name = chart.GetReleaseName()
 	var chartName = chart.GetChartName()
 
@@ -103,7 +100,7 @@ func (p Proxy) Install(chart Chart) error {
 		p.logger.Error().Error("new kube client error", err).Fire()
 		return err
 	}
-	if err = p.kclient.CreateNamespace(p.ctx, p.namespace); err != nil {
+	if err = p.kclient.CreateNamespace(ctx, p.namespace); err != nil {
 		p.logger.Error().Error("create namespace error", err).Fire()
 		return err
 	}
@@ -114,23 +111,25 @@ func (p Proxy) Install(chart Chart) error {
 		ReleaseName: name,
 		ChartName:   fmt.Sprintf("%s/%s", p.repositoryCache, chartName),
 		Namespace:   p.namespace,
-		DryRun:      p.dryRun,
+		DryRun:      common.DryRun,
 		ValuesYaml:  valuesStr,
 		Recreate:    true,
 	}
-	_, err = p.client.InstallOrUpgradeChart(p.ctx, chartSpec)
+	_, err = p.client.InstallOrUpgradeChart(ctx, chartSpec)
 	if err != nil {
 		p.logger.Error().Error("helm install error", err).Fire()
 		return err
 	}
 
-	if chart.WaitingReady() {
-		err = p.WaitingReady(chart)
+	if chart.WaitingReady() && !common.DryRun{
+		wCtx, cancel := context.WithTimeout(ctx, chart.GetTimeoutSecond())
+		defer cancel()
+		err = p.WaitingReady(wCtx, chart)
 	}
 	return err
 }
 
-func (p Proxy) WaitingReady(chart Chart) error {
+func (p Proxy) WaitingReady(ctx context.Context, chart Chart) error {
 	name := chart.GetReleaseName()
 	p.logger.Info().String("waiting release", name).Msg("ready..").Fire()
 
@@ -147,33 +146,31 @@ func (p Proxy) WaitingReady(chart Chart) error {
 		return err
 	}
 
-	timeoutSec := chart.GetTimeoutSecond()
 	duration := time.Duration(DefaultDurationSec) * time.Second
-	spendSecs := 0
-	for spendSecs < timeoutSec {
-		time.Sleep(duration)
-		spendSecs += DefaultDurationSec
-
-		ready, err = p.IsReady(ops)
-		if err != nil {
-			p.logger.Error().Error("check status ready error", err).Fire()
-			return err
-		}
-		if ready {
-			p.logger.Info().String("all pods ready of release", name).
-				String("in namespace", p.namespace).Int("spend seconds", spendSecs).Fire()
+	for {
+		select {
+		case <- time.After(duration):
+			ready, err = p.IsReady(ctx, ops)
+			if err != nil {
+				p.logger.Error().Error("check status ready error", err).Fire()
+				return err
+			}
+			if ready {
+				p.logger.Info().String("all pods ready of release", name).
+					String("in namespace", p.namespace).Fire()
+				return nil
+			}
+		case <- ctx.Done():
+			p.logger.Warn().Error("waiting-action been canceled, error", ctx.Err()).Fire()
 			return nil
 		}
 	}
-	msg := fmt.Sprintf("install release=%s failed, timeout.", name)
-	p.logger.Error().Msg(msg).Fire()
-	return errors.New(msg)
 }
 
 // Note: need to init p.kubeClient before
-func (p Proxy) IsReady(ops v1.ListOptions) (bool, error) {
+func (p Proxy) IsReady(ctx context.Context, ops v1.ListOptions) (bool, error) {
 	// get PodLists
-	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(p.ctx, ops)
+	pods, err := p.kclient.CoreV1().Pods(p.namespace).List(ctx, ops)
 	if err != nil {
 		return false, err
 	}

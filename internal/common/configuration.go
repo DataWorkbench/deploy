@@ -12,6 +12,11 @@ import (
 )
 
 var LeastNodeErr = errors.New("at least 3 nodes are required for helm release")
+// ***************************************************************
+// Global Config Var
+// ***************************************************************
+var Debug, DryRun bool
+
 
 // ***************************************************************
 // K8s Configuration Zone
@@ -99,8 +104,6 @@ func (p *Persistent) UpdateLocalPv(localPvHome string, nodes []string) error {
 
 // TODO: save the dataomnis-conf.yaml to k8s as configmap for backup
 type Config struct {
-	Debug bool
-
 	// kube nodes from k8s apiserver
 	Nodes []string `yaml:"nodes"`
 
@@ -158,9 +161,5 @@ func (c *Config) Read(file string, logger glog.Logger) error {
 		logger.Error().Error("validate configuration error", err).Fire()
 		return err
 	}
-	return nil
-}
-
-func (c Config) checkImage() error {
 	return nil
 }

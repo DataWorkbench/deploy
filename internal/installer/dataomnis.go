@@ -231,48 +231,48 @@ type Dataomnis struct {
 type DataomnisChart struct {
 	helm.ChartMeta
 
-	values *Dataomnis
+	Conf *Dataomnis
 }
 
 // update each field value from global Config if that is ZERO
-func (d *DataomnisChart) updateFromConfig(c common.Config) error {
+func (d *DataomnisChart) UpdateFromConfig(c common.Config) error {
 	if c.Image != nil {
-		if d.values.Image == nil {
-			d.values.Image = &common.Image{}
+		if d.Conf.Image == nil {
+			d.Conf.Image = &common.Image{}
 		}
-		d.values.Image.UpdateFromConfig(c.Image)
+		d.Conf.Image.Copy(c.Image)
 	}
-	d.values.Image.Tag = d.values.Version
+	d.Conf.Image.Tag = d.Conf.Version
 
-	if d.values.MysqlClient == nil {
-		d.values.MysqlClient = &MysqlClient{}
+	if d.Conf.MysqlClient == nil {
+		d.Conf.MysqlClient = &MysqlClient{}
 	}
-	d.values.MysqlClient.update(common.MysqlClusterName)
+	d.Conf.MysqlClient.update(common.MysqlClusterName)
 
-	if d.values.RedisClient == nil {
-		d.values.RedisClient = &RedisClient{Mode: common.RedisClusterModeCluster}
+	if d.Conf.RedisClient == nil {
+		d.Conf.RedisClient = &RedisClient{Mode: common.RedisClusterModeCluster}
 	}
-	d.values.RedisClient.generateAddr(common.RedisClusterName, 3)
+	d.Conf.RedisClient.generateAddr(common.RedisClusterName, 3)
 
-	d.values.EtcdClient = &EtcdClient{
+	d.Conf.EtcdClient = &EtcdClient{
 		Endpoint: common.EtcdClusterName,
 	}
 
-	d.values.HdfsClient = &HdfsClient{
+	d.Conf.HdfsClient = &HdfsClient{
 		ConfigmapName: fmt.Sprintf(common.HdfsConfigMapFmt, common.HdfsClusterName),
 	}
 
 	// update hostPath for log-dir
-	d.values.Persistent.HostPath = fmt.Sprintf(common.DataomnisHostPathFmt, c.LocalPVHome, d.GetReleaseName())
-	d.values.Persistent.LocalPv = nil
+	d.Conf.Persistent.HostPath = fmt.Sprintf(common.DataomnisHostPathFmt, c.LocalPVHome, d.GetReleaseName())
+	d.Conf.Persistent.LocalPv = nil
 
-	if d.values.Apiglobal.Enabled {
-		d.values.Apiglobal.updateRegion()
-		d.values.Apiglobal.updateAuthentication()
+	if d.Conf.Apiglobal.Enabled {
+		d.Conf.Apiglobal.updateRegion()
+		d.Conf.Apiglobal.updateAuthentication()
 	}
 
-	if c.Debug {
-		data, err := yaml.Marshal(d.values)
+	if common.Debug {
+		data, err := yaml.Marshal(d.Conf)
 		if err != nil {
 			return err
 		}
@@ -282,8 +282,8 @@ func (d *DataomnisChart) updateFromConfig(c common.Config) error {
 	return nil
 }
 
-func (d *DataomnisChart) initHostPathDir(c common.Config) error {
-	localPvHome := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager,notifier}", d.values.Persistent.HostPath)
+func (d DataomnisChart) InitLocalDir(c common.Config) error {
+	localDir := fmt.Sprintf("%s/log/{account,apiglobal,apiserver,enginemanager,resourcemanager,scheduler,spacemanager,notifier}", d.Conf.Persistent.HostPath)
 	var host *ssh.Host
 	var conn *ssh.Connection
 	var err error
@@ -293,16 +293,16 @@ func (d *DataomnisChart) initHostPathDir(c common.Config) error {
 		if err != nil {
 			return errors.Wrap(err, "new connection failed")
 		}
-		if _, err := conn.Mkdir(localPvHome); err != nil {
+		if _, err := conn.Mkdir(localDir); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (d *DataomnisChart) parseValues() (helm.Values, error) {
+func (d DataomnisChart) ParseValues() (helm.Values, error) {
 	var v helm.Values = map[string]interface{}{}
-	bytes, err := json.Marshal(d.values)
+	bytes, err := json.Marshal(d.Conf)
 	if err != nil {
 		return v, err
 	}
@@ -314,12 +314,12 @@ func NewDataomnisChart(release string, c common.Config) *DataomnisChart {
 	d := &DataomnisChart{}
 	d.ChartName = common.DataomnisSystemChart
 	d.ReleaseName = release
-	d.WaitingReady = true
+	d.Waiting = true
 
 	if c.Dataomnis != nil {
-		d.values = c.Dataomnis
+		d.Conf = c.Dataomnis
 	} else {
-		d.values = &Dataomnis{}
+		d.Conf = &Dataomnis{}
 	}
 	return d
 }

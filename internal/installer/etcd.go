@@ -7,6 +7,7 @@ import (
 	"github.com/DataWorkbench/deploy/internal/k8s/helm"
 	"github.com/DataWorkbench/deploy/internal/ssh"
 	"github.com/pkg/errors"
+	"time"
 )
 
 type EtcdConfig struct {
@@ -37,7 +38,7 @@ func (e *EtcdChart) UpdateFromConfig(c common.Config) error {
 	return e.Conf.Persistent.UpdateLocalPv(c.LocalPVHome, c.Nodes)
 }
 
-func (e EtcdChart) InitLocalPvDir() error {
+func (e EtcdChart) InitLocalDir() error {
 	localPvHome := fmt.Sprintf("%s/%s", e.Conf.Persistent.LocalPv.Home, common.EtcdClusterName)
 	var host *ssh.Host
 	var conn *ssh.Connection
@@ -65,11 +66,11 @@ func (e EtcdChart) ParseValues() (helm.Values, error) {
 	return v, err
 }
 
-func (e EtcdChart) GetTimeoutSecond() int {
+func (e EtcdChart) GetTimeoutSecond() time.Duration {
 	if e.Conf.TimeoutSecond == 0 {
 		return e.ChartMeta.GetTimeoutSecond()
 	}
-	return e.Conf.TimeoutSecond
+	return time.Duration(e.Conf.TimeoutSecond) * time.Second
 }
 
 func NewEtcdChart(release string, c common.Config) *EtcdChart {
